@@ -69,7 +69,7 @@ def write_ifc(path, project, axes, log=print):
             f"FILE_NAME('{_esc(path.split('/')[-1].split(chr(92))[-1])}','{now}',('UNA'),('UNA Road Engineering Analysis'),'UNA','UNA','');\n"
             "FILE_SCHEMA(('IFC4X3_ADD2'));\nENDSEC;\nDATA;\n")
     org = w.add(f"IFCORGANIZATION($,'UNA',$,$,$)")
-    app = w.add(f"IFCAPPLICATION({org},'1.2','UNA Road Engineering Analysis','UNA')")
+    app = w.add(f"IFCAPPLICATION({org},'{_esc(__import__("una").__version__)}','UNA Road Engineering Analysis','UNA')")
     per = w.add("IFCPERSON($,'UNA',$,$,$,$,$,$)")
     pao = w.add(f"IFCPERSONANDORGANIZATION({per},{org},$)")
     oh = w.add(f"IFCOWNERHISTORY({pao},{app},$,.NOCHANGE.,$,$,$,{int(datetime.datetime.now().timestamp())})")

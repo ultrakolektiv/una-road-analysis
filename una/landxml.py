@@ -76,7 +76,7 @@ def write_landxml(path, project, axes, log=print):
                     f'        <Profile name={nm}>\n          <ProfAlign name={nm}>\n          {_profile(ax)}\n          </ProfAlign>\n        </Profile>\n      </Alignment>')
     xml = ('<?xml version="1.0" encoding="UTF-8"?>\n<LandXML xmlns="http://www.landxml.org/schema/LandXML-1.2" version="1.2" date="%s" time="%s" language="English">\n'
            '  <Units><Metric areaUnit="squareMeter" linearUnit="meter" volumeUnit="cubicMeter" temperatureUnit="celsius" pressureUnit="HPA" angularUnit="decimal degrees" directionUnit="decimal degrees"/></Units>\n'
-           '  <Project name=%s/>\n  <Application name="UNA Road Engineering Analysis" desc="UNA" manufacturer="UNA" version="1.3"/>\n  <Alignments>\n%s\n  </Alignments>\n</LandXML>\n') % (now.date().isoformat(), now.strftime("%H:%M:%S"), quoteattr(project), "\n".join(body))
+           '  <Project name=%s/>\n  <Application name="UNA Road Engineering Analysis" desc="UNA" manufacturer="UNA" version="%s"/>\n  <Alignments>\n%s\n  </Alignments>\n</LandXML>\n') % (now.date().isoformat(), now.strftime("%H:%M:%S"), quoteattr(project), __import__("una").__version__, "\n".join(body))
     open(path, "w", encoding="utf-8").write(xml)
     log(_TF("LandXML (Civil 3D): {0} ({1} osovina)", path, len(seen)))
     return path
