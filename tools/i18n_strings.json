@@ -1,0 +1,2360 @@
+{
+"--preglednost": [
+"__main__.py:9"
+],
+"--licenca": [
+"__main__.py:11"
+],
+"JSON datoteka projekta (ako se izostavi, otvara se prozor)": [
+"__main__.py:6"
+],
+"izlazni folder (default: folder 'izlaz' pored projekta)": [
+"__main__.py:7"
+],
+"dodatno: zrake preglednosti i DXF crtež": [
+"__main__.py:9"
+],
+"ispiši ID ovog računara (za zahtjev licence)": [
+"__main__.py:10"
+],
+"aktiviraj licencu iz datoteke": [
+"__main__.py:11"
+],
+"LICENCA:": [
+"__main__.py:23"
+],
+"Greška:": [
+"__main__.py:17"
+],
+"dvije odvojene osovine (desna i lijeva)": [
+"engine.py:45:MODUL"
+],
+"centralna osovina (oba smjera)": [
+"engine.py:45:MODUL"
+],
+"jedna osovina – smjer stacionaže": [
+"engine.py:46:MODUL"
+],
+"jedna osovina – suprotno smjeru stacionaže": [
+"engine.py:46:MODUL"
+],
+"Glavni projekat – dionica": [
+"engine.py:29:MODUL"
+],
+"Raspon {0}–{1} ({2}) izlazi iz osovine {3} (st. {4:.1f}–{5:.1f})": [
+"engine.py:124"
+],
+"merodavno teretno vozilo prema Pravilniku (slika 3-10 Priloga 2)": [
+"engine.py:39:MODUL"
+],
+"Tegljač (Pravilnik)": [
+"engine.py:39:MODUL"
+],
+"teško teretno vozilo – tegljač s poluprikolicom (savremeno vozilo)": [
+"engine.py:40:MODUL"
+],
+"Tegljač (savremeni)": [
+"engine.py:40:MODUL"
+],
+"autovoz (vučno vozilo s prikolicom)": [
+"engine.py:41:MODUL"
+],
+"putničko vozilo (srednja klasa)": [
+"engine.py:42:MODUL"
+],
+"Putničko vozilo": [
+"engine.py:42:MODUL"
+],
+"desna osovina (D{0})": [
+"engine.py:94"
+],
+"desni kolovoz": [
+"engine.py:94"
+],
+"lijeva osovina (L{0})": [
+"engine.py:94"
+],
+"lijevi kolovoz": [
+"engine.py:94"
+],
+"PRIJELAZNICA": [
+"engine.py:141",
+"preglednost.py:55:MODUL",
+"preglednost.py:150",
+"report.py:269",
+"report.py:255",
+"report.py:607"
+],
+"centralna osovina (sekcija {0})": [
+"engine.py:96",
+"engine.py:96"
+],
+"Desni kolovoz": [
+"engine.py:109"
+],
+"smjer stacionaže": [
+"engine.py:110",
+"figs.py:119",
+"optika.py:155",
+"pipeline.py:116",
+"xlsx.py:409"
+],
+"suprotno smjeru stacionaže": [
+"engine.py:110",
+"optika.py:155",
+"pipeline.py:116",
+"preglednost.py:417",
+"preglednost_crtez.py:10:MODUL",
+"report.py:46",
+"xlsx.py:409"
+],
+"osovina": [
+"engine.py:98",
+"engine.py:100",
+"optika.py:294",
+"pipeline.py:133",
+"pipeline.py:36",
+"pipeline.py:16",
+"pipeline.py:16",
+"preglednost.py:124",
+"preglednost.py:494"
+],
+"osovina (sekcija {0})": [
+"engine.py:98",
+"engine.py:100"
+],
+"osovina →": [
+"engine.py:98"
+],
+"Lijevi kolovoz": [
+"engine.py:109"
+],
+"osovina ←": [
+"engine.py:100"
+],
+"Centralna osovina": [
+"engine.py:109"
+],
+"Osovina": [
+"engine.py:109",
+"preglednost.py:490",
+"report.py:140"
+],
+"Situacioni plan osovina (oznake stacionaže)": [
+"figs.py:57"
+],
+"Uzdužni profil": [
+"figs.py:68",
+"report.py:140"
+],
+"Nagib [%]": [
+"figs.py:69",
+"optika.py:134",
+"optika.py:263",
+"preglednost.py:469",
+"xlsx.py:405",
+"xlsx.py:401",
+"xlsx.py:228"
+],
+"Stacionaža [m]": [
+"figs.py:69",
+"figs.py:81",
+"figs.py:96",
+"figs.py:108",
+"figs.py:138",
+"figs.py:167",
+"preglednost.py:469",
+"preglednost.py:471",
+"preglednost.py:453",
+"preglednost_dijagram.py:54",
+"xlsx.py:405",
+"xlsx.py:402",
+"xlsx.py:411",
+"xlsx.py:415",
+"xlsx.py:426",
+"xlsx.py:422",
+"xlsx.py:139"
+],
+"Krivina 1000/R [1/km]": [
+"figs.py:80",
+"xlsx.py:177"
+],
+"Dijagram krivine (+ desno, − lijevo) i poprečnog nagiba lijeve strane kolovoza": [
+"figs.py:80"
+],
+"Poprečni nagib lijeve\nstrane [%]": [
+"figs.py:81"
+],
+"krivina": [
+"figs.py:82",
+"report.py:88",
+"report.py:312"
+],
+"Pređeni put [m]": [
+"figs.py:122",
+"figs.py:122"
+],
+"Potrošnja goriva [l]": [
+"figs.py:122"
+],
+"Kumulativno vrijeme putovanja i potrošnja goriva teških vozila (st. {0:.0f} – {1:.0f})": [
+"figs.py:123"
+],
+"Slike: {0}": [
+"figs.py:170"
+],
+"Brzina [km/h]": [
+"figs.py:95",
+"figs.py:106",
+"figs.py:136",
+"figs.py:166",
+"preglednost_dijagram.py:38",
+"preglednost_dijagram.py:81",
+"xlsx.py:411",
+"xlsx.py:415",
+"xlsx.py:426"
+],
+"Grafički prilog {0}: st. {1:.0f} – {2:.0f} (plan, uzdužni profil, brzine)": [
+"figs.py:157"
+],
+"Smjer rastuće stacionaže": [
+"figs.py:40"
+],
+"Suprotno smjeru stacionaže": [
+"figs.py:40",
+"xlsx.py:317"
+],
+"Rezultirajući profil Vp – {0}": [
+"figs.py:92"
+],
+"Krivina": [
+"figs.py:145"
+],
+"Ciljna brzina T": [
+"figs.py:91"
+],
+"Putničko": [
+"figs.py:103",
+"figs.py:163"
+],
+"Scenarij: ograničenje brzine": [
+"figs.py:93"
+],
+"Ciljna brzina T (geometrija)": [
+"figs.py:131"
+],
+"Vp – sa ograničenjem": [
+"figs.py:134"
+],
+"smjer rastuće stacionaže": [
+"optika.py:9:MODUL",
+"preglednost.py:417",
+"preglednost_crtez.py:10:MODUL",
+"report.py:46"
+],
+"smjer opadajuće stacionaže": [
+"optika.py:9:MODUL"
+],
+"Sažetak": [
+"optika.py:128",
+"preglednost.py:411"
+],
+"BiH Smjernice (jpcfbih.ba, 4.2.5, Tabela 8) i Pravilnik RS (Sl. glasnik RS 50/2011, Prilog 1, tč. 6.1.3 i Prilog 2)": [
+"optika.py:12:MODUL"
+],
+"**Tabela {0} – {1}**\n\n": [
+"optika.py:173",
+"report.py:42"
+],
+"Dionica": [
+"optika.py:178",
+"report.py:45"
+],
+"Optičke analize sprovedene su za usvojeno rješenje trase. Vozač svoje manevre podešava prema sadržaju u vidnom polju, pa je za svaku traku i svaki smjer vožnje numerički modelom trase (plan, niveleta, poprečni profil, prepreke uz kolovoz) određena raspoloživa preglednost. Proračun je urađen programom {0}; ulazna projektna brzina Vp preuzeta je iz Elaborata 3 (vozno-dinamičke analize, rezultirajući profil projektne brzine).\n": [
+"optika.py:181"
+],
+"Oko vozača je {0} m iznad nivelete, a visina predmeta {1} (za zaustavnu preglednost i preticanje{2}). Zrake preglednosti polaze od ose oka vozača, na rastojanju od ose kolovoza prema usvojenom ofsetu.\n": [
+"optika.py:183"
+],
+"# Zahtijevana preglednost, Pzp = f(Vp)\n": [
+"optika.py:184"
+],
+"# Raspoloživa i preticajna preglednost\n": [
+"optika.py:196"
+],
+"## Raspoloživa preglednost Pr\n": [
+"optika.py:197"
+],
+"Raspoloživa preglednost Pr određena je kao najduža tetiva od oka vozača koju dozvoljavaju prepreka uz kolovoz (horizontalna preglednost) i niveleta (vertikalna preglednost). Rezultati su dati po tragovima, za oba smjera vožnje, a kompletan proračun je u prilogu (Excel i Tabela 4).\n": [
+"optika.py:198"
+],
+"Prema tački 3.4.2.1 Priloga 2 Pravilnika jedan od uslova bezbjednosti vožnje je da dužina raspoložive preglednosti Pr, odnosno zahtijevane preglednosti Pzp, bude veća ili jednaka dužini puta usporenja X~d~, tj. **Pr (Pzp) ≥ X~d~**. Dužina puta usporenja pri prelazu sa brzine V~1~ na V~2~ (slika 3-09, a = d = 0,8 m/s²) iznosi X~d~ = 0,1·V~sr~·ΔV, gdje je V~sr~ = (V~1~ + V~2~)/2, ΔV = V~1~ − V~2~ [km/h], X~d~ u [m]. Provjera se vrši na početku svake zone usporenja rezultirajućeg profila V~p~ (u smjeru vožnje), tj. na mjestu na kojem V~p~ počinje opadati.\n": [
+"optika.py:209"
+],
+"Mjesta na kojima raspoloživa preglednost nije dovoljna:\n": [
+"optika.py:226"
+],
+"## Preticajna preglednost Pp\n": [
+"optika.py:234"
+],
+"# Model trase\n": [
+"optika.py:273"
+],
+"Prostorni model projektovane trase u razmjeri R 1:1000 je ulazni podatak za optičke analize. Model čine osovine kolovoza, ivice kolovoza (crvene linije debljine 0,3 mm u razmjeri crteža), linije prepreka uz kolovoz i zrake preglednosti, u DXF formatu (otvara se u AutoCAD-u, snima kao DWG po potrebi). Grafički prilozi dati su u Sadržaju grafičkih priloga.\n": [
+"optika.py:274"
+],
+"Rezultati se vizuelizuju numeričkim modelom: situacioni prikaz zraka preglednosti po tragovima i dijagrami po stacionaži koji prate profil brzina. Prednost numeričkog modela je brza provjera varijantnih rješenja uz ponovni proračun cijele dionice.\n": [
+"optika.py:276"
+],
+"# Sadržaj i uslovi obrade projektne dokumentacije\n": [
+"optika.py:277"
+],
+"Sadržaj elaborata definisan je regulativom i propisima navedenim u Opštem dijelu Projektnog zadatka (tačka 3.11) i ostalim pravilnicima i propisima iz ove oblasti. Pored grafičkih priloga u razmjeri R 1:1000 dat je kompletan numerički proračun u tabelarnoj formi (Word i Excel).\n": [
+"optika.py:278"
+],
+"## Sadržaj grafičkih priloga\n": [
+"optika.py:280"
+],
+"## Korištena regulativa\n": [
+"optika.py:284"
+],
+"1. Smjernice za projektovanje, građenje, održavanje i nadzor na putevima u BiH – Geometrijski elementi (1-1-3), tačka 4.2.5 Preglednost pri preticanju, Tabela 8.\n2. Pravilnik o uslovima koje sa aspekta bezbjednosti saobraćaja moraju da ispunjavaju putni objekti i drugi elementi javnog puta (Sl. glasnik RS 50/2011), Prilog 1 tač. 6.1.3 i Prilog 2.\n3. Smjernice za projektovanje puteva u Republici Srbiji – Projektni elementi puta (JP Putevi Srbije), Tabela 4.2.4.\n": [
+"optika.py:285"
+],
+"Preglednost_preticanje_{0}.dxf": [
+"optika.py:302"
+],
+"Preticajna preglednost {0}: Pp = {1:.0f} m, ostvareno {2:.1f} % (min. {3:.0f} %)": [
+"optika.py:83"
+],
+"preglednost [m]": [
+"optika.py:112",
+"optika.py:116"
+],
+"Dijagram raspoložive preglednosti – {0}, {1}": [
+"optika.py:118"
+],
+"{0} – optičke analize (preticanje)": [
+"optika.py:129"
+],
+"Najduža zona [m]": [
+"optika.py:131",
+"optika.py:256"
+],
+"---\ntitle: \"ELABORAT OPTIČKIH ANALIZA\"\nsubtitle: \"{0}\"\n---\n": [
+"optika.py:179"
+],
+"Dodatak na očitanu vrijednost: {0} m. Pzp se primjenjuje pri projektovanju saobraćajno-tehničke opreme, uređenju putnog pojasa i za provjeru elemenata plana i profila.\n": [
+"optika.py:188"
+],
+"Zahtijevana preglednost Pzp u funkciji projektne brzine Vp i podužnog nagiba": [
+"optika.py:189"
+],
+"Sažetak raspoložive preglednosti u odnosu na zahtijevanu (projektna brzina Vp)": [
+"optika.py:206"
+],
+"U profilu V~p~ nema zona usporenja (V~p~ se ne smanjuje za više od 2 km/h), pa uslov Pr (Pzp) ≥ X~d~ nije potrebno provjeravati.\n": [
+"optika.py:220"
+],
+"Zone nedovoljne preglednosti": [
+"optika.py:232"
+],
+"Nedovoljna preglednost nije utvrđena ni na jednom mjestu.\n": [
+"optika.py:233"
+],
+"### Tabela raspoložive preglednosti – {0}, {1}\n": [
+"optika.py:260"
+],
+"Sadržaj grafičkih priloga": [
+"optika.py:281"
+],
+"Tip puta za preticanje: {0}": [
+"optika.py:295"
+],
+"Elaborat 4 – Optičke analize | {0}": [
+"optika.py:314"
+],
+"Optičke analize (Elaborat 4) / Optical Analyses (Elaborate 4)": [
+"optika.py:332"
+],
+"Numerički proračun preglednosti / Numerical Calculation of Sight Distances": [
+"optika.py:332"
+],
+"Grafički prilozi – optičke analize / Graphical Appendices – Optical Analyses": [
+"optika.py:332"
+],
+"projektna brzina Vp (Elaborat 3)": [
+"optika.py:108"
+],
+"zahtijevana preglednost Pzp = f(Vp, nagib)": [
+"optika.py:110"
+],
+"raspoloživa preglednost Pr": [
+"optika.py:110"
+],
+"stacionaža [m]": [
+"optika.py:116",
+"optika.py:117"
+],
+"Tabela 29": [
+"optika.py:130"
+],
+"Stacionaža s": [
+"optika.py:134"
+],
+"Raspoloživa Pr [m]": [
+"optika.py:134"
+],
+"Raspoloživa za preticanje [m]": [
+"optika.py:134"
+],
+"Preticanje moguće": [
+"optika.py:134"
+],
+"Preglednost_Vr_": [
+"optika.py:150"
+],
+"Situacija – zrake preglednosti za računsku brzinu Vr (horizontalna i vertikalna preglednost)": [
+"optika.py:150"
+],
+"Da bi se ostvarila brzina veća od računske, na svakom mjestu trase mora biti obezbijeđena preglednost koja zavisi od projektne brzine Vp i stvarnog podužnog nagiba (zahtijevana preglednost Pzp). Mora biti ispunjen uslov **Pzp ≥ Pz**, gdje je Pz zaustavna preglednost u funkciji računske brzine deonice. ": [
+"optika.py:186"
+],
+"Zaustavna preglednost Pz u funkciji računske brzine deonice (Pravilnik, tabela 4-01)": [
+"optika.py:193"
+],
+"Za računsku brzinu Vr = {0} km/h zaustavna preglednost je Pz = {1} m": [
+"optika.py:195"
+],
+"Dužina Pr<Pzp [m]": [
+"optika.py:207"
+],
+"Provjera uslova Pr (Pzp) ≥ X~d~ na zonama usporenja": [
+"optika.py:216"
+],
+"Uslov je ispunjen na svim zonama usporenja.\n": [
+"optika.py:218"
+],
+"Uslov nije ispunjen na {0} provjera; na tim mjestima treba povećati raspoloživu preglednost ili ublažiti prelaz brzine (npr. većim radijusom ili dužim elementom ispred krivine).\n": [
+"optika.py:218"
+],
+"![]({0}){{width=16cm}}\n\n*Slika {1} – Dijagram brzine, zahtijevane, raspoložive i preticajne preglednosti – {2}, {3}*\n": [
+"optika.py:224"
+],
+"i međunarodna praksa (npr. AASHTO/Caltrans HDM, tačka 201.2) preglednost pri preticanju razmatra samo na dvotračnim putevima, a višetračne dionice projektuje prema zaustavnoj preglednosti. Za ovu saobraćajnicu mjerodavna je zahtijevana (zaustavna) preglednost Pzp iz poglavlja 2, a njeno ispunjenje u oba smjera vožnje prikazano je dijagramima raspoložive preglednosti Pr i tabelama u prethodnom poglavlju.\n": [
+"optika.py:237"
+],
+"### Preticajna preglednost prema Pravilniku (Prilog 2, tačke 4.3 i 4.4)\n": [
+"optika.py:241"
+],
+"Potrebne dužine preticajne preglednosti date su u tabeli 4-02 (za dvotračne puteve), a minimalni procenat u tabeli 4-03 (po smjeru vožnje).\n": [
+"optika.py:242"
+],
+"Ostvareni procenat preticajne preglednosti određuje se po smjeru vožnje izrazom **%Pp = Σlpi / L · 100**, gdje je lpi dužina na kojoj je raspoloživa preglednost Pr ≥ Pp, a L ukupna dužina trase. Raspoloživa preglednost Pr određuje se sa mjesta oka vozača ho = {0} m. Zrake se crtaju **iz lijeve (preticajne) trake**, i za razdvojene osovine i za centralnu osovinu. Potrebna dužina Pp = {1} m za Vr = {2} km/h (tabela 4-02); minimum {3} % (tabela 4-03).\n": [
+"optika.py:245"
+],
+"### Obezbjeđenje preglednosti pri preticanju (BiH Smjernice, tačka 4.2.5.3)\n": [
+"optika.py:247"
+],
+"> Na dvosmjernim putevima sa jednim kolovozom iz tehničke grupe A, potrebno je obezbijediti preglednost pri preticanju na dužini kojom se postiže predviđena dovoljna propusnost puta pri određenoj brzini putovanja. Ukoliko saobraćajnim dimenzionisanjem nije određena potrebna dužina dionica za obezbjeđenje preglednosti pri preticanju, najmanjom dužinom smatra se: > 25 % dužine puta za puteve tehničke grupe A i > 15 % dužine puta za puteve tehničke grupe B i C. U posebno složenim uslovima reljefa moguće je izostaviti navedene najmanje dužine, što mora biti određeno projektnim zadatkom. Na dužim usponima sa dodatnom trakom za spora vozila preticanje nije dozvoljeno pri kretanju nizbrdo.\n": [
+"optika.py:248"
+],
+"Minimalne daljine preglednosti pri preticanju (Tabela 30 Smjernica):\n": [
+"optika.py:249"
+],
+"Zrake preglednosti pri preticanju crtaju se **iz lijeve (preticajne) trake**, i za razdvojene kolovoze (osovine) i za centralnu osovinu: oko vozača je {0} m iznad nivelete, visina predmeta {1}, a zraka polazi od ose oka vozača u lijevoj traci. Potrebna dužina Pp očitana je iz Tabele 30 za brzinu {2} (Vr = {3} km/h → Pp = {4} m); ostvareni %Pp je udio dužine trase na kojoj je raspoloživa preglednost ≥ Pp. Minimalni procenat za tehničku grupu {5} iznosi {6} %. Za razdvojene kolovoze analiza je pokazatelj kvaliteta trase (preticanje se vrši u okviru istog kolovoza), a izostavljanje minimalne dužine u posebno složenim uslovima mora biti određeno projektnim zadatkom.\n": [
+"optika.py:251"
+],
+"Ostvareni procenat preticajne preglednosti %Pp": [
+"optika.py:255"
+],
+"Numerički proračun ({0}, {1}) – korak {2} m": [
+"optika.py:270"
+],
+"Datoteka": [
+"optika.py:282"
+],
+" – preticajna preglednost se ne računa (razdvojeni kolovozi: vozna i preticajna traka)": [
+"optika.py:295"
+],
+"PREGLEDNOST PRI PRETICANJU – zrake iz lijeve (preticajne) trake": [
+"optika.py:304"
+],
+"raspoloživa preglednost za preticanje": [
+"optika.py:114"
+],
+"preticanje moguće ({0:.1f} %, min. {1:.0f} %)": [
+"optika.py:115"
+],
+"Preglednost_Vp_": [
+"optika.py:151"
+],
+"Situacija – zrake zahtijevane preglednosti Pzp na osnovu projektne brzine Vp i nagiba, horizontalna i vertikalna preglednost": [
+"optika.py:151"
+],
+"h2 prema Tabeli 29 Smjernica (0–0,15 m, zavisi od brzine Vp)": [
+"optika.py:183"
+],
+"Pzp se određuje u svakom presjeku trase na osnovu projektne brzine Vp, interpolacijom tabele 4-01 Pravilnika (Prilog 2); dijagram Pzp = f(Vp, iN) (slika 4-01) nije ugrađen, pa se uticaj nagiba ne uzima u obzir. ": [
+"optika.py:187"
+],
+"Pzp se određuje u svakom presjeku trase na osnovu projektne brzine Vp i podužnog nagiba u smjeru vožnje, očitavanjem iz dijagrama Crtež 52 (skraćena zaustavna preglednost, fT50 %). ": [
+"optika.py:187"
+],
+" (Pravilnik, tabela 4-01).": [
+"optika.py:195"
+],
+" (Crtež 52, nagib 0 %).": [
+"optika.py:195"
+],
+"Zona usporenja od–do [m]": [
+"optika.py:217"
+],
+"Stacionaža od–do [m]": [
+"optika.py:233"
+],
+"Min. raspoloživo [m]": [
+"optika.py:233"
+],
+"Preticajna preglednost Pp i ostvareni procenat %Pp **nisu računati**, jer se na ovoj saobraćajnici ne primjenjuju. Dionica ima fizički razdvojene kolovoze, a svaki kolovoz ima voznu i preticajnu traku, pa preticanje ne zalazi u traku suprotnog toka. ": [
+"optika.py:236"
+],
+"Preglednost_zahtijevana_": [
+"optika.py:152"
+],
+"Situacija – zrake zahtijevane preglednosti i zone nedovoljne preglednosti": [
+"optika.py:152"
+],
+"Tabela 4-02 i 4-03 Priloga 2 Pravilnika (Pp = 260–600 m, minimalni %Pp = 20 %) odnose se na dvotračne puteve; na dvotračnim putevima računska brzina se može postići samo uz dovoljno preticajne preglednosti (tačka 3.3.2). ": [
+"optika.py:237"
+],
+"Tačka 4.2.5.3 BiH Smjernica (Tabela 30 i minimalni procenat od > 25 % za tehničku grupu A) odnosi se na dvosmjerne puteve sa jednim kolovozom; ": [
+"optika.py:237"
+],
+"Pandoc greška: ": [
+"optika.py:331",
+"report.py:653",
+"report.py:765"
+],
+"Preglednost_ocekivana_": [
+"optika.py:153"
+],
+"Situacija – očekivana (raspoloživa) preglednost, linija prepreke i dodirne tačke": [
+"optika.py:153"
+],
+"; za preticanje zadato ": [
+"optika.py:183"
+],
+"Preglednost_preticanje_": [
+"optika.py:154"
+],
+"Situacija – preglednost pri preticanju: zrake Pp iz lijeve (preticajne) trake, oba smjera": [
+"optika.py:154"
+],
+"h2 po Tabeli 29 (zavisi od Vp)": [
+"optika.py:251"
+],
+"Preglednost_vertikalna_": [
+"optika.py:155"
+],
+": niveleta, linija oka, linija predmeta i najduža moguća zraka": [
+"optika.py:155"
+],
+"Preglednost_dijagram_Vr_": [
+"optika.py:156",
+"optika.py:157"
+],
+"Dijagram horizontalne i vertikalne preglednosti za računsku brzinu Vr (svi tragovi)": [
+"optika.py:156"
+],
+"po stacionaži": [
+"optika.py:156",
+"optika.py:157",
+"optika.py:158",
+"optika.py:159",
+"optika.py:160"
+],
+"Vertikalna preglednost u uzdužnom profilu – ": [
+"optika.py:155"
+],
+"Dijagram horizontalne i vertikalne preglednosti za računsku brzinu Vr, ": [
+"optika.py:157"
+],
+"Preglednost_dijagram_": [
+"optika.py:158",
+"optika.py:159"
+],
+"Dijagram brzina – preglednost (svi tragovi)": [
+"optika.py:158"
+],
+"Dijagram brzina – preglednost, ": [
+"optika.py:159"
+],
+"Dijagram raspoložive i preticajne preglednosti, ": [
+"optika.py:160"
+],
+"^\\s*\\d+\\s+(PRAVAC|KRUZNI_LUK|PRIJELAZNICA)\\s+\\d+": [
+"parse.py:6:MODUL",
+"parse.py:159"
+],
+"{0}: nije pronađen nijedan element (PRAVAC / KRUZNI_LUK / PRIJELAZNICA)": [
+"parse.py:50"
+],
+"{0}: nije pronađena tabela prelomnih tačaka nivelete": [
+"parse.py:88"
+],
+"{0}: nisu pronađeni poprečni nagibi": [
+"parse.py:130"
+],
+"{0}: {1} elemenata, dužina {2:.3f} m (st. {3:.3f}–{4:.3f}), K = {5:.3f} gon/km": [
+"parse.py:150"
+],
+" (ispis {0})": [
+"parse.py:151"
+],
+"preglednost": [
+"pipeline.py:22",
+"pipeline.py:105",
+"pipeline.py:100",
+"preglednost.py:335"
+],
+"1/4 Učitavanje ispisa i proračun profila brzine …": [
+"pipeline.py:70"
+],
+"Gotovo za {0:.0f} s.": [
+"pipeline.py:125"
+],
+"2/4 Izrada slika …": [
+"pipeline.py:82"
+],
+"4/4 Izrada Excel radne knjige sa formulama i dijagramima (može potrajati) …": [
+"pipeline.py:97"
+],
+"5/5 Preglednost: zrake, omotač i DXF crtež …": [
+"pipeline.py:102"
+],
+"Preglednost_rezultati_{0}.xlsx": [
+"pipeline.py:120"
+],
+"Excel (preglednost): {0}": [
+"pipeline.py:120"
+],
+" [UNA licenca {0}]": [
+"pipeline.py:59"
+],
+"UPOZORENJE: sekcije nisu povezane (kraj {0} ≠ početak {1}); brzina se prenosi preko praznine.": [
+"pipeline.py:74"
+],
+"6/6 Elaborat optičkih analiza (preticajna preglednost, sadržaj grafičkih priloga) …": [
+"pipeline.py:122"
+],
+"Sekcija {0}: 'do' mora biti veće od 'od'.": [
+"pipeline.py:14"
+],
+"Sekcija {0}: stacionaže nisu brojevi.": [
+"pipeline.py:15"
+],
+"Preglednost: nije odabrana nijedna strana osovine.": [
+"pipeline.py:33"
+],
+"Preglednost: neispravan unos ({0}).": [
+"pipeline.py:34"
+],
+"Sekcija {0} ({1}): datoteka '{2}' ne postoji: {3}": [
+"pipeline.py:21"
+],
+"Preglednost, prepreka {0}: zadajte 'element' ili 'od' i 'do'.": [
+"pipeline.py:31"
+],
+"Preglednost, prepreka {0}: strana mora biti unutra / vani / desno / lijevo.": [
+"pipeline.py:32"
+],
+"Preglednost_vertikalna_{0}_{1}.dxf": [
+"pipeline.py:117"
+],
+"Preglednost, prepreka {0}: tip '{1}' nema upisan ofset (tipovi prepreka).": [
+"pipeline.py:29"
+],
+"Preglednost, prepreka {0}: zadajte tip prepreke ili ofset od ivice kolovoza (broj ≥ 0).": [
+"pipeline.py:30"
+],
+"Sekcija {0} ({1}): širine traka moraju biti > 0.": [
+"pipeline.py:42"
+],
+"VERTIKALNA PREGLEDNOST – raspoloživa, ": [
+"pipeline.py:116"
+],
+"desna traka (desno od osovine kolovoza)": [
+"preglednost.py:54:MODUL"
+],
+"lijeva traka (lijevo od osovine kolovoza)": [
+"preglednost.py:54:MODUL"
+],
+"kružni luk": [
+"preglednost.py:55:MODUL",
+"report.py:255"
+],
+"prijelaznica": [
+"preglednost.py:55:MODUL",
+"preglednost.py:150",
+"report.py:255"
+],
+"PREGLEDNOST – {0}": [
+"preglednost.py:418"
+],
+"Napomena: IZRAČUNATE VRIJEDNOSTI (nisu formule). Lz iz dijagrama 'Skraćena zaustavna preglednost (fT50 %)', očitanog iz slike (odstupanje ≈ 0,1 m).": [
+"preglednost.py:419"
+],
+"1. PREGLEDNOST NA OSNOVU Vp (V85)": [
+"preglednost.py:462"
+],
+"tabela": [
+"preglednost.py:340",
+"preglednost.py:339"
+],
+"Poprečni profil i ofsete po slučaju (ofset u smjeru vožnje; ivice u smjeru stacionaže)": [
+"preglednost.py:428"
+],
+"3. OČEKIVANA (RASPOLOŽIVA) PREGLEDNOST – prepreke prema unesenim ofsetima od ivice kolovoza": [
+"preglednost.py:464"
+],
+"kraj trase": [
+"preglednost.py:308",
+"preglednost.py:307"
+],
+"Preglednost Vp, {0}: Lz {1:.0f}–{2:.0f} m, slobodan prostor desno {3:.2f} m / lijevo {4:.2f} m, vertikalno nedovoljno na {5}, horizontalno (prepreke) na {6} mjesta": [
+"preglednost.py:372"
+],
+"Preglednost za Vr = {0:g} km/h, {1}: Pz {2:.0f}–{3:.0f} m, vertikalno nedovoljno na {4}, horizontalno (prepreke) na {5} mjesta": [
+"preglednost.py:375"
+],
+"Oko vozača iznad nivelete [m]": [
+"preglednost.py:421"
+],
+"Podrazumijevana širina trake/2 – ofset [m]": [
+"preglednost.py:421"
+],
+"Korak proračuna zraka [m]": [
+"preglednost.py:422"
+],
+"Dodatak na zaustavnu dužinu Lz [m] (unosi korisnik)": [
+"preglednost.py:422"
+],
+"Zahtijevana dužina zrake L [m] (unosi korisnik)": [
+"preglednost.py:422"
+],
+"Najveća tražena dužina zrake (očekivana) [m]": [
+"preglednost.py:422"
+],
+"Strane osovine": [
+"preglednost.py:423"
+],
+"Zadani tip prepreke (sve krivine)": [
+"preglednost.py:424"
+],
+"2. ZAHTIJEVANA PREGLEDNOST, ": [
+"preglednost.py:463"
+],
+"Raspoloživo – horizontalno [m]": [
+"preglednost.py:469"
+],
+"Raspoloživo – vertikalno [m]": [
+"preglednost.py:469"
+],
+"Raspoloživa preglednost [m]": [
+"preglednost.py:469"
+],
+"Ograničava": [
+"preglednost.py:469",
+"preglednost.py:472"
+],
+"Nagib u smjeru vožnje [%]": [
+"preglednost.py:471"
+],
+"Dužina zrake [m]": [
+"preglednost.py:471"
+],
+"Vertikalna raspoloživa [m]": [
+"preglednost.py:471"
+],
+"Zraka završava van trase": [
+"preglednost.py:471"
+],
+"Horizontalno raspoloživo – prepreke [m]": [
+"preglednost.py:472"
+],
+"Vertikalno raspoloživo – niveleta [m]": [
+"preglednost.py:472"
+],
+"Raspoloživo ukupno [m]": [
+"preglednost.py:472"
+],
+"Od [m]": [
+"preglednost.py:490"
+],
+"Do [m]": [
+"preglednost.py:490"
+],
+"Ofset prepreke od ivice – desno [m]": [
+"preglednost.py:490"
+],
+"Ofset prepreke od ivice – lijevo [m]": [
+"preglednost.py:490"
+],
+"Zahtijevana preglednost {0}, {1}: slobodan prostor desno {2:.2f} m / lijevo {3:.2f} m, vertikalno nedovoljno na {4}, horizontalno (prepreke) na {5} mjesta": [
+"preglednost.py:379"
+],
+"Očekivana preglednost, {0}: raspoloživo {1}, nedovoljno na {2} mjesta": [
+"preglednost.py:384"
+],
+"po Tabeli 29 (h2 = f(Vp))": [
+"preglednost.py:421"
+],
+"Tip prepreke '{0}': ofset od ivice kolovoza [m]": [
+"preglednost.py:424"
+],
+"{0}  {1}:  trake desno {2} (ivica {3:.2f} m), lijevo {4} (ivica {5:.2f} m);  osovina kolovoza {6:.2f} m od osovine puta; ofset oka desno {7:.2f} m, lijevo {8:.2f} m": [
+"preglednost.py:431"
+],
+"HORIZONTALNA preglednost (prepreke)": [
+"preglednost.py:446"
+],
+"VERTIKALNA preglednost (niveleta)": [
+"preglednost.py:446"
+],
+"Pzp = f(Vp, nagib)": [
+"preglednost.py:463"
+],
+"stacionaže": [
+"preglednost.py:371"
+],
+"suprotno stacionaži": [
+"preglednost.py:371"
+],
+"Potrebna dužina min / max [m]": [
+"preglednost.py:439"
+],
+"Raspoloživa preglednost min / max [m] (bez zraka koje izlaze van trase)": [
+"preglednost.py:439"
+],
+"Mjesta sa nedovoljnom preglednošću": [
+"preglednost.py:440"
+],
+"Najveći potreban slobodni prostor desno od osovine trake [m]": [
+"preglednost.py:442"
+],
+"Najveći potreban slobodni prostor lijevo od osovine trake [m]": [
+"preglednost.py:443"
+],
+"Mjesta sa nedovoljnom vertikalnom preglednošću": [
+"preglednost.py:443"
+],
+"Horizontalna preglednost (prepreke): prepreke nisu zadane": [
+"preglednost.py:447"
+],
+"{0}: nedovoljno na {1} mjesta": [
+"preglednost.py:448"
+],
+"   st. {0:.0f} – {1:.0f}: raspoloživo min {2:.0f} m < potrebno {3:.0f} m (Vp {4:.0f} km/h)": [
+"preglednost.py:450"
+],
+"m od osovine trake [m]": [
+"preglednost.py:453"
+],
+" – zadovoljava na cijeloj dužini": [
+"preglednost.py:448"
+],
+"Pzp=f(Vp, nagib)": [
+"preglednost.py:379"
+],
+"traka desno od osovine": [
+"preglednost_crtez.py:10:MODUL"
+],
+"traka lijevo od osovine": [
+"preglednost_crtez.py:10:MODUL"
+],
+"ZAHTIJEVANA PREGLEDNOST Pzp NA OSNOVU PROJEKTNE BRZINE Vp (V85) I NAGIBA": [
+"preglednost_crtez.py:11:MODUL"
+],
+"ZAHTIJEVANA PREGLEDNOST (zadana dužina zrake)": [
+"preglednost_crtez.py:11:MODUL"
+],
+"OČEKIVANA (RASPOLOŽIVA) PREGLEDNOST": [
+"preglednost_crtez.py:11:MODUL"
+],
+"PREGLEDNOST ZA RAČUNSKU BRZINU Vr": [
+"preglednost_crtez.py:11:MODUL"
+],
+"Preglednost_Vp": [
+"preglednost_crtez.py:12:MODUL"
+],
+"Preglednost_zahtijevana": [
+"preglednost_crtez.py:12:MODUL"
+],
+"Preglednost_ocekivana": [
+"preglednost_crtez.py:12:MODUL"
+],
+"Preglednost_Vr": [
+"preglednost_crtez.py:12:MODUL"
+],
+"Dionica: {0}   |   Računska brzina Vr = {1:g} km/h; Vp = V85 iz Elaborata 3 (a = d = {2:g} m/s²)": [
+"preglednost_crtez.py:161"
+],
+"Zraka = tetiva od oka vozača (osovina vozne trake) do tačke ispred, mjereno duž osovine vozne trake. Oko {0:.2f} m i predmet {1} iznad nivelete (vertikalna provjera).": [
+"preglednost_crtez.py:186"
+],
+"Poprečni profil (u smjeru stacionaže: širine traka od osovine puta) i ofset osovine oka vozača od osovine kolovoza svog smjera (u smjeru vožnje):": [
+"preglednost_crtez.py:188"
+],
+"Mjerilo crteža {0} (jedinica: m)  |  Koordinate: Y (istok), X (sjever) iz ispisa projektanta  |  Izrada: UNA - ROAD ENGINEERING ANALYSIS  |  {1}": [
+"preglednost_crtez.py:202"
+],
+"OSOVINA_PUTA": [
+"preglednost_crtez.py:49",
+"preglednost_crtez.py:163",
+"preglednost_crtez.py:68"
+],
+"Osovina puta (stacionaže svakih 100 m, oznaka na 500 m)": [
+"preglednost_crtez.py:163"
+],
+"Prostor između osovine trake i granice (isprekidano) mora ostati slobodan od prepreka (usjek, ograda, zelenilo, objekti). m = potreban slobodni prostor od osovine vozne trake; oznake = lokalni maksimumi ≥ 1,0 m.": [
+"preglednost_crtez.py:187"
+],
+"OSOVINA_TRAKE_{0}": [
+"preglednost_crtez.py:58",
+"preglednost_crtez.py:98",
+"preglednost_crtez.py:166"
+],
+"Ivica kolovoza (crvena linija debljine {0:g} mm na papiru; širine traka zadaje korisnik)": [
+"preglednost_crtez.py:164"
+],
+"Osovina oka vozača – {0}": [
+"preglednost_crtez.py:166"
+],
+"Prepreka desno od osovine puta (ofset od ivice kolovoza)": [
+"preglednost_crtez.py:169",
+"preglednost_crtez.py:171"
+],
+"Prepreka lijevo od osovine puta (ofset od ivice kolovoza)": [
+"preglednost_crtez.py:169",
+"preglednost_crtez.py:171"
+],
+"Dodirna tačka zrake i linije prepreke (zraka je tu najduža moguća)": [
+"preglednost_crtez.py:171"
+],
+"Zraka sa raspoloživom preglednošću manjom od potrebne (prepreka ili niveleta)": [
+"preglednost_crtez.py:172"
+],
+"Zraka sa nedovoljnom VERTIKALNOM preglednošću (zaklon nivelete)": [
+"preglednost_crtez.py:174"
+],
+"Pz = skraćena zaustavna preglednost (Crtež 52, fT50 %) za računsku brzinu Vr = {0:g} km/h (projektni zadatak) i podužni nagib u smjeru vožnje.": [
+"preglednost_crtez.py:179"
+],
+"zadana dužina L = {0:.0f} m": [
+"preglednost_crtez.py:184"
+],
+"Pzp = Lz(Vp, nagib) (Crtež 52, fT50 %)": [
+"preglednost_crtez.py:184"
+],
+"Očekivana preglednost = najduža zraka od oka vozača koju dopuštaju prepreka (linija na unesenom ofsetu od krajnje ivice kolovoza, po elementima trase: pravac, prijelaznica, kružni luk) i niveleta. Poređenje sa potrebnom dužinom: {0}.": [
+"preglednost_crtez.py:185"
+],
+"{0}  {1}: trake desno {2} m (ivica {3:.2f} m), lijevo {4} m (ivica {5:.2f} m); osovina kolovoza {6:.2f} m od osovine puta; ofset oka desno {7:.2f} m, lijevo {8:.2f} m": [
+"preglednost_crtez.py:191"
+],
+"Zraka sa nedovoljnom HORIZONTALNOM preglednošću (prepreka uz kolovoz)": [
+"preglednost_crtez.py:175"
+],
+"Lz = skraćena zaustavna preglednost (Smjernice BiH, Crtež 52, fT50 %) u funkciji Vp (V85) i podužnog nagiba u smjeru vožnje; vrijednosti očitane iz dijagrama.": [
+"preglednost_crtez.py:179"
+],
+"Zahtijevana dužina zrake L = {0:.0f} m zadana je od strane projektanta (ne zavisi od Vp ni od nagiba).": [
+"preglednost_crtez.py:181"
+],
+"h2 = 0–0,15 m po Tabeli 29 (zavisi od Vp)": [
+"preglednost_crtez.py:186"
+],
+"{0}: raspoloživo {1} (horizontalno nedovoljno na {2}, vertikalno na {3} mjesta). ": [
+"preglednost_crtez.py:195"
+],
+" Na očitanu vrijednost dodato je {0:g} m (dodatak zadao projektant).": [
+"preglednost_crtez.py:179"
+],
+"Zahtijevana preglednost Pzp = Lz(Vp) očitana iz Crteža 52 (fT50 %) za projektnu brzinu Vp iz Elaborata 3 u tom presjeku i stvarni podužni nagib niveleta": [
+"preglednost_crtez.py:182"
+],
+"Zadovoljava na cijeloj dužini.": [
+"preglednost_crtez.py:195"
+],
+"raspoloživo {0:.0f} m (potrebno {1:.0f} m)": [
+"preglednost_crtez.py:123"
+],
+"NEDOVOLJNO na: ": [
+"preglednost_crtez.py:195",
+"preglednost_crtez.py:198",
+"preglednost_crtez.py:199"
+],
+"Preglednost_dijagram_Vr_{0}": [
+"preglednost_dijagram.py:138"
+],
+"Preglednost_dijagram_{0}": [
+"preglednost_dijagram.py:146"
+],
+"DXF vertikalna preglednost (profil): {0}": [
+"preglednost_dijagram.py:190"
+],
+"{0} – brzina i preglednost – {1}": [
+"preglednost_dijagram.py:39",
+"preglednost_dijagram.py:80"
+],
+"Preglednost [m]": [
+"preglednost_dijagram.py:54",
+"preglednost_dijagram.py:81"
+],
+"Dijagrami brzine i preglednosti: ": [
+"preglednost_dijagram.py:60"
+],
+"BRZINA_VP": [
+"preglednost_dijagram.py:67",
+"preglednost_dijagram.py:89",
+"preglednost_dijagram.py:110"
+],
+"BRZINA_VR": [
+"preglednost_dijagram.py:67",
+"preglednost_dijagram.py:90",
+"preglednost_dijagram.py:110"
+],
+"PREGLEDNOST_POTREBNA": [
+"preglednost_dijagram.py:68",
+"preglednost_dijagram.py:91",
+"preglednost_dijagram.py:110"
+],
+"PREGLEDNOST_ZAHTIJEVANA": [
+"preglednost_dijagram.py:68",
+"preglednost_dijagram.py:92",
+"preglednost_dijagram.py:111",
+"preglednost_dijagram.py:112"
+],
+"PREGLEDNOST_RASPOLOZIVA": [
+"preglednost_dijagram.py:68",
+"preglednost_dijagram.py:111",
+"preglednost_dijagram.py:101",
+"preglednost_dijagram.py:113"
+],
+"PREGLEDNOST_VERTIKALNA": [
+"preglednost_dijagram.py:68",
+"preglednost_dijagram.py:94",
+"preglednost_dijagram.py:111"
+],
+"PREGLEDNOST_HORIZONTALNA": [
+"preglednost_dijagram.py:68",
+"preglednost_dijagram.py:94",
+"preglednost_dijagram.py:111",
+"preglednost_dijagram.py:114"
+],
+"PREGLEDNOST_NEDOVOLJNA": [
+"preglednost_dijagram.py:68",
+"preglednost_dijagram.py:111",
+"preglednost_dijagram.py:108",
+"preglednost_dijagram.py:113",
+"preglednost_dijagram.py:106"
+],
+"Razmjera: 1 mm = {0:g} m (stacionaža), {1:g} km/h (brzina), {2:g} m (preglednost). Jedinica crteža: mm.": [
+"preglednost_dijagram.py:116"
+],
+"Računska brzina Vr = {0:g} km/h": [
+"preglednost_dijagram.py:37",
+"preglednost_dijagram.py:110"
+],
+"Zahtijevana preglednost L (zadao projektant)": [
+"preglednost_dijagram.py:111"
+],
+"Vertikalna raspoloživa preglednost (niveleta)": [
+"preglednost_dijagram.py:111",
+"preglednost_dijagram.py:44"
+],
+"Horizontalna raspoloživa preglednost (prepreke)": [
+"preglednost_dijagram.py:111",
+"preglednost_dijagram.py:45"
+],
+"Raspoloživa preglednost (manja od H i V)": [
+"preglednost_dijagram.py:111"
+],
+"Dio gdje je preglednost nedovoljna": [
+"preglednost_dijagram.py:111"
+],
+"Računska brzina Vr (projektni zadatak)": [
+"preglednost_dijagram.py:36"
+],
+"Projektna brzina Vp (V85)": [
+"preglednost_dijagram.py:36",
+"preglednost_dijagram.py:110"
+],
+"Zahtijevana preglednost L = {0:g} m": [
+"preglednost_dijagram.py:42"
+],
+"Očekivana (raspoloživa) preglednost – manja od horizontalne i vertikalne": [
+"preglednost_dijagram.py:47"
+],
+"Preglednost nedovoljna": [
+"preglednost_dijagram.py:48"
+],
+"Računska brzina Vr": [
+"preglednost_dijagram.py:110",
+"xlsx.py:61"
+],
+"Potrebna preglednost Pz za Vr i nagib": [
+"preglednost_dijagram.py:110"
+],
+"Potrebna preglednost Lz (Vp i nagib)": [
+"preglednost_dijagram.py:110"
+],
+"Linija oka (siva) i linija predmeta (plava) prate nivelete; zraka ide od linije oka do linije predmeta i prikazuje NAJVEĆU moguću vertikalnu preglednost (do Lmax)": [
+"preglednost_dijagram.py:180"
+],
+"u presjeku, na istim stacionažama kao zrake u situaciji. Zelena = ≥ potrebna Pzp(Vp), crvena = manja od potrebne ({0} zraka).": [
+"preglednost_dijagram.py:181"
+],
+"Potrebna preglednost Pz za Vr, nagib": [
+"preglednost_dijagram.py:41"
+],
+"Potrebna preglednost Lz (Vp, nagib": [
+"preglednost_dijagram.py:41"
+],
+"Vertikalna preglednost u uzdužnom profilu: oko vozača {0:.2f} m, predmet ": [
+"preglednost_dijagram.py:179"
+],
+"h2 = %.2f–%.2f m po Tabeli 29 (zavisi od Vp)": [
+"preglednost_dijagram.py:179"
+],
+"Br. – redni broj elementa u ispisu; Element – pravac / kružni luk / prijelaznica; Smjer – smjer krivine; St. početka i kraja; L – dužina; R – radijus (za prijelaznicu: od → do, ∞ = pravac); A – parametar klotoide.": [
+"report.py:260"
+],
+"U sklopu Glavnog projekta – {0} – za usvojenu trasu urađene su vozno-dinamičke analize u skladu sa Projektnim zadatkom (Elaborat 3). Cilj analize je da se definišu mjerodavni parametri za dimenzionisanje konstruktivnih elemenata plana i profila, da se utvrde eksploatacioni efekti (brzine, vrijeme putovanja, potrošnja goriva) i da se provjeri usklađenost i homogenost primijenjenih elemenata projektne geometrije.\n": [
+"report.py:108"
+],
+"Analizirani raspon trase je st. {0} – {1} m. Trasa se sastoji od {2}:\n": [
+"report.py:109"
+],
+"Sa računskom brzinom **V~r~ = {0:.0f} km/h** analiza obuhvata:\n": [
+"report.py:123"
+],
+"- rezultirajući profil projektne brzine V~p~ (V85) za putničko vozilo i teška vozila ({0}) u uslovima slobodnog saobraćajnog toka, za sve smjerove vožnje na cijeloj trasi;\n- usklađivanje (harmonizaciju) elemenata trase i statističke pokazatelje dinamičke homogenosti: srednju vrijednost projektne brzine, srednje kvadratno odstupanje i koeficijent dinamičke homogenosti;\n- profil brzina, vrijeme putovanja i potrošnju goriva teških vozila;\n- provjeru poprečnih nagiba kolovoza na kružnim lukovima za dobijene projektne brzine{1}.\n\n**Zahtijevana preglednost i optičke analize (Elaborat 4) nisu predmet ovog elaborata.** Rezultirajući profili projektne brzine iz poglavlja 4 su ulazni podatak za te analize (P~zp~ = f(V~p~)).\n\nNumerički proračun dat je tabelarno u ovom elaboratu (prilozi A) i u pratećoj radnoj knjizi (Excel), u kojoj su svi koraci urađeni formulama, a svi dijagrami iz ovog elaborata izrađeni su kao Excel dijagrami koji se automatski preračunavaju kada se u listove *Ulaz_n* ubace novi ispisi (ulazni podaci su označeni plavom bojom).\n": [
+"report.py:124"
+],
+"Korišteni su ispisi projektanta, po tri datoteke za svaku osovinu (horizontalna osovina, uzdužni profil, poprečni nagibi):\n": [
+"report.py:139"
+],
+"Kao provjera ispravnosti preuzimanja podataka, osovine su rekonstruisane numeričkom integracijom elemenata (odstupanje krajnje tačke od ispisa dato je u tabeli), a karakteristika krivine iz ispisa poredi se sa izračunatom. Uzdužni profili su rekonstruisani iz tablica prelomnih tačaka (stacionaža, kota, radijus vertikalne krivine, nagib poslije prelomne tačke, početak i kraj krivine); rekonstruisane kote porede se sa kotama osovine u ispisu poprečnih profila (kolona „Nivelete”).\n\nPoprečni nagib kolovoza za provjeru na krivinama očitava se sa vanjske trake lijeve strane kolovoza; konvencija: pozitivan nagib raste od osovine ka spolja, a nagib desne strane je u ispisima jednak negativnom nagibu lijeve strane (maksimalna razlika |L + D| u ispisima: {0}). Poprečni nagib se koristi samo u provjerama na kružnim lukovima (poglavlje 4.3) i ne ulazi u profil brzine, vrijeme i potrošnju goriva.\n\nProračun je izvršen na mreži Δs = {1} m (u zadnjem koraku sekcije korak može biti kraći).\n": [
+"report.py:143"
+],
+"\n## Metoda određivanja projektne brzine V~p~ (V85) – srpske smjernice\n": [
+"report.py:148"
+],
+"Brzina za proizvoljni radijus R između tabličnih vrijednosti R~j~ i R~j+1~ dobija se linearnom interpolacijom:\n\n$$V_p(R) = V_j + \\frac{R - R_j}{R_{j+1} - R_j}\\,(V_{j+1} - V_j) \\le \\max V_r$$\n": [
+"report.py:171"
+],
+"Zakonitost V~p~ – i~N~ ograničava brzinu u slučajevima: {0}; najnepovoljnije u slučaju {1} ({2}), gdje nagib u smjeru vožnje dostiže {3} %": [
+"report.py:199"
+],
+"\n### Model vožnje\n": [
+"report.py:209"
+],
+"\n## Statistički pokazatelji dinamičke homogenosti\n": [
+"report.py:230"
+],
+"Na osnovu rezultirajućeg profila V~p~(s) na dionici dužine L određuju se (ponderisano po dužini, integracija trapeznom formulom na mreži Δs):\n\n$$V_{p,sr} = \\frac{1}{L}\\int_0^L V_p(s)\\,ds \\approx \\frac{1}{L}\\sum_{i=1}^{n-1} \\frac{V_i + V_{i+1}}{2}\\,\\Delta s_i$$\n\n$$\\sigma = \\sqrt{\\frac{1}{L}\\int_0^L \\left(V_p(s) - V_{p,sr}\\right)^2 ds}$$\n\n$$D_h = \\frac{\\sigma}{V_{p,sr}} \\cdot 100\\ [\\%]$$\n\nDinamička usklađenost susjednih elemenata trase (pravac – krivina – pravac) izražava se razlikom projektnih brzina\n\n$$\\Delta V_{i,i+1} = \\left| V_{p,i} - V_{p,i+1} \\right|$$\n\nKriterij ocjene (Lamm i dr. [5]): ΔV ≤ 10 km/h – dobro; 10 < ΔV ≤ 20 km/h – zadovoljavajuće; ΔV > 20 km/h – loše. Za projektnu brzinu elementa uzima se: na kružnom luku (sa prijelaznicama) najmanja brzina, na pravcu najveća brzina u elementu. Ocjena se daje prema razlici *ciljnih* brzina elemenata (V~p,R~ odnosno V~p~(i~N~), prije glačanja ubrzanjem/usporenjem), jer rezultirajući profil po definiciji ublažava skokove; razlika rezultirajućih brzina data je uz nju radi poređenja.\n\nVrijeme putovanja određuje se iz\n\n$$T = \\int_0^L \\frac{ds}{v(s)} \\approx \\sum_{i=1}^{n-1} \\frac{\\Delta s_i}{2}\\left(\\frac{1}{v_i} + \\frac{1}{v_{i+1}}\\right)$$": [
+"report.py:231"
+],
+"\n# Geometrija trase\n": [
+"report.py:249"
+],
+"\n## Uzdužni profil\n": [
+"report.py:281"
+],
+"![]({0}){{width=16cm}}\n\n*Slika 1 – Uzdužni profil nivelete i podužni nagib*\n": [
+"report.py:311"
+],
+"![]({0}){{width=16cm}}\n\n*Slika 2 – Dijagram krivine (1000/R) i poprečnog nagiba lijeve strane*\n": [
+"report.py:312"
+],
+"![]({0}){{width=14cm}}\n\n*Slika 3 – Situacioni plan osovina sa stacionažama*\n": [
+"report.py:313"
+],
+"\n# Rezultirajući profil projektne brzine – putničko vozilo\n": [
+"report.py:315"
+],
+"## Brzine na elementima i harmonizacija\n": [
+"report.py:316"
+],
+"\n## Statistika rezultirajućeg profila\n": [
+"report.py:345"
+],
+"\n## Provjera poprečnih nagiba na kružnim lukovima\n": [
+"report.py:367"
+],
+"**Zaključak provjere:**": [
+"report.py:398"
+],
+"\n# Dinamički model vozila – brzine, vrijeme putovanja i potrošnja goriva\n": [
+"report.py:404"
+],
+"## Model kretanja i potrošnje\n": [
+"report.py:405"
+],
+"Za putničko vozilo i teška vozila nisu zadati parametri u Projektnom zadatku, pa su usvojeni tipični (potrebno ih je potvrditi): {0}; gustina vazduha ρ = {1} kg/m³. Profil brzine putničkog vozila iz poglavlja 4 (V~p~) je rezultat zakonitosti V~p~ – R i V~p~ – i~N~ s ograničenjima ubrzanja i usporenja, dok se u ovom poglavlju isto vozilo analizira dinamičkim modelom (sile otpora i vuče), pa se dobijaju brzina po sili vuče, vrijeme putovanja i potrošnja goriva. Na ulazu u trasu vozilo ima v~lim~, a na granicama sekcija brzina se prenosi s prethodne dionice u smjeru vožnje.\n\nZa svaki korak Δs, prema [8] i [9] (v u m/s, G = podužni nagib kao razlomak, + uzbrdo u smjeru vožnje):\n": [
+"report.py:408"
+],
+"$$R_{r} = f_{rl}\\, m\\, g,\\quad f_{rl} = 0,01\\left(1 + \\frac{v}{44,73}\\right)$$\n\n$$R_{a} = \\tfrac{1}{2}\\,\\rho\\, C_d A\\, v^2,\\qquad R_{g} = m\\, g\\, G,\\qquad F_{r} = R_r + R_a + R_g$$\n\n$$F_t = \\min\\left(\\frac{\\eta\\,P}{v},\\ \\mu\\, m\\, g\\right),\\qquad a = \\frac{F_t - F_r}{\\gamma_m\\, m},\\qquad v_{i+1} = \\sqrt{v_i^2 + 2\\,a\\,\\Delta s} \\le v_{lim}$$\n\nPotrošnja goriva po koraku: za F~r~ ≤ 0 (kočenje motorom, bez ubrizgavanja) računa se potrošnja praznog hoda; u protivnom\n\n$$\\Delta B = b \\cdot \\frac{F_u\\, v_{sr}}{\\eta \\cdot 1000} \\cdot \\frac{\\Delta s}{v_{sr}} \\cdot \\frac{1}{3600}\\ [\\text{l}]$$\n\npri čemu je F~u~ = F~r~ kada vozilo održava v~lim~, a F~u~ = F~t~ kada vozilo koristi punu snagu (uspon sa padom brzine ili ubrzavanje).\n": [
+"report.py:412"
+],
+"![]({0}){{width=16cm}}\n\n*Slika 5 – Profil brzina teških vozila (siva linija – putničko vozilo)*\n": [
+"report.py:492"
+],
+"![]({0}){{width=16cm}}\n\n*Slika 6 – Kumulativno vrijeme putovanja i potrošnja goriva po pređenom putu*\n": [
+"report.py:493"
+],
+"\n# Zaključci i preporuke\n": [
+"report.py:571"
+],
+"Brzine teških vozila u smjeru uspona padaju do {0} km/h; razlika prema putničkim vozilima jedan je od ulaznih podataka za analizu preticanja, dodatne trake za spora vozila i saobraćajne opreme.": [
+"report.py:590"
+],
+"\n# Sadržaj i uslovi obrade\n": [
+"report.py:594"
+],
+"Elaborat je urađen u skladu sa Projektnim zadatkom (Elaborat vozno-dinamičkih analiza) i uslovima obrade iz Opšteg dijela. Numerički proračun dat je u tabelama (prilozi A) i u radnoj knjizi (Excel) sa formulama, dijagramima i svim tabelama iz ovog elaborata. Grafički prilozi (prilog B) prikazuju krivinu, uzdužni profil i profile brzina po segmentima trase za sve smjerove vožnje. Za grafičke priloge u razmjeri 1:1000 podaci iz radne knjige (listovi *Profil_n*) mogu se direktno prenijeti u CAD; prilozi u ovom dokumentu prilagođeni su formatu A4.\n": [
+"report.py:595"
+],
+"# Prilog B – Grafički prilozi {.unnumbered}\n": [
+"report.py:612"
+],
+"Svaki prilog prikazuje segment trase: krivinu 1000/R, nivelete i profile brzina za sva mjerodavna vozila (po smjerovima vožnje). Isprekidana crvena linija – računska brzina V~r~ = {0} km/h.\n": [
+"report.py:613"
+],
+"# Prilog C – Pretpostavke i ograničenja {.unnumbered}\n": [
+"report.py:617"
+],
+"**Zakonitost V~p~ – R** zamijenjena je interpolacijom tablice R~min~(V~r~) iz Priloga 2 uz ograničenje na max V~r~ = {0} km/h (dijagram: slika 3-07 „Teorijska zavisnost projektne brzine od radijusa horizontalne krivine”, Prilog 2 pravilnika [1]). Ako se iz originalnog grafika očitaju niže brzine u krivinama, profil V~p~ će biti niži i raznolikiji (veći D~h~).": [
+"report.py:619"
+],
+"**Zakonitost V~p~ – i~N~** je tablica sastavljena na osnovu dijagrama iz slike 3-08 Priloga 2 pravilnika [1], [4].": [
+"report.py:620"
+],
+"**Ubrzanje i usporenje** a = d = {0} m/s² (ekvivalent obrasca L = 0,1·V~sr~·ΔV iz slike 3-09 Priloga 2, nominalno 0,8 m/s²).": [
+"report.py:621"
+],
+"**Prijelaznice** se tretiraju kao „pravac” u smislu ciljne brzine (brzina krivine primjenjuje se na kružnom luku), što je uobičajeno pri formiranju profila V85.": [
+"report.py:622"
+],
+"**Dinamički model vozila**: svi parametri vozila (putničko i teška; masa, snaga, C~d~A, v~lim~, η, γ~m~, μ, specifična potrošnja, prazan hod) su pretpostavljeni; početna brzina na ulazu u trasu = v~lim~. Potrošnja je modelska i ne zamjenjuje mjerenja.": [
+"report.py:623"
+],
+"**Granice dionica**: lukovi koji prelaze granicu sekcije ocjenjuju se samo u dijelu unutar sekcije.": [
+"report.py:625"
+],
+"**Poprečni nagib** primijenjenog luka = nagib vanjske trake kolovoza lijeve strane (desna je jednaka sa suprotnim predznakom); nagib se koristi samo u provjerama (tabele poprečnih nagiba), ne i u profilu brzine, vremenu i gorivu.": [
+"report.py:626"
+],
+"**Kriterij ΔV** (10 / 20 km/h) preuzet je iz literature (Lamm i dr.) [5] i primijenjen na razliku ciljnih brzina elemenata; ako Priručnik ima drugačije granice, uskladiti.": [
+"report.py:627"
+],
+"**Preglednost** (Elaborat 4) nije obrađena.": [
+"report.py:628"
+],
+"**Referentni najveći podužni nagib** za V~r~ = {0} km/h uzet je {1} % (potvrditi).": [
+"report.py:631"
+],
+"**Tabela O2 – Objašnjenje kolona u tabelama**\n\n": [
+"report.py:640"
+],
+"---\ntoc-title: \"Sadržaj\"\ntitle: \"ELABORAT 3 – VOZNO-DINAMIČKE ANALIZE\"\nsubtitle: \"{0} – računska brzina V~r~ = {1:.0f} km/h\"\nauthor: \"Rezultirajući profil projektne brzine, usklađenost elemenata trase, vrijeme putovanja i potrošnja goriva\"\ndate: \"{2}\"\n---\n\n": [
+"report.py:97"
+],
+".\n\n**Tabela O1 – Značenje oznaka**\n\n": [
+"report.py:133"
+],
+"Za određivanje brzine V85 primijenjena je metoda iz **Pravilnika o uslovima koje javni putevi izvan naselja moraju da ispunjavaju sa aspekta bezbjednosti saobraćaja (Sl. glasnik RS 50/2011), Prilog 2** [1], uz **Priručnik za projektovanje puteva u Republici Srbiji (Putevi Srbije), dio 4.0** [2] (model vožnje). Prema tim dokumentima projektna brzina V~p~ nije zadana unaprijed, već se dobija kao *posljedica* usvojenih elemenata geometrije, u rasponu\n\n$$V_{ri} \\le V_p \\le \\max V_r, \\qquad \\max V_r = V_r + <<dm>> = <<mx>>\\ \\text{km/h}$$\n\nNajveća brzina na pravcu je max V~r~, odnosno V~ri~ + <<dm>> km/h, pri čemu se ta vrijednost poredi s max V~r~ iz tabele 3-04 Priloga 2 i ne smije je prekoračiti<<tab34>>.\n\nRezultirajući profil V~p~ konstruiše se po stacionaži na sljedeći način:\n\n1. za svaki kružni luk iz zakonitosti **V~p~ – R** određuje se brzina koju vozač ostvaruje u krivini; na pravcima je ciljna brzina max V~r~;\n2. iz zakonitosti **V~p~ – i~N~** (uticaj podužnog nagiba) određuje se ciljna brzina u zavisnosti od nagiba nivelete u smjeru vožnje;\n3. mjerodavna ciljna brzina je manja od te dvije (i od eventualnog ograničenja brzine u scenariju);\n4. ciljna brzina se „glača\" modelom vožnje sa ubrzanjem a = <<a>> m/s² i usporenjem d = <<d>> m/s² (nominalno a = d = 0,8 m/s², a put promjene brzine određen je obrascem iz slike 3-09: L = 0,1·V~sr~·ΔV, što odgovara a = d = 0,77 m/s²);\n5. na tako dobijenom profilu određuju se statistički pokazatelji (V~p,sr~, σ, D~h~) i usklađenost susjednih elemenata ΔV~p~.\n\nProfil se konstruiše posebno za svaki smjer vožnje: u smjeru rastuće stacionaže i u smjeru opadajuće stacionaže (podužni nagib i~N~ se uzima sa predznakom u smjeru vožnje, + uzbrdo). Slučajevi (dionice) u istom smjeru vožnje lančano se nastavljaju na granicama sekcija: brzina na kraju jedne dionice je ulazna brzina sljedeće (zadovoljavaju se i ubrzanje i usporenje kroz granicu). Na ulazu u trasu pretpostavljena je slobodna vožnja sa <<ve>> km/h.\n\n**Napomena o zakonitostima.** Zakonitosti V~p~ – R i V~p~ – i~N~ su u Prilogu 2 pravilnika [1] date grafički (slike 3-07 i 3-08): (a) za V~p~ – R – primijenjena je linearna interpolacija tablice minimalnih radijusa R~min~(V~ri~), izračunatih obrascem sa slike 3-07, R~min~ = V~ri~² / (127·(f~R~(V) + i~pk,max~)), sa i~pk,max~ = 7 % i f~R~ iz tabele 3-05, ograničena na max V~r~; (b) za V~p~ – i~N~ – tablica je očitana s dijagrama na slici 3-08 (tačnost očitanja oko ±5 km/h) [4]. Obje zakonitosti su u radnoj knjizi ulazni podaci (list *Parametri*) i mogu se zamijeniti preciznije očitanim vrijednostima bez promjene ostalih formula. Rezultati poglavlja 4 zavise od ovih tablica, pa se preporučuje kontrola očitanih vrijednosti prema originalnim dijagramima.": [
+"report.py:149"
+],
+" sadrži podatke iz Priloga 2 pravilnika: minimalne radijuse horizontalnih krivina i koeficijente trenja za računske brzine V~r~.\n\n": [
+"report.py:168"
+],
+"Minimalni radijusi (obrazac sa slike 3-07, i~pk,max~ = 7 %) i koeficijenti trenja (tabela 3-05 Priloga 2 pravilnika [1])": [
+"report.py:169"
+],
+"V~r~ – računska brzina; R~min~ – najmanji radijus; f~T~, f~R~ – dopušteni podužni i bočni koeficijent trenja.": [
+"report.py:169"
+],
+"Najveća brzina u zavisnosti od podužnog nagiba (tablica sastavljena na osnovu dijagrama iz Priloga 2 pravilnika, slika 3-08 [4])": [
+"report.py:193"
+],
+"i~N~ – podužni nagib; V~p~(i~N~) – najveća brzina za dati nagib.": [
+"report.py:193"
+],
+"Na analiziranim dionicama zakonitost V~p~ – i~N~ ne ograničava brzinu putničkog vozila (V~p~(i~N~) ≥ max V~r~), pa V~p~ zavisi samo od radijusa lukova.\n": [
+"report.py:208"
+],
+"Prijelaz sa jedne ciljne brzine V~1~ na drugu odvija se konstantnim ubrzanjem a ili usporenjem d. Brzina nakon pređenog puta s određuje se iz\n\n$$v_2 = \\sqrt{v_1^2 \\pm 2\\,a\\,s}$$\n\na dužina puta potrebna za promjenu brzine sa V~1~ na V~2~ je\n\n$$s = \\frac{v_1^2 - v_2^2}{2\\,d}$$\n\nPravilnik (slika 3-09) daje put ubrzanja i usporenja pri a = d = 0,8 m/s² obrascem L~a,d~ = 0,1·(V~sr~·ΔV), gdje je V~sr~ = (V~1~ + V~2~)/2 i ΔV = |V~1~ − V~2~| (brzine u km/h, put u m). Taj obrazac je ekvivalentan gornjim jednačinama s ubrzanjem i usporenjem a = d = 1/(0,1·3,6²) = <<aef>> m/s², pa se u proračunu primjenjuju te vrijednosti (npr. 100 → 80 km/h: L = 0,1·90·20 = 180 m).\n": [
+"report.py:210"
+],
+"Kontrola prijelaznica: za klotoidu važi A² = R·L. Npr. {0}, element {1} (R = {2} m, L = {3} m): A = √({4} · {5}) = {6} m, što odgovara ispisu ({7} m).\n": [
+"report.py:274"
+],
+"PT – prelomna tačka nivelete; Stac., Kota – položaj PT; i~ul~, i~izl~ – nagib prije i poslije; Δi – promjena nagiba; R~v~, L~vk~, T, e – elementi vertikalne krivine; Tip – udubljena (Δi > 0) ili ispupčena (Δi < 0).": [
+"report.py:291"
+],
+"Primjenom metode iz poglavlja 2 dobijeni su rezultirajući profili V~p~ na slici 4. Na svim kružnim lukovima ostvaruje se najveća dopuštena brzina max V~r~ = {0} km/h.\n": [
+"report.py:321"
+],
+"**Provjera uslova V~ri~ ≤ V~p~.** Na cijeloj trasi je V~p~ ≥ V~r~ = {0} km/h (tačka 3.3.3 Priloga 2 pravilnika).\n": [
+"report.py:331"
+],
+"Br., Element – krivina (luk sa prijelaznicama) ili pravac; St. od / do; L; R; Smjer; V~p,i~ cilj – ciljna brzina elementa T (krivina: najmanja, pravac: najveća); ΔV~cilj~ – razlika u odnosu na sljedeći element i Ocjena prema kriteriju 10 / 20 km/h; V~p,i~ rez. i ΔV~rez~ – isto za rezultirajući profil poslije ubrzanja/usporenja.": [
+"report.py:340"
+],
+"Na svim dionicama razlike ciljnih brzina susjednih elemenata su ≤ 10 km/h, tj. trasa je sa aspekta dinamičke usklađenosti susjednih elemenata ocijenjena kao **dobra**.\n": [
+"report.py:342"
+],
+"Primjer proračuna statistike za slučaj **<<k>>** (<<lab>>), dužina L = <<L>> m, <<n>> tačaka:\n\n$$V_{p,sr} = \\frac{1}{<<L>>}\\sum \\frac{V_i + V_{i+1}}{2}\\,\\Delta s_i = <<m>>\\ \\text{km/h}$$\n\n$$\\sigma = \\sqrt{\\frac{1}{<<L>>}\\sum \\frac{(V_i - <<m>>)^2 + (V_{i+1} - <<m>>)^2}{2}\\,\\Delta s_i} = <<sd>>\\ \\text{km/h}$$\n\n$$D_h = \\frac{\\sigma}{V_{p,sr}} \\cdot 100 = \\frac{<<sd>>}{<<m>>} \\cdot 100 = <<dh>>\\ \\%$$\n\n$$T = \\sum \\frac{\\Delta s_i}{2}\\left(\\frac{1}{v_i} + \\frac{1}{v_{i+1}}\\right) = <<t>>\\ \\text{s} = <<tm>>\\ \\text{min}$$\n": [
+"report.py:347"
+],
+"Pokazatelji dinamičke homogenosti, putničko vozilo": [
+"report.py:357"
+],
+"Dionica / smjer; V~p,sr~, σ, D~h~ – statistika po dužini; V~min~, V~max~; T – vrijeme putovanja; redovi „cijela trasa” obuhvataju sve dionice u istom smjeru vožnje (lančano).": [
+"report.py:357"
+],
+". Vrijednosti D~h~ su direktno posljedica pretpostavljenih zakonitosti V~p~–R i V~p~–i~N~ (poglavlje 2.2): ako se iz originalnih grafika očitaju niže brzine u krivinama, profil će biti niži i raznolikiji (veći D~h~).\n": [
+"report.py:366"
+],
+"Potreban poprečni nagib na krivini za računsku brzinu određuje se iz Priloga 2 [1]:\n\n$$i_{pk}(V_r) = 7 \\cdot \\left(\\frac{R_{min}(V_r)}{R}\\right)^{0,74},\\qquad 2,5\\ \\% \\le i_{pk} \\le 7\\ \\%$$\n\na dinamička provjera za rezultirajuću brzinu V (uslov bočnog trenja):\n\n$$f_{pot} = \\frac{V^2}{127\\,R} - \\frac{i_p}{100} \\le f_R(V),\\qquad i_{p,potr} = \\left(\\frac{V^2}{127\\,R} - f_R(V)\\right)\\cdot 100$$\n": [
+"report.py:368"
+],
+"Luk br. – broj elementa; R; Smjer; V~p~ – najmanja brzina na luku (u dijelu unutar dionice); i~pk~(V~r~) – potreban nagib za V~r~; i~p~ prim. – primijenjeni nagib; i~p~ ≥ i~pk~ – uslov (poređenje na 0,1 %); f~R~(V~p~); i~p,potr~ – potreban nagib za V~p~; f~pot~ – iskorišteno trenje; f~pot~ ≤ f~R~ – uslov; R ≥ R~min~ – da li je radijus veći od najmanjeg za V~r~.": [
+"report.py:393"
+],
+"kriterij i~p~ ≥ i~pk~(V~r~) zadovoljen je na svim lukovima.": [
+"report.py:399"
+],
+"Dinamički uslov bočnog trenja zadovoljen je na svim lukovima za dobijene brzine.": [
+"report.py:400"
+],
+"Svi lukovi imaju R ≥ R~min~(V~r~).": [
+"report.py:401"
+],
+"**Vozilo prema Pravilniku.** Za merodavno teretno vozilo Pravilnik (Prilog 2, slika 3-10) daje V-L dijagram brzine na usponima, iz kojeg proizlaze ravnotežne brzine od 68, 55, 43, 33, 24 i 15 km/h na usponima od 2 % do 7 %. Za vozilo „{0}” sila vuče nije zadata konstantnom snagom nego krivom F~t~(v), dobijenom iz tih ravnotežnih tačaka (pri ravnoteži je F~t~ = F~r~) za masu m = {1} t i C~d~A = {2} m². Ispod najmanje brzine kriva se zadržava na zadnjoj vrijednosti, a iznad najveće vrijedi konstantna snaga. Time se brzine tog vozila na usponima poklapaju s dijagramom iz Pravilnika. Ostala vozila („{3}”) računaju se s konstantnom snagom (savremena vozila), pa su njihove brzine na usponima veće; njihovi parametri su pretpostavke.\n": [
+"report.py:426"
+],
+"**<<title>>** st. <<s>> m: brzina v = <<vkmh>> km/h = <<v>> m/s, nagib u smjeru vožnje G = <<G>> %, korak Δs = <<ds>> m.\n\n$$f_{rl} = 0,01\\left(1 + \\frac{<<v>>}{44,73}\\right) = <<frl>>,\\qquad R_r = <<frl>> \\cdot <<m>> \\cdot <<g>> = <<Rr>>\\ \\text{N}$$\n\n$$R_a = 0,5 \\cdot <<rho>> \\cdot <<cda>> \\cdot <<v>>^2 = <<Ra>>\\ \\text{N},\\qquad R_g = <<m>> \\cdot <<g>> \\cdot <<Gf>> = <<Rg>>\\ \\text{N}$$\n\n$$F_r = <<Rr>> + <<Ra>> + (<<Rg>>) = <<Fr>>\\ \\text{N}$$\n\n$$F_t = \\min\\left(\\frac{<<eta>> \\cdot <<Pw>>}{<<v>>},\\ <<mu>> \\cdot <<m>> \\cdot <<g>>\\right) = \\min(<<Fp>>;\\ <<Fm>>) = <<Ft>>\\ \\text{N}$$\n\n<<tail>>\n": [
+"report.py:458"
+],
+". Na dionicama gdje je vozilo pretežno nizbrdo brzina je ograničena na v~lim~ = {0} km/h; na usponima brzina pada do ravnotežne vrijednosti, što znači veliku razliku prema putničkim vozilima. Potrebu za dodatnom trakom za spora vozila treba ocijeniti prema važećem pravilniku.\n": [
+"report.py:491"
+],
+"Vrijeme putovanja i potrošnja goriva teških vozila": [
+"report.py:494"
+],
+"V~sr~, σ, D~h~, V~min~ – statistika brzine teškog vozila; T – vrijeme; Gorivo – ukupno [l], po km i na 100 km; redovi „cijela trasa” su zbir dionica u smjeru vožnje.": [
+"report.py:494"
+],
+". Potrošnja u smjeru nizbrdice je mala jer se vozilo kreće uz kočenje motorom, a potrošnju u smjeru uspona određuje rad motora punom snagom. Apsolutne vrijednosti zavise od usvojenih parametara vozila (poglavlje 5.1) i služe za poređenje varijanti, a ne kao garantovana potrošnja.\n": [
+"report.py:510"
+],
+"\n# Scenarij sa ograničenjem brzine\n": [
+"report.py:513"
+],
+"## Polazište\n": [
+"report.py:514"
+],
+"Pored osnovnog proračuna (poglavlja 2 – 5), u kojem brzina V85 proizlazi **samo iz geometrije**, urađen je scenarij sa dodatnim ograničenjem brzine: {0}. Ograničenje djeluje kao dodatna ciljna brzina T = min(V~p,R~; V~p~(i~N~); v~ogr~), a prije njega vozilo se usporava sa d = {1} m/s², a poslije njega ubrzava sa a = {2} m/s². Ograničenje brzine snižava stvarnu brzinu V85 samo ako se vozači pridržavaju ograničenja; zato ovaj scenarij vrijedi uz odgovarajuću signalizaciju i, po potrebi, fizičke mjere usporavanja, a za preglednost (Elaborat 4) treba provjeriti i rezultat iz geometrije.\n": [
+"report.py:516"
+],
+"![]({0}){{width=16cm}}\n\n*Slika 7 – Putničko vozilo: geometrija (V85) i scenarij sa ograničenjem brzine*\n": [
+"report.py:526"
+],
+"\n**Zapažanja.**\n": [
+"report.py:565"
+],
+"3. Elementi koji nisu u dijelu analize (npr. naplatna rampa i izlaz iz nje) nisu modelirani; ako se zahtijeva provjera zaustavnog puta ili uslova na prilazu, brzinu na prilazu treba zadati posebno.": [
+"report.py:568"
+],
+"4. Početak i kraj zone ograničenja mogu se promijeniti u radnoj knjizi (list *Parametri*, tablica zona ograničenja; scenarij se uključuje ćelijom B14 = 2).\n": [
+"report.py:569"
+],
+"Rezultirajuća projektna brzina (V85) i statistika po dionicama: ": [
+"report.py:576"
+],
+"Na dionicama sa povoljnim elementima dobijena V~p~ prelazi računsku brzinu V~r~ = {0} km/h (do {1} km/h). Preglednost u Elaboratu 4 treba provjeriti za V~p~, a ne samo za V~r~.": [
+"report.py:578"
+],
+"Dinamička usklađenost susjednih elemenata je ocijenjena kao dobra (ΔV~cilj~ ≤ 10 km/h) na svim dionicama.": [
+"report.py:580"
+],
+"Primijenjeni poprečni nagibi zadovoljavaju dinamički uslov bočnog trenja na svim lukovima za dobijene brzine.": [
+"report.py:583"
+],
+"Podužni nagib dostiže {0} %, što je više od referentne granice {1} % za V~r~ = {2} km/h (granicu potvrditi u pravilniku/Projektnom zadatku).": [
+"report.py:584"
+],
+"Zakonitost V~p~ – i~N~ određuje brzinu na dijelu trase (uspon), pa izvor te zakonitosti treba potvrditi.": [
+"report.py:585"
+],
+"; B – Grafički prilozi; C – Pretpostavke i ograničenja.": [
+"report.py:597"
+],
+"# Prilog {0} – Numerički proračun profila brzina, {1}: {2} {{.unnumbered}}\n": [
+"report.py:601"
+],
+"s – stacionaža; z – kota; i – nagib; El. – P pravac, K kružni luk, Pr prijelaznica; R; V~p~ – putničko; V~1~, V~2~ … – brzine teških vozila; t – kumulativno vrijeme [s]; B – kumulativna potrošnja [l], računato od ulaza u dionicu.": [
+"report.py:610"
+],
+" km/h. Pretpostavlja se da se vozilo na granici sekcija kreće bez zaustavljanja, a stacionaže osovina u susjednim sekcijama uzimaju se kao nominalno jednake.": [
+"report.py:624"
+],
+"Elaborat 3 – Vozno-dinamičke analize | {0}": [
+"report.py:748"
+],
+"zadovoljavajuće": [
+"report.py:81"
+],
+"dva odvojena kolovoza, svaki sa svojom osovinom – desni kolovoz (vožnja u smjeru rastuće stacionaže) i lijevi kolovoz (vožnja suprotno smjeru stacionaže)": [
+"report.py:114"
+],
+"centralna osovina sa jednim zajedničkim ispisom geometrije; proračun je urađen za oba smjera vožnje (u smjeru stacionaže i suprotno)": [
+"report.py:115"
+],
+"jedna osovina, proračun samo za smjer rastuće stacionaže": [
+"report.py:116"
+],
+"jedna osovina, proračun samo za smjer opadajuće stacionaže": [
+"report.py:117"
+],
+"; ograničenje brzine (scenarij): ": [
+"report.py:119"
+],
+"Brojevi u uglastim zagradama [n] u tekstu odnose se na popis literature na kraju elaborata. Indeksi slučajeva (smjerova vožnje): ": [
+"report.py:133"
+],
+"Značenje": [
+"report.py:134",
+"xlsx.py:53"
+],
+"Poprečni nagibi": [
+"report.py:140"
+],
+"Dužina [m]": [
+"report.py:140"
+],
+"K proračun / ispis [gon/km]": [
+"report.py:140"
+],
+"Tabela ": [
+"report.py:168",
+"report.py:717"
+],
+"Na svim kružnim lukovima najmanji radijus je R = {0} m (osovina {1}, luk br. {2}), što daje V~p,R~ = {3} km/h (ograničenje max V~r~ = {4} km/h).\n": [
+"report.py:186"
+],
+"Nijedan kružni luk ne ograničava brzinu ispod max V~r~ = {0} km/h.\n": [
+"report.py:191"
+],
+"Najveći podužni nagibi nivelete: ": [
+"report.py:195"
+],
+"\nZbog toga je potvrda izvora tablice V~p~(i~N~) posebno važna za te dionice.\n": [
+"report.py:206"
+],
+"Elementi horizontalne osovine: {0}, st. {1} – {2} ({3})": [
+"report.py:263"
+],
+"Tabele {0}–{1}": [
+"report.py:265",
+"report.py:291",
+"report.py:340",
+"report.py:393"
+],
+"Tabela {0}": [
+"report.py:265",
+"report.py:291",
+"report.py:340",
+"report.py:393",
+"report.py:41"
+],
+". Proračun profila brzine izvršen je na cijeloj dionici (uključujući puni ulaz u luk), a rezultati su prikazani za granice sekcije.\n": [
+"report.py:277"
+],
+". Dinamička provjera poprečnog nagiba data je u poglavlju 4.3.\n": [
+"report.py:280"
+],
+"Prelomne tačke nivelete: {0}, st. {1} – {2} ({3})": [
+"report.py:289"
+],
+"(nema vertikalnih krivina u rasponu)\n\n": [
+"report.py:290"
+],
+"Elementi vertikalne krivine (parabola): Δi = i~izl~ − i~ul~; L~vk~ = R~v~·|Δi|/100; T = L~vk~/2; e = T²/(2R~v~). Primjer za PT <<i>> osovine <<ax>> (st. <<s>> m): Δi = <<go>> − (<<gi>>) = <<dg>> %, L~vk~ = <<Rv>> · <<adg>>/100 = <<L1>> m (iz ispisa: <<tk>> − <<tz>> = <<L2>> m), T = <<t>> m, e = <<e>> m.\n\nKota nivelete unutar krivine: z(s) = z~PT~ + i~ul~/100 · (s − s~PT~) + Δi/(200·L~vk~) · (s − s~TZ~)². Nagib nivelete mijenja se linearno unutar vertikalne krivine: i(s) = i~ul~ + Δi·(s − s~TZ~)/L~vk~. Provjera: kota nivelete u tjemenu PT je z~PT~ <<sg>> e = <<zz>> <<sg>> <<e>> = <<zpt>> m.\n": [
+"report.py:302"
+],
+"Najveći podužni nagib nivelete (apsolutno) po dionicama: ": [
+"report.py:306"
+],
+". Ti elementi ne zadovoljavaju računsku brzinu i treba ih ispraviti ili obrazložiti; brzina se u profilu ne podiže na V~r~ jer bi to prikrilo stvarno ograničenje.\n": [
+"report.py:329"
+],
+"![]({0}){{width=16cm}}\n\n*Slika 4 – Rezultirajući profili projektne brzine – putničko vozilo": [
+"report.py:332"
+],
+"Usklađenost susjednih elemenata, {0}: {1} (putničko vozilo)": [
+"report.py:336"
+],
+". Razlika rezultirajućih brzina je manja jer se usporenje odvija na prijelaznici i prethodnim elementima; ostale razlike su ≤ 10 km/h („dobro”).\n": [
+"report.py:344"
+],
+"Dionica (smjer vožnje)": [
+"report.py:364"
+],
+"Koeficijent dinamičke homogenosti D~h~ po dionicama: ": [
+"report.py:366"
+],
+"**Primjer – najnepovoljniji luk: <<k>>, luk br. <<no>> (R = <<R>> m, V = <<V>> km/h, R~min~(<<Vr>>) = <<Rm>> m, primijenjeni nagib <<ip>> %):**\n\n$$i_{pk}(<<Vr>>) = 7 \\cdot \\left(\\frac{<<Rm>>}{<<R>>}\\right)^{0,74} = 7 \\cdot <<x>> = <<y>>\\ \\% <<cmp>>$$\n\n$$f_{pot} = \\frac{<<V>>^2}{127 \\cdot <<R>>} - <<ipf>> = <<a>> - <<ipf>> = <<b>> <<c2>> f_R(<<V>>) = <<fr>>$$\n\n$$i_{p,potr} = \\left(<<a>> - <<fr>>\\right) \\cdot 100 = <<ipr>>\\ \\%$$\n": [
+"report.py:378"
+],
+"Poprečni nagibi na kružnim lukovima, {0}: {1}": [
+"report.py:390"
+],
+"(nema kružnih lukova)\n\n": [
+"report.py:392"
+],
+". Preporuka: nagib na luku povećati (do 7,0 %), ili prihvatiti manju brzinu na luku, ili povećati radijus.": [
+"report.py:400"
+],
+". Projektant treba potvrditi da je za te lukove dopušteno odstupanje ili povećati radijus.": [
+"report.py:401"
+],
+"Kriva sile vuče vozila prema Pravilniku": [
+"report.py:428"
+],
+"v – brzina; F~t~ – sila vuče izvedena iz ravnotežnih tačaka dijagrama (slika 3-10).": [
+"report.py:428"
+],
+"Ravnotežne brzine vozila na usponu (model) i dijagram iz Pravilnika": [
+"report.py:441"
+],
+"Brzina pri kojoj sila vuče izjednačava sve otpore; „Pravilnik” – vrijednosti sa slike 3-10.": [
+"report.py:441"
+],
+"Primjer 1 – {0}, {1} ({2}, najmanja brzina)": [
+"report.py:480"
+],
+"Najmanje brzine vozila „{0}” po dionicama: ": [
+"report.py:491"
+],
+"Vozilo / dionica": [
+"report.py:505"
+],
+"Ukupno za obilazak cijele trase (svi analizirani smjerovi): ": [
+"report.py:510"
+],
+"{0} km/h na st. {1} – {2}": [
+"report.py:515",
+"report.py:119"
+],
+"Dužina potrebna za usporenje sa <<v1>> na <<v2>> km/h:\n\n$$s = \\frac{(<<v1>>/3,6)^2 - (<<v2>>/3,6)^2}{2 \\cdot <<d>>} = \\frac{<<a>> - <<b>>}{<<d2>>} = <<s>>\\ \\text{m}$$\n\nPrema tome, za zonu koja počinje na st. <<zs>> m, usporenje (u smjeru vožnje ka zoni) počinje najkasnije oko <<s>> m ispred početka zone, pa ograničenje i najavu treba postaviti najkasnije na tom mjestu.": [
+"report.py:519"
+],
+"Poređenje scenarija, putničko vozilo": [
+"report.py:527"
+],
+"Statistika brzine putničkog vozila za geometriju i scenarij sa ograničenjem (kolone kao u Tabeli o homogenosti).": [
+"report.py:527"
+],
+"Usklađenost susjednih elemenata uz ograničenje brzine": [
+"report.py:538"
+],
+"Kolone kao u tabelama usklađenosti (poglavlje 4.1), za scenarij.": [
+"report.py:538"
+],
+"Provjera poprečnog nagiba lukova u zoni ograničenja za ograničenu brzinu": [
+"report.py:545"
+],
+"Kolone kao u Tabelama poprečnih nagiba, uz V = rezultirajuća brzina scenarija na luku; R~min~ za brzinu luka dobija se interpolacijom iz Tabele 1.": [
+"report.py:545"
+],
+". Teška vozila nisu pogođena ako je njihova brzina ionako ≤ ograničenje.": [
+"report.py:567"
+],
+". Preporučuje se ujednačiti radijuse susjednih elemenata ili obezbijediti odgovarajuću signalizaciju.": [
+"report.py:579"
+],
+". Preporučuje se povećati radijus ili obrazložiti odstupanje (preporučena brzina, signalizacija).": [
+"report.py:581"
+],
+". Preporuka: povećati nagib (do 7,0 %) ili prihvatiti manju brzinu na luku.": [
+"report.py:582"
+],
+"{0}: putničko {1} min; ": [
+"report.py:588"
+],
+"Vrijeme putovanja i potrošnja goriva po smjerovima: ": [
+"report.py:589"
+],
+"; t – kumulativno vrijeme prvog teškog vozila [s]; B – kumulativna potrošnja prvog teškog vozila [l].\n\n": [
+"report.py:602"
+],
+"**Smjerovi i lanac**: dionice u smjeru rastuće stacionaže računaju se u tom smjeru, a u suprotnom smjeru obrnuto; na granicama sekcija brzina putničkog i teških vozila prenosi se s prethodne dionice u smjeru vožnje; ulazna brzina putničkog vozila na početku lanca iznosi ": [
+"report.py:624"
+],
+"); stacionaže početka i kraja zone treba potvrditi, a dokument i datum zahtjeva (Investitor) navesti.": [
+"report.py:630"
+],
+"Šta je preuzeto / gdje se koristi": [
+"report.py:638"
+],
+"Tabela": [
+"report.py:640",
+"xlsx.py:56"
+],
+"Značenje kolona": [
+"report.py:640",
+"xlsx.py:56"
+],
+"Sadržaj": [
+"report.py:718"
+],
+"sljedećih sekcija": [
+"report.py:109"
+],
+"; za ovaj put max V~r~ prema tabeli 3-04 iznosi {0} km/h, pa je max V~r~ = min(V~r~ + {1}; {2}) = {3} km/h": [
+"report.py:166"
+],
+". Svi ostali kružni lukovi imaju V~p,R~ = {0} km/h (ograničenje max V~r~).\n": [
+"report.py:189"
+],
+"**Primjer – ulaz u kružni luk br. <<no>> (<<ax>>, smanjenje <<v1>> → <<v2>> km/h):**\n\n$$s = \\frac{(<<v1>>/3,6)^2 - (<<v2>>/3,6)^2}{2 \\cdot <<d>>} = \\frac{<<a1>> - <<b1>>}{<<d2>>} = <<s>>\\ \\text{m}$$\n\nPočetak luka je na st. <<s0>> m, pa (u smjeru vožnje koji ide ka luku) usporenje počinje oko <<dist>> m prije početka luka, a nakon izlaza iz luka brzina se vraća na <<v1>> km/h na istom rastojanju.": [
+"report.py:224"
+],
+"St. početka [m]": [
+"report.py:264",
+"xlsx.py:116",
+"xlsx.py:262",
+"xlsx.py:275"
+],
+"Elementi koji prelaze granice sekcija ocjenjuju se samo u dijelu unutar sekcije: ": [
+"report.py:277"
+],
+" Kao referentna granica za V~r~ = {0:.0f} km/h uzima se {1} % (granicu treba potvrditi u pravilniku i Projektnom zadatku); ta granica je premašena na: ": [
+"report.py:309"
+],
+"Primjenom metode iz poglavlja 2 dobijeni su rezultirajući profili V~p~ na slici 4. Ograničenja brzine ispod max V~r~ = {0} km/h postoje na lukovima: ": [
+"report.py:319"
+],
+"na lukovima ": [
+"report.py:327"
+],
+"na dionicama s velikim podužnim nagibom: ": [
+"report.py:328"
+],
+"**Provjera uslova V~ri~ ≤ V~p~.** Prema tački 3.3.3 Priloga 2 pravilnika mora biti V~ri~ ≤ V~p~ ≤ max V~r~. Računska brzina je V~r~ = {0} km/h, a rezultirajuća V~p~ je manja od nje ": [
+"report.py:329"
+],
+"; isprekidana ljubičasta linija – scenarij sa ograničenjem brzine": [
+"report.py:332"
+],
+"St. od [m]": [
+"report.py:337",
+"report.py:543"
+],
+"St. do [m]": [
+"report.py:337",
+"report.py:543"
+],
+"Razlike ciljnih brzina susjednih elemenata veće od 10 km/h: ": [
+"report.py:344",
+"report.py:566"
+],
+"**Cijela trasa – {0} ({1})**": [
+"report.py:363"
+],
+"kriterij i~p~ ≥ i~pk~(V~r~) nije zadovoljen na: ": [
+"report.py:399"
+],
+"Dinamička provjera za rezultirajuću brzinu V~p~ pokazuje da nagib nije dovoljan na: ": [
+"report.py:400"
+],
+"Uslov R ≥ R~min~(V~r~) = {0} m nije zadovoljen na: ": [
+"report.py:401"
+],
+"Dionica / scenarij": [
+"report.py:537"
+],
+"Slučaj": [
+"report.py:543",
+"report.py:556"
+],
+"Luk br.": [
+"report.py:556",
+"report.py:391"
+],
+"{0}: D~h~ {1} → {2} %, vrijeme {3} s duže": [
+"report.py:564"
+],
+"Razlike ciljnih brzina susjednih elemenata ostaju ≤ 10 km/h.": [
+"report.py:566"
+],
+"2. Koeficijent dinamičke homogenosti i vrijeme putovanja po cijeloj trasi (geometrija → ograničenje): ": [
+"report.py:567"
+],
+"Dinamička usklađenost susjednih elemenata nije dobra na: ": [
+"report.py:579"
+],
+"Radijus manji od R~min~(V~r~) = {0} m imaju: ": [
+"report.py:581"
+],
+"Poprečni nagib nije dovoljan na: ": [
+"report.py:582"
+],
+"Scenarij sa ograničenjem brzine: ": [
+"report.py:592"
+],
+"Vrijednosti na svakoj 10. tački mreže (korak {0} m; {1} rastuće stacionaže; vremena i gorivo računati od ulaza u dionicu); potpuni proračun na koraku {2} m nalazi se u radnoj knjizi (listovi *Profil_{3}* i *Voz1_{4}* …). Oznake: V~p~ – putničko vozilo; ": [
+"report.py:602"
+],
+"**Scenarij sa ograničenjem brzine**: ograničenje je primijenjeno na zadatim zonama (": [
+"report.py:630"
+],
+"f~T~ (podužno)": [
+"report.py:170"
+],
+"f~R~ (poprečno)": [
+"report.py:170"
+],
+"Lukovi kod kojih zakonitost V~p~ – R ograničava brzinu: ": [
+"report.py:189"
+],
+"ispupčena": [
+"report.py:288"
+],
+"> 7,0\\ \\%\\ (\\text{ne može se postići ni sa najvećim dopuštenim nagibom})": [
+"report.py:386"
+],
+"Uspon [%]": [
+"report.py:442"
+],
+"**{0} – cijela trasa, {1}**": [
+"report.py:504"
+],
+"ograničenje": [
+"report.py:531",
+"report.py:535"
+],
+". Ove razlike ne mogu se ublažiti geometrijom bez povećanja radijusa, pa je neophodna najava ograničenja (znak, uzdužne oznake, po potrebi prethodno ograničenje).": [
+"report.py:566"
+],
+"scenarij sa ograničenjem brzine na dijelu trase (poglavlje %d)": [
+"report.py:127"
+],
+"**Primjer – kružni luk br. <<no>> ({<<ax>>}, R = <<R>> m, st. <<s0>> – <<s1>>):** R leži između R~j~ = <<R1>> m (V = <<V1>> km/h) i R~j+1~ = <<R2>> m (V = <<V2>> km/h):\n\n$$V_p(<<R>>) = <<V1>> + \\frac{<<R>> - <<R1>>}{<<R2>> - <<R1>>}\\,(<<V2>> - <<V1>>) = <<V1>> + <<q>> \\cdot <<dV>> = <<y>>\\ \\text{km/h}$$\n": [
+"report.py:181"
+],
+"**Lukovi sa radijusom manjim od najmanjeg za V~r~ (R~min~(V~r~) = ": [
+"report.py:280"
+],
+"{0}, luk br. {1} (R = {2} m, V~p,R~ = {3} km/h)": [
+"report.py:280"
+],
+"{0}, luk br. {1} (R = {2} m, st. {3} – {4}) – V~p~ = {5} km/h": [
+"report.py:319"
+],
+"{0}, luk br. {1} (R = {2} m, V~p~ = {3} km/h)": [
+"report.py:327"
+],
+"{0} (najmanja V~p~ = {1} km/h na st. {2} m)": [
+"report.py:328"
+],
+"{0}, prelaz sa elementa {1} na element {2} (st. {3}): ΔV~cilj~ = {4} km/h (**{5}**), ΔV~rez~ = {6} km/h": [
+"report.py:344"
+],
+"{0}, luk br. {1} (primijenjeno {2} %, potrebno {3} %)": [
+"report.py:399"
+],
+"{0}, luk br. {1} (R = {2} m, V = {3} km/h, primijenjeno {4} %, potrebno {5} %)": [
+"report.py:400"
+],
+"{0}, luk br. {1} (R = {2} m)": [
+"report.py:401",
+"report.py:581"
+],
+"Vozilo je na ograničenju brzine v~lim~ i sile pogona dovoljno: F~u~ = F~r~ = <<Fu>> N, v~i+1~ = v~lim~ = <<vn>> m/s, ΔB = <<fl>> l": [
+"report.py:475"
+],
+"F~r~ ≤ 0 – vozilo ne troši gorivo za pogon (kočenje motorom), računa se samo prazan hod: ΔB = <<b>> · <<dt>>/3600 = <<fl>> l": [
+"report.py:476"
+],
+"**Cijela trasa, {0}, {1}**": [
+"report.py:536"
+],
+"{0}, luk br. {1} (primijenjeno {2} %, potrebno {3} % za V = {4} km/h)": [
+"report.py:582"
+],
+"{0}, luk br. {1} (R = {2} m, st. {3} – {4}) – V~p,R~ = {5} km/h": [
+"report.py:189"
+],
+"Pravilnik, slika 3-10 [km/h]": [
+"report.py:442"
+],
+"VODEĆI PROJEKTANT": [
+"template_export.py:113"
+],
+"ODGOVORNI PROJEKTANT": [
+"template_export.py:113"
+],
+"SARADNICI NA PROJEKTU": [
+"template_export.py:114"
+],
+"Tabela/Table ": [
+"template_export.py:194"
+],
+" SEQ Tabela_/_Table \\* ARABIC ": [
+"template_export.py:194"
+],
+"Slika / Figure  ": [
+"template_export.py:194"
+],
+" SEQ Slika_/_Figure_ \\* ARABIC ": [
+"template_export.py:194"
+],
+"Template nema naslov 'TEKSTUALNA DOKUMENTACIJA' (stil NASLOV) – ne mogu odrediti mjesto za tekst elaborata.": [
+"template_export.py:210"
+],
+"Template nema očekivane dijelove (NUMERIČKA / GRAFIČKA DOKUMENTACIJA).": [
+"template_export.py:215"
+],
+"Template nema primjer naslova tabele (stil Caption).": [
+"template_export.py:217"
+],
+"Grafički prilozi – vozno-dinamičke analize / Graphical Appendices – Driving Dynamics Analysis": [
+"template_export.py:296"
+],
+"Numerički proračun profila brzina / Numerical Calculation of Speed Profiles": [
+"template_export.py:308"
+],
+"Vozno-dinamičke analize (Elaborat 3) / Driving Dynamics Analyses (Elaborate 3)": [
+"template_export.py:314"
+],
+"Tabela/Table": [
+"template_export.py:216"
+],
+"^Tabela (\\d+) – (.+)$": [
+"template_export.py:260"
+],
+"^Slika (\\d+) – (.+)$": [
+"template_export.py:260"
+],
+"Računska brzina": [
+"texts.py:4:MODUL"
+],
+"Zadata projektnim zadatkom": [
+"texts.py:4:MODUL"
+],
+"2.2, svi proračuni": [
+"texts.py:4:MODUL"
+],
+"Računska brzina izračunata iz radijusa (tablica R~min~(V~r~))": [
+"texts.py:5:MODUL"
+],
+"Najveća projektna brzina = V~r~ + 20": [
+"texts.py:6:MODUL"
+],
+"Projektna brzina = V85, dobija se kao posljedica geometrije": [
+"texts.py:7:MODUL"
+],
+"Rezultat proračuna": [
+"texts.py:7:MODUL"
+],
+"Brzina iz zakonitosti V~p~–R (zavisi od radijusa kružnog luka)": [
+"texts.py:8:MODUL"
+],
+"Tabela R~min~(V~r~), element": [
+"texts.py:8:MODUL"
+],
+"Brzina iz zakonitosti V~p~–i~N~ (zavisi od podužnog nagiba)": [
+"texts.py:9:MODUL"
+],
+"T (ciljna brzina)": [
+"texts.py:10:MODUL"
+],
+"min(V~p,R~ ; V~p~(i~N~) ; ograničenje) prije primjene ubrzanja/usporenja": [
+"texts.py:10:MODUL"
+],
+"Proračun": [
+"texts.py:10:MODUL",
+"texts.py:11:MODUL",
+"texts.py:12:MODUL",
+"texts.py:13:MODUL",
+"texts.py:14:MODUL",
+"texts.py:15:MODUL",
+"texts.py:19:MODUL",
+"texts.py:26:MODUL",
+"texts.py:31:MODUL",
+"texts.py:33:MODUL",
+"texts.py:37:MODUL",
+"texts.py:39:MODUL"
+],
+"Srednja projektna brzina (ponderisana po dužini)": [
+"texts.py:11:MODUL"
+],
+"Srednje kvadratno odstupanje brzine od V~p,sr~": [
+"texts.py:12:MODUL"
+],
+"Koeficijent dinamičke homogenosti = σ / V~p,sr~ · 100": [
+"texts.py:13:MODUL"
+],
+"Razlika projektnih brzina susjednih elemenata (ΔV~cilj~ – razlika ciljnih brzina T, služi za ocjenu; ΔV~rez~ – razlika rezultirajućih brzina)": [
+"texts.py:14:MODUL"
+],
+"Najmanja i najveća brzina na dionici": [
+"texts.py:15:MODUL"
+],
+"Ubrzanje i usporenje u modelu vožnje": [
+"texts.py:16:MODUL"
+],
+"Priručnik (model vožnje)": [
+"texts.py:16:MODUL"
+],
+"Korak proračuna": [
+"texts.py:17:MODUL"
+],
+"Pretpostavka proračuna": [
+"texts.py:17:MODUL"
+],
+"svi proračuni": [
+"texts.py:17:MODUL",
+"texts.py:18:MODUL"
+],
+"Dužina dionice / stacionaža": [
+"texts.py:18:MODUL"
+],
+"Radijus kružnog luka": [
+"texts.py:20:MODUL"
+],
+"ispis horizontalne osovine": [
+"texts.py:20:MODUL",
+"texts.py:22:MODUL",
+"texts.py:23:MODUL"
+],
+"Najmanji radijus za V~r~": [
+"texts.py:21:MODUL"
+],
+"Dužina elementa trase": [
+"texts.py:23:MODUL"
+],
+"Podužni nagib nivelete (+ uzbrdo u smjeru rastuće stacionaže)": [
+"texts.py:24:MODUL"
+],
+"ispis uzdužnog profila": [
+"texts.py:24:MODUL",
+"texts.py:25:MODUL"
+],
+"Nagib prije / poslije prelomne tačke nivelete": [
+"texts.py:25:MODUL"
+],
+"Algebarska razlika nagiba na prelomnoj tački": [
+"texts.py:26:MODUL"
+],
+"Radijus, dužina, tangenta i vanjska ordinata vertikalne krivine": [
+"texts.py:27:MODUL"
+],
+"ispis uzdužnog profila / proračun": [
+"texts.py:27:MODUL"
+],
+"Proračun iz prelomnih tačaka": [
+"texts.py:28:MODUL"
+],
+"Poprečni nagib kolovoza na krivini (primijenjen)": [
+"texts.py:29:MODUL"
+],
+"ispis poprečnih nagiba": [
+"texts.py:29:MODUL"
+],
+"Potreban poprečni nagib na krivini za V~r~: 7·(R~min~/R)^0,74": [
+"texts.py:30:MODUL"
+],
+"Potreban poprečni nagib za brzinu V~p~": [
+"texts.py:31:MODUL"
+],
+"Dopušteni koeficijent bočnog / podužnog trenja": [
+"texts.py:32:MODUL"
+],
+"Iskorišteni bočni koeficijent trenja = V²/(127R) − i~p~/100": [
+"texts.py:33:MODUL"
+],
+"Masa, snaga motora, aerodinamički faktor, stepen iskorištenja, faktor rotirajućih masa, koeficijent prianjanja": [
+"texts.py:34:MODUL"
+],
+"Pretpostavke za teška vozila": [
+"texts.py:34:MODUL"
+],
+"Ograničenje brzine teškog vozila": [
+"texts.py:35:MODUL"
+],
+"Koeficijent otpora kotrljanja; otpori kotrljanja, vazduha, nagiba; ukupni otpor": [
+"texts.py:36:MODUL"
+],
+"Wong, Cvetanović": [
+"texts.py:36:MODUL"
+],
+"Raspoloživa vučna sila; sila koja se koristi za potrošnju": [
+"texts.py:37:MODUL"
+],
+"Specifična potrošnja goriva": [
+"texts.py:38:MODUL"
+],
+"Potrošnja goriva po koraku": [
+"texts.py:39:MODUL"
+],
+"Pravilnik o uslovima koje sa aspekta bezbednosti saobraćaja moraju da ispunjavaju putni objekti i drugi elementi javnog puta, „Sl. glasnik RS”, br. 50/2011, Prilog 2 (broj i izdanje Službenog glasnika provjeriti).": [
+"texts.py:42:MODUL"
+],
+"Metoda određivanja V~p~ (V85) i raspon V~ri~ ≤ V~p~ ≤ max V~r~ (2.2); tablica R~min~ i koeficijenata trenja; i~pk~ na krivinama (4.3); upućuje na slike 3-07 (V~p~–R) i 3-08 (V~p~–i~N~).": [
+"texts.py:42:MODUL"
+],
+"Priručnik za projektovanje puteva u Republici Srbiji, JP „Putevi Srbije”, dio 4.0 „Projektni elementi puta”.": [
+"texts.py:43:MODUL"
+],
+"Opis rezultirajućeg profila brzine, usklađenosti i statistike (D~h~); ubrzanje / usporenje (2.2.3).": [
+"texts.py:43:MODUL"
+],
+"Projektni zadatak za izradu Glavnog projekta – Opšti dio i Elaborati.": [
+"texts.py:44:MODUL"
+],
+"Obim i sadržaj elaborata, računska brzina, vozila za koja se radi profil brzina.": [
+"texts.py:44:MODUL"
+],
+"Pravilnik iz [1], Prilog 2, slika 3-08 (zavisnost brzine od podužnog nagiba) i slika 3-07 „Teorijska zavisnost projektne brzine od radijusa horizontalne krivine”.": [
+"texts.py:45:MODUL"
+],
+"Tablica V~p~(i~N~) i zavisnost V~p~–R sastavljene su na osnovu dijagrama iz Priloga 2 pravilnika.": [
+"texts.py:45:MODUL"
+],
+"Kriterij ocjene usklađenosti ΔV (≤ 10 / 10–20 / > 20 km/h).": [
+"texts.py:46:MODUL"
+],
+"Opšti okvir za V85 i usklađenost elemenata; numeričke vrijednosti nisu korištene.": [
+"texts.py:47:MODUL"
+],
+"Smjernice za projektovanje, građenje, održavanje i nadzor na putevima u Bosni i Hercegovini, 2005.": [
+"texts.py:48:MODUL"
+],
+"Opšti okvir (računske brzine); numeričke vrijednosti nisu korištene.": [
+"texts.py:48:MODUL"
+],
+"Formule otpora kretanja i vučne sile (5.1).": [
+"texts.py:49:MODUL"
+],
+"Cvetanović, B.: *Teorija kretanja motornih vozila*, Beograd.": [
+"texts.py:50:MODUL"
+],
+"Otpori vožnji i potrošnja goriva (5.1).": [
+"texts.py:50:MODUL"
+],
+"VOZNO-DINAMIČKA ANALIZA – {0} – radna knjiga uz Elaborat 3": [
+"xlsx.py:36"
+],
+" 1. Na listovima Ulaz_* zamijenite plave podatke ispisima projektanta: elementi horizontalne osovine (A–H), prelomne tačke nivelete (O–U), poprečni nagibi (AC i dalje). Dodajete li redove, UMETNITE ih unutar tablice (iznad zadnjeg reda).": [
+"xlsx.py:39"
+],
+" 2. Na listovima Profil_* podesite početnu/krajnju stacionažu i korak (plava polja u redu 3).": [
+"xlsx.py:40"
+],
+" 3. Sve ostalo se računa formulama: Vp–R, Vp–iN, profil brzine, teška vozila, vrijeme, gorivo, statistika, provjere nagiba i dijagrami (list Dijagrami).": [
+"xlsx.py:41"
+],
+" 4. Skup susjednih elemenata (Provjere_*) i spisak lukova za provjeru su ulazni podaci (plavo).": [
+"xlsx.py:42"
+],
+"BOJE: plavo = ulaz/pretpostavka; crno = formula; zeleno = veza na drugi list.": [
+"xlsx.py:43"
+],
+"LANAC: brzina na granici sekcija prenosi se između listova (ulazna brzina, a usporenje 'gleda unaprijed' na početak sljedeće sekcije).": [
+"xlsx.py:44"
+],
+"METODA: Prilog 2 pravilnika (Sl. glasnik RS 50/2011; naziv provjeriti) i Priručnik za projektovanje puteva u RS (4.0): Vp (=V85) je posljedica geometrije, Vri ≤ Vp ≤ maxVr; zakoni Vp–R i Vp–iN; a = d = 0,8 m/s².": [
+"xlsx.py:45"
+],
+"SCENARIJ: Parametri!B14 = 1 samo geometrija; 2 = dodatno ograničenje brzine iz tabele ograničenja (Parametri, red 59 i dalje).": [
+"xlsx.py:47"
+],
+"OZNAKE I SIMBOLI (isto kao Tabela O1 u elaboratu)": [
+"xlsx.py:52"
+],
+"Tabela 1 (Prilog 2 pravilnika)": [
+"xlsx.py:87"
+],
+"Tabela 2: sastavljena na osnovu dijagrama (slika 3-08, Prilog 2 pravilnika)": [
+"xlsx.py:91"
+],
+"Tabela ograničenja brzine (važi kad je B14 = 2), oba smjera": [
+"xlsx.py:93"
+],
+"STATISTIKA REZULTIRAJUĆIH PROFILA BRZINE": [
+"xlsx.py:294"
+],
+"UKUPNO PO SMJERU VOŽNJE (lanac sekcija)": [
+"xlsx.py:314"
+],
+"σ = √(∫V²ds/L − Vp,sr²) (algebarski jednako ∫(V−Vp,sr)²ds/L za trapeznu integraciju). Vrijeme = Σ Δs/v.": [
+"xlsx.py:330"
+],
+"REZIME REZULTATA (veze na list Statistika)": [
+"xlsx.py:332"
+],
+"PRILOZI A – profili brzina na koraku od svaka 10 tačaka mreže (veze na Profil_* i Voz*_*)": [
+"xlsx.py:351"
+],
+"SITUACIONI PLAN – koordinate osovina (Y, X) integrisane iz elemenata (vrijednosti, ≈10 m); služe za dijagram plana": [
+"xlsx.py:365"
+],
+"DIJAGRAMI (isti kao slike u elaboratu) – ažuriraju se automatski": [
+"xlsx.py:376"
+],
+"Situacioni plan osovina": [
+"xlsx.py:392"
+],
+"Poprečni nagib kolovoza (lijeva i desna strana)": [
+"xlsx.py:405"
+],
+"UNA licenca {0}": [
+"xlsx.py:435"
+],
+"Excel sačuvan: {0} ({1} listova)": [
+"xlsx.py:436"
+],
+". Preglednost (Elaborat 4) NIJE obuhvaćena.": [
+"xlsx.py:37"
+],
+"PRETPOSTAVKE (provjeriti!): 1) Vp–R = interpolacija tablice Rmin(Vr) sastavljene na osnovu dijagrama (slika 3-07, Prilog 2 pravilnika); 2) Vp–iN = tablica sastavljena na osnovu dijagrama (slika 3-08, Prilog 2 pravilnika); 3) teška vozila: parametri pretpostavljeni (list Parametri); 4) mreža ": [
+"xlsx.py:46"
+],
+"{0:g} m, statistika ponderisana po dužini, vrijeme = ∫ds/v; 5) poprečni nagib luka = nagib odabrane trake (Ulaz_*), apsolutna vrijednost; 6) kriterij ΔV: ≤10 dobro, 10–20 zadovoljavajuće, >20 loše (Lamm); ocjena po ciljnim brzinama.": [
+"xlsx.py:46"
+],
+"Projektni zadatak": [
+"xlsx.py:61"
+],
+"Najveća projektna brzina maxVr": [
+"xlsx.py:61"
+],
+"ekvivalent obrasca 0,1·Vsr·ΔV (slika 3-09), nominalno 0,8": [
+"xlsx.py:62",
+"xlsx.py:62"
+],
+"Zadani korak mreže": [
+"xlsx.py:62"
+],
+"Specifična potrošnja goriva b": [
+"xlsx.py:63"
+],
+"Potrošnja u praznom hodu": [
+"xlsx.py:64"
+],
+"Ulazna brzina putničkog na ulazu u lanac": [
+"xlsx.py:65"
+],
+"SCENARIJ: 1 = geometrija, 2 = sa ograničenjima (tabela dolje)": [
+"xlsx.py:66"
+],
+"Brzinski parametar f_rl": [
+"xlsx.py:67"
+],
+"Stepen iskorištenja η": [
+"xlsx.py:72"
+],
+"Ograničenje brzine v_lim [km/h]": [
+"xlsx.py:72"
+],
+"Faktor rotirajućih masa γm": [
+"xlsx.py:72"
+],
+"Specifična potrošnja goriva b [l/kWh]": [
+"xlsx.py:72"
+],
+"Potrošnja u praznom hodu [l/h]": [
+"xlsx.py:72"
+],
+"Nagib iN [%]": [
+"xlsx.py:89"
+],
+"Ograničenje od st. [m]": [
+"xlsx.py:93"
+],
+"do st. [m]": [
+"xlsx.py:93"
+],
+"brzina [km/h]": [
+"xlsx.py:93"
+],
+"Radijus: + desna krivina, − lijeva, 0 = beskonačno. Plave kolone su ulazni podaci.": [
+"xlsx.py:114"
+],
+"TABELA – ELEMENTI HORIZONTALNE OSOVINE": [
+"xlsx.py:115"
+],
+"TABELA – PRELOMNE TAČKE NIVELETE": [
+"xlsx.py:128"
+],
+"POPREČNI NAGIBI (po trakama; za provjeru: lijeva {0}, desna {1})": [
+"xlsx.py:138"
+],
+"REZULTIRAJUĆI PROFIL PROJEKTNE BRZINE – PUTNIČKO VOZILO – {0}": [
+"xlsx.py:165"
+],
+"Osovina: {0}. Cilj T = min(Vp,R ; Vp,iN u smjeru vožnje ; ograničenje po scenariju). Prolaz 1: ubrzanje a; prolaz 2: usporenje d (v² = v₀² + 2·a·Δs). Kota i nagib iz prelomnih tačaka ({1}).": [
+"xlsx.py:166"
+],
+"SA [m]": [
+"xlsx.py:167"
+],
+"Ulazna brzina [km/h]": [
+"xlsx.py:168"
+],
+"Granični uslov na izlazu [km/h]": [
+"xlsx.py:173"
+],
+"USKLAĐENOST SUSJEDNIH ELEMENATA I PROVJERA POPREČNIH NAGIBA – {0}": [
+"xlsx.py:260"
+],
+"ΔVp između susjednih elemenata (krivine: najmanja brzina; pravci: najveća). Jedinice su ulazni podatak.": [
+"xlsx.py:261"
+],
+"PROVJERA POPREČNOG NAGIBA NA KRUŽNIM LUKOVIMA": [
+"xlsx.py:273"
+],
+"ipk(Vr) = 7·(R_min(Vr)/R)^0,74 [%], 2,5 ≤ ipk ≤ 7; ip,potr = V²/(127R) − fR(V); f_pot = V²/(127R) − ip/100 ≤ fR(V). V = najmanja rezultirajuća brzina na luku (dio unutar granica).": [
+"xlsx.py:274"
+],
+"Dionica / vozilo": [
+"xlsx.py:295"
+],
+"putničko": [
+"xlsx.py:296"
+],
+"{0} – putničko": [
+"xlsx.py:310"
+],
+"Smjer / vozilo": [
+"xlsx.py:315"
+],
+"Smjer stacionaže": [
+"xlsx.py:317"
+],
+"Uzdužni profil nivelete": [
+"xlsx.py:401"
+],
+"Podužni nagib nivelete": [
+"xlsx.py:401"
+],
+"Krivina 1000/R (+ desno, − lijevo)": [
+"xlsx.py:401"
+],
+"Rezultirajući profil Vp – putničko vozilo – {0}": [
+"xlsx.py:411"
+],
+"Brzine teških vozila – {0}": [
+"xlsx.py:415"
+],
+"Profil brzina – {0}": [
+"xlsx.py:426"
+],
+"Putničko Vp": [
+"xlsx.py:427"
+],
+"Parametar vozila": [
+"xlsx.py:71"
+],
+"R početak [m]": [
+"xlsx.py:116"
+],
+"k početak [1/km]": [
+"xlsx.py:116"
+],
+"=IF(B{0}=\"PRIJELAZNICA\",SQRT(MAX(ABS(F{1}),ABS(G{2}))*E{3}),\"\")": [
+"xlsx.py:125"
+],
+"=IF(W{0}>0,IF(S{1}>AA{2},\"udubljena\",\"ispupčena\"),\"–\")": [
+"xlsx.py:137"
+],
+"Nagib g [%]": [
+"xlsx.py:177"
+],
+"Vp,iN u smjeru vožnje [km/h]": [
+"xlsx.py:177"
+],
+"REZULTIRAJUĆA Vp [km/h]": [
+"xlsx.py:177"
+],
+"Poprečni nagib lijeve strane [%]": [
+"xlsx.py:177"
+],
+"Poprečni nagib desne strane [%]": [
+"xlsx.py:177"
+],
+"{0} – profil brzine, vrijeme i potrošnja goriva – {1}": [
+"xlsx.py:221"
+],
+"Fr = f_rl·m·g + ½ρ·CdA·v² + m·g·G; Ft = min(η·P/v ; μ·m·g) – za vozilo s krivom vuče (slika 3-10): Ft(v) interpolirano iz tabele na listu Parametri; v² = v₀² + 2·(Ft−Fr)/(γm·m)·Δs; gorivo = b·(Fu·v/η)·dt (Fu=Fr pri v_lim; Fu=Ft pri punom opterećenju; prazan hod pri Fr≤0).": [
+"xlsx.py:222"
+],
+"Početna brzina [km/h]": [
+"xlsx.py:223"
+],
+"Tip (P=pravac, K=krivina)": [
+"xlsx.py:262"
+],
+"R kružnog luka [m]": [
+"xlsx.py:262"
+],
+"Smjer krivine": [
+"xlsx.py:262"
+],
+"Ocjena (po ΔVp,cilj)": [
+"xlsx.py:262"
+],
+"Vp,i – rezultirajuća [km/h]": [
+"xlsx.py:262"
+],
+"ΔV rezultirajuća [km/h]": [
+"xlsx.py:262"
+],
+"V rezultirajuća (min) [km/h]": [
+"xlsx.py:275"
+],
+"ip,potr za V [%]": [
+"xlsx.py:275"
+],
+"Cijela trasa ←": [
+"xlsx.py:334"
+],
+"Putničko – {0}": [
+"xlsx.py:417"
+],
+"Kumulativna potrošnja goriva": [
+"xlsx.py:421"
+],
+"{0} – {1} (po sekciji, od ulaza u sekciju)": [
+"xlsx.py:422"
+],
+"v sljedeće [m/s]": [
+"xlsx.py:228"
+],
+"=IF(I{0}<=10,\"dobro\",IF(I{1}<=20,\"zadovoljavajuće\",\"loše\"))": [
+"xlsx.py:271"
+],
+"Pokazatelj / vozilo": [
+"xlsx.py:334"
+],
+"Cijela trasa →": [
+"xlsx.py:334"
+]
+}
