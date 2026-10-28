@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="bs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UNA – Vožnja</title>
+<style>
+:root{--bg:#0e1116;--pn:rgba(14,17,22,.78);--tx:#eef2f7;--mu:#9aa7b8;--ok:#3ddc84;--bad:#ff5a4f;--ac:#4cc3ff;--or:#ffb020}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:14px/1.35 system-ui,Segoe UI,Roboto,sans-serif;overflow:hidden}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block}
+.pn{position:absolute;background:var(--pn);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 14px}
+#hud{left:14px;top:14px;min-width:270px}
+#hud h1{margin:0 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mu);font-weight:600}
+#hud table{border-collapse:collapse;width:100%}#hud td{padding:2px 0}#hud td:first-child{color:var(--mu);padding-right:14px}#hud td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+#big{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}#big small{font-size:13px;color:var(--mu);font-weight:500}
+#st{margin-top:8px;padding:6px 10px;border-radius:8px;font-weight:700;text-align:center}
+.ok{background:rgba(61,220,132,.18);color:var(--ok)}.bad{background:rgba(255,90,79,.22);color:var(--bad)}
+#ctl{right:14px;top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:60vw;justify-content:flex-end}
+button,select,input[type=number]{background:#1b2230;color:var(--tx);border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:6px 10px;font:inherit}
+button{cursor:pointer}button:hover{background:#26304a}
+#bot{left:14px;right:14px;bottom:14px;display:flex;gap:12px;align-items:stretch;padding:8px}
+#mm{width:150px;height:110px;border-radius:8px;background:#0b0e13;flex:none}
+#ch{flex:1;height:110px;min-width:0;border-radius:8px;background:#0b0e13;cursor:pointer}
+#sl{position:absolute;left:14px;right:14px;bottom:146px;width:calc(100% - 28px);accent-color:#4cc3ff}
+#pf{right:14px;top:64px;font-weight:600;text-align:right;max-width:44vw}
+#pf small{display:block;color:var(--mu);font-weight:500}
+@media(max-width:820px){#ctl{max-width:100%;top:auto;bottom:170px;right:14px}#hud{min-width:0}#pf{display:none}}
+#rt{max-width:300px}
+</style></head><body>
+<canvas id="cv"></canvas>
+<div class="pn" id="hud"><h1 id="t_proj"></h1><div id="big"><span id="v">0</span> <small>km/h</small></div>
+<table id="tb"></table><div id="st"></div></div>
+<div class="pn" id="pf"><span id="pfn"></span><small id="pfo"></small></div>
+<div class="pn" id="ctl"><select id="rt"></select><button id="pl">⏸</button><select id="sp"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
+<label style="color:var(--mu)"><span id="t_h"></span> <input id="eh" type="number" step="0.05" min="0.5" max="3" style="width:70px"></label><button id="lg">EN</button></div>
+<input type="range" id="sl" min="0" max="1000" value="0">
+<div class="pn" id="bot"><canvas id="mm" width="300" height="220"></canvas><canvas id="ch" width="1600" height="220"></canvas></div>
+<script>
+const DATA=/*__DATA__*/null;
+const L={bs:{title:"Vožnja – pogled iz oka vozača",st:"Stacionaža",sp:"Brzina Vp",rad:"Radijus",str:"pravac",cs:"Poprečni nagib",gr:"Uzdužni nagib",el:"Element",e0:"pravac",e1:"prijelaznica",e2:"kružni luk",npp:"NPP",sd:"Raspoloživa preglednost",rq:"Zahtijevana preglednost",okt:"PREGLEDNOST ZADOVOLJAVA",bh:"NEDOVOLJNO – horizontalna (prepreka)",bv:"NEDOVOLJNO – vertikalna (niveleta)",eye:"Oko [m]",left:"lijevo",right:"desno",t:{otvorena:"Otvorena trasa",most:"Most / vijadukt",tunel:"Tunel"},wall:"Prepreka desno / lijevo",bar:"Razdjelni pojas",ln:"Raspoloživa",lr:"Zahtijevana",spd:"Brzina"},
+en:{title:"Drive-through – driver's eye view",st:"Chainage",sp:"Speed Vp",rad:"Radius",str:"tangent",cs:"Cross slope",gr:"Grade",el:"Element",e0:"tangent",e1:"transition",e2:"circular arc",npp:"Typical section",sd:"Available sight distance",rq:"Required sight distance",okt:"SIGHT DISTANCE OK",bh:"INSUFFICIENT – horizontal (obstacle)",bv:"INSUFFICIENT – vertical (grade line)",eye:"Eye [m]",left:"left",right:"right",t:{otvorena:"Open road",most:"Bridge / viaduct",tunel:"Tunnel"},wall:"Obstacle right / left",bar:"Central reserve",ln:"Available",lr:"Required",spd:"Speed"}};
+let lang=DATA.lang==="en"?"en":"bs";const T=()=>L[lang];
+const cv=document.getElementById('cv'),cx=cv.getContext('2d'),mm=document.getElementById('mm'),mx=mm.getContext('2d'),ch=document.getElementById('ch'),chx=ch.getContext('2d');
+const rtSel=document.getElementById('rt');Object.keys(DATA.routes).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=DATA.routes[k].naziv;rtSel.appendChild(o)});
+let R=null,key=null,q=0,playing=true,speedF=1,eyeH=DATA.h,last=0,yawS=null,pitS=0;
+function setRoute(k){key=k;R=DATA.routes[k];q=R.q[0];R.tx=[];R.ty=[];for(let i=0;i<R.n;i++){const a=Math.max(0,i-1),b=Math.min(R.n-1,i+1);let dx=R.x[b]-R.x[a],dy=R.y[b]-R.y[a];const l=Math.hypot(dx,dy)||1;R.tx.push(dx/l);R.ty.push(dy/l)}
+ const sl=document.getElementById('sl');sl.max=R.q[R.n-1]-R.q[0];yawS=null;buildMini();buildChart()}
+const bs=(arr,v)=>{let lo=0,hi=arr.length-1;while(hi-lo>1){const m=(lo+hi)>>1;if(arr[m]<=v)lo=m;else hi=m}return lo};
+function smp(v){v=Math.min(Math.max(v,R.q[0]),R.q[R.n-1]-1e-6);const i=bs(R.q,v),j=i+1,f=(v-R.q[i])/((R.q[j]-R.q[i])||1);const lp=a=>a[i]+(a[j]-a[i])*f;
+ let tx=lp(R.tx),ty=lp(R.ty);const l=Math.hypot(tx,ty)||1;tx/=l;ty/=l;const p={i,x:lp(R.x),y:lp(R.y),z:lp(R.z),tx,ty,nx:ty,ny:-tx,s:lp(R.s),v:lp(R.v),g:lp(R.g),k:lp(R.k),cl:lp(R.cl),cd:lp(R.cd),de:lp(R.de),lr:lp(R.lr),rr:lp(R.rr),D:lp(R.D),Lz:lp(R.Lz),sg:R.sg[i],pf:R.pf[i],el:R.el[i],Rm:R.R[i],ok:R.ok[i],q:v};return p}
+const zAt=(p,r,h=0)=>{const rc=Math.min(Math.max(r,p.lr-.5),p.rr+.5);const t=p.sg*(p.de+rc);return p.z+(t>0?p.cd*t:-p.cl*t)/100+h};
+const W=(p,r,h=0)=>[p.x+p.nx*r,p.y+p.ny*r,zAt(p,r,h)];
+let CAM=null;
+function setCam(){const e=smp(q),a=smp(q+18),b=smp(q+45);const ez=zAt(e,0,eyeH);const yaw=Math.atan2(a.y-e.y,a.x-e.x);const pit=Math.atan2(zAt(b,0,eyeH)-ez,45)*0.85;
+ if(yawS===null)yawS=yaw;let d=yaw-yawS;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;yawS+=d*0.25;pitS+=(pit-pitS)*0.2;
+ CAM={ex:e.x,ey:e.y,ez:ez,cy:Math.cos(yawS),sy:Math.sin(yawS),cp:Math.cos(pitS),sp:Math.sin(pitS),e}}
+let Wd=0,Hd=0,foc=1,hx=0,hy=0;
+function proj(P){const dx=P[0]-CAM.ex,dy=P[1]-CAM.ey,dz=P[2]-CAM.ez;const f=dx*CAM.cy+dy*CAM.sy,r=dx*CAM.sy-dy*CAM.cy;const f2=f*CAM.cp+dz*CAM.sp,u2=dz*CAM.cp-f*CAM.sp;if(f2<0.35)return null;return [hx+foc*r/f2,hy-foc*u2/f2,f2]}
+function poly(pts,col,alpha){const o=[];for(const P of pts){const s=proj(P);if(!s)return;o.push(s)}cx.beginPath();cx.moveTo(o[0][0],o[0][1]);for(let i=1;i<o.length;i++)cx.lineTo(o[i][0],o[i][1]);cx.closePath();if(alpha!=null)cx.globalAlpha=alpha;cx.fillStyle=col;cx.fill();cx.strokeStyle=col;cx.lineWidth=.6;cx.stroke();if(alpha!=null)cx.globalAlpha=1}
+function mix(c1,c2,t){return `rgb(${(c1[0]+(c2[0]-c1[0])*t)|0},${(c1[1]+(c2[1]-c1[1])*t)|0},${(c1[2]+(c2[2]-c1[2])*t)|0})`}
+const C={sky1:[88,150,214],sky2:[200,224,244],road:[62,64,68],road2:[52,54,58],grass:[92,128,70],grass2:[80,112,62],rock:[130,118,104],conc:[178,178,172],concD:[140,140,136],rail:[190,194,198],tun:[104,106,110],tunC:[84,86,90],haze:[196,214,232],dark:[8,9,11],line:[240,240,240],yel:[255,214,80]};
+function ground(p,side,pf){ // profil terena izvan prepreke: lista [dr, dz] (dr = udaljenost od lica prepreke prema van)
+ if(pf.tip==="most")return[[0,-pf.dp],[0.01,-26],[60,-26]];
+ if(pf.tip==="tunel")return null;
+ if(side<0)return[[0,0],[2,0],[60,0]];
+ if(pf.key==="usjek")return[[0,-0.2],[3,-0.6],[6,-0.6],[18,5],[60,6]];
+ return[[0,0],[(pf.bank||1.5),0],[(pf.bank||1.5)+6,-4],[70,-4.2]]}
+function strip(a,b,fa,fb,pf){ // a,b = uzorci, fa fb = udaljenost
+ const fogT=Math.min(1,fa/700),tun=pf.tip==="tunel";const fog=(c)=>tun?mix(c,C.dark,Math.min(1,fa/90)):mix(c,C.haze,fogT*0.85);
+ const iv=pf.iv,Rl=a.lr-iv,Rr=a.rr+iv,Rl2=b.lr-iv,Rr2=b.rr+iv,cr=pf.cr,wp=(Rr-Rl),wp2=(Rr2-Rl2);
+ const q4=(r1,r2,h1,h2,col,al)=>poly([W(a,r1,h1),W(a,r2,h2),W(b,r2,h2),W(b,r1,h1)],col,al);
+ const q4b=(r1a,r2a,r1b,r2b,h,col)=>poly([W(a,r1a,h),W(a,r2a,h),W(b,r2b,h),W(b,r1b,h)],col);
+ const rb=Rr+(pf.ofR-iv),lb=Rl-(pf.ofL-iv),rb2=Rr2+(pf.ofR-iv),lb2=Rl2-(pf.ofL-iv);
+ if(tun){ // tunel: pod, zidovi, svod
+  const wR=a.rr+pf.ofR,wL=a.lr-pf.ofL,wR2=b.rr+pf.ofR,wL2=b.lr-pf.ofL;
+  poly([W(a,wL,0),W(a,wR,0),W(b,wR2,0),W(b,wL2,0)],fog(C.road2));
+  poly([W(a,Rl,0),W(a,Rr,0),W(b,Rr2,0),W(b,Rl2,0)],fog(C.road));
+  poly([W(a,wR,0),W(a,wR,pf.hs),W(b,wR2,pf.hs),W(b,wR2,0)],fog(C.tun));
+  poly([W(a,wL,0),W(a,wL,pf.hs),W(b,wL2,pf.hs),W(b,wL2,0)],fog(C.tun));
+  poly([W(a,wL,pf.hs),W(a,wR,pf.hs),W(b,wR2,pf.hs),W(b,wL2,pf.hs)],fog(C.tunC));
+  const qa=a.q,qb=b.q;const k=Math.ceil(qa/14)*14;if(k<qb){const t=(k-qa)/((qb-qa)||1);const pm=smp(k);const gl=mix([255,244,200],C.dark,Math.min(1,fa/260));
+   poly([W(pm,-1.2,pf.hs-.05),W(pm,1.2,pf.hs-.05),W(pm,1.2,pf.hs-.05),W(pm,-1.2,pf.hs-.05)],gl);const s1=proj(W(pm,0,pf.hs-.08));if(s1){cx.fillStyle=gl;const w=Math.max(2,foc*2.4/s1[2]);cx.fillRect(s1[0]-w/2,s1[1]-w*.12,w,w*.24)}}
+ }else{
+  // teren desno i lijevo (iza suprotnog kolovoza)
+  for(const side of[1,-1]){const g=ground(a,side,pf);if(!g)continue;const base=side>0?rb+(pf.hR?0.2:0):(lb-cr-wp-(pf.ofL-iv)*2);const baseB=side>0?rb2+(pf.hR?0.2:0):(lb2-cr-wp2-(pf.ofL-iv)*2);
+   const gc=pf.tip==="most"?C.grass2:(pf.key==="usjek"&&side>0?C.rock:C.grass);
+   for(let m=0;m<g.length-1;m++){const r1=base+side*g[m][0],r2=base+side*g[m+1][0],r1b=baseB+side*g[m][0],r2b=baseB+side*g[m+1][0];
+    poly([W(a,r1,g[m][1]),W(a,r2,g[m+1][1]),W(b,r2b,g[m+1][1]),W(b,r1b,g[m][1])],fog(m%2?gc:[gc[0]*.93,gc[1]*.93,gc[2]*.93]))}}
+  if(pf.tip!=="most"){poly([W(a,Rr,-.01),W(a,rb,-.01),W(b,rb2,-.01),W(b,Rr2,-.01)],fog([120,118,112]))}
+  // središnji pojas (između kolovoza) i suprotni kolovoz
+  poly([W(a,Rl,-.02),W(a,Rl-cr,-.02),W(b,Rl2-cr,-.02),W(b,Rl2,-.02)],fog(pf.tip==="most"?C.concD:C.grass2));
+  poly([W(a,Rl-cr,0),W(a,Rl-cr-wp,0),W(b,Rl2-cr,0),W(b,Rl2-cr-wp2,0)].map((P,i)=>P),fog(C.road2));
+  poly([W(a,Rl-cr,0),W(a,Rl-cr-wp,0),W(b,Rl2-cr-wp2,0),W(b,Rl2-cr,0)],fog(C.road2));
+  if(pf.tip==="most"){poly([W(a,Rr,0),W(a,Rr,-pf.dp),W(b,Rr2,-pf.dp),W(b,Rr2,0)],fog(C.concD));poly([W(a,Rl,0),W(a,Rl,-pf.dp),W(b,Rl2,-pf.dp),W(b,Rl2,0)],fog(C.concD))}
+  poly([W(a,Rl,0),W(a,Rr,0),W(b,Rr2,0),W(b,Rl2,0)],fog(C.road));
+ }
+ // oznake
+ const dash=(Math.floor(a.q/9)%2===0);
+ const ln=(r,w,col)=>poly([W(a,r-w/2,0.01),W(a,r+w/2,0.01),W(b,r+w/2,0.01),W(b,r-w/2,0.01)],fog(col));
+ ln(a.lr,.16,C.line);ln(a.rr,.16,C.line);if(dash)ln((a.lr+a.rr)/2,.14,C.line);
+ if(!tun){ln(a.lr-cr-iv-wp+iv,.0,C.line)}
+ if(!tun){const dash2=dash;const o1=(Rl-cr-iv),o2=(Rl-cr-wp+iv);poly([W(a,o1-.03,.01),W(a,o1+.13,.01),W(b,o1+.13,.01),W(b,o1-.03,.01)],fog(C.line));if(dash2)poly([W(a,(o1+o2)/2-.07,.01),W(a,(o1+o2)/2+.07,.01),W(b,(o1+o2)/2+.07,.01),W(b,(o1+o2)/2-.07,.01)],fog(C.line))}
+ if(!tun){ // prepreke: betonska ograda (most, puna) ili odbojna ograda (šine na stupovima); kosine/zidovi (visina>1.3) nisu ograda
+  const most=pf.tip==="most",t=most?.46:.2,col=most?C.conc:C.rail,top=most?C.line:C.rail,tc=[top[0]*.9,top[1]*.9,top[2]*.9],h0=most?0:.45;
+  const fence=(ra,rb_,sgn,h)=>{if(h>1.3)return;const x1=ra,x2=rb_;
+   poly([W(a,x1,h0),W(a,x1,h),W(b,x2,h),W(b,x2,h0)],fog(col));poly([W(a,x1,h),W(a,x1+sgn*t,h),W(b,x2+sgn*t,h),W(b,x2,h)],fog(tc))};
+  fence(rb,rb2,1,pf.hR);fence(lb,lb2,-1,pf.hL);fence(Rl-cr+(pf.ofL-iv),Rl2-cr+(pf.ofL-iv),-1,pf.hL);
+  if(!most){const kq=Math.ceil(a.q/4)*4;if(kq<b.q){const pm=smp(kq);const lst=[];if(pf.hR<=1.3)lst.push([pm.rr+pf.ofR+.1,pf.hR]);if(pf.hL<=1.3)lst.push([pm.lr-pf.ofL-.1,pf.hL]);for(const [r_,h_] of lst){const s1=proj(W(pm,r_,0)),s2=proj(W(pm,r_,h_));if(s1&&s2){cx.strokeStyle=fog(C.rail);cx.lineWidth=Math.max(1,foc*0.09/s1[2]);cx.beginPath();cx.moveTo(s1[0],s1[1]);cx.lineTo(s2[0],s2[1]);cx.stroke()}}}}
+ }
+}
+function bar(p,d,colTxt,col,txt,hh){const a=smp(q+d),b=smp(q+d+1.4),w=3.6/2;poly([W(a,-w,.02),W(a,w,.02),W(b,w,.02),W(b,-w,.02)],col,.55);const s=proj(W(a,0,hh||1.6));if(s&&s[2]<420){cx.font=`600 ${Math.max(11,Math.min(18,2200/s[2]))}px system-ui`;cx.fillStyle=colTxt;cx.textAlign="center";cx.fillText(txt,s[0],s[1])}}
+function frame(){
+ const dpr=Math.min(2,window.devicePixelRatio||1);if(cv.width!==(cv.clientWidth*dpr|0)||cv.height!==(cv.clientHeight*dpr|0)){cv.width=cv.clientWidth*dpr;cv.height=cv.clientHeight*dpr}
+ Wd=cv.width;Hd=cv.height;foc=Wd/(2*Math.tan(35*Math.PI/180));hx=Wd/2;hy=Hd*0.47;
+ setCam();const e=CAM.e,pf0=DATA.profili[e.pf],tun=pf0.tip==="tunel";
+ // nebo
+ const g=cx.createLinearGradient(0,0,0,hy);if(tun){g.addColorStop(0,"#0a0b0d");g.addColorStop(1,"#14161a")}else{g.addColorStop(0,`rgb(${C.sky1})`);g.addColorStop(1,`rgb(${C.sky2})`)}
+ cx.fillStyle=g;cx.fillRect(0,0,Wd,Hd);cx.fillStyle=tun?"#0a0b0d":mix(C.grass,C.haze,.7);cx.fillRect(0,hy,Wd,Hd-hy);
+ if(!tun){cx.fillStyle="rgba(120,140,150,.55)";cx.beginPath();cx.moveTo(0,hy);for(let i=0;i<=40;i++){cx.lineTo(i*Wd/40,hy-(Math.sin(i*.9+q*.002)*.5+.5)*Hd*.035-Hd*.012)}cx.lineTo(Wd,hy);cx.fill()}
+ // uzorci duž puta (blizu → daleko)
+ const ds=[];let d=2.2;const maxd=tun?260:520,qmax=R.q[R.n-1]-1e-3;while(d<maxd&&q+d<qmax){ds.push(d);d+=Math.min(14,Math.max(1.3,d*.06))}
+ const sm=ds.map(x=>smp(q+x));
+ for(let k=sm.length-2;k>=0;k--)strip(sm[k],sm[k+1],ds[k],ds[k+1],DATA.profili[sm[k].pf]);
+ // preglednost
+ const Lz=e.Lz,Dv=Math.min(e.D,900),bad=e.ok!==0&&Dv<Lz;
+ if(Lz>3&&q+Lz<qmax)bar(e,Lz,"#ffd27a","#ffb020",T().lr+" "+Lz.toFixed(0)+" m",1.6);
+ if(Dv>3&&q+Dv<qmax&&Dv<600)bar(e,Dv,bad?"#ff9a92":"#9be7ff",bad?"#ff5a4f":"#4cc3ff",T().ln+" "+Dv.toFixed(0)+" m",3.4);
+ // haubа
+ const hg=cx.createLinearGradient(0,Hd*.92,0,Hd);hg.addColorStop(0,"rgba(0,0,0,0)");hg.addColorStop(1,"rgba(0,0,0,.85)");cx.fillStyle=hg;cx.fillRect(0,Hd*.9,Wd,Hd*.1);
+ hud(e,pf0,bad,Lz,Dv);chart();mini(e)}
+function hud(e,pf,bad,Lz,Dv){const t=T(),id=x=>document.getElementById(x);id('t_proj').textContent=(DATA.projekat||'')+' · '+t.title;id('v').textContent=e.v.toFixed(0);
+ const k=Math.abs(e.k),Rr=k>1/6000?1/k:0,dir=e.k>0?t.left:t.right;
+ const rows=[[t.st,'km '+(e.s/1000).toFixed(0)+'+'+((e.s%1000+1000)%1000).toFixed(1).padStart(6,'0')],[t.el,t['e'+e.el]],[t.rad,Rr?`R=${Rr.toFixed(0)} m (${dir})`:t.str],[t.cs,(((e.sg>0?e.cd:e.cl)*(e.sg>0?1:1))).toFixed(1)+' %'],[t.gr,(e.g>=0?'+':'')+e.g.toFixed(2)+' %'],[t.sd,Dv>=900?'>900 m':Dv.toFixed(0)+' m'],[t.rq,Lz.toFixed(0)+' m']];
+ id('tb').innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('');
+ const st=id('st');const lim=e.ok===1?t.bh:e.ok===2?t.bv:'';st.className=bad?'bad':'ok';st.textContent=bad?lim:t.okt;
+ id('pfn').textContent=(t.t[pf.tip]||pf.tip)+' – '+pf.naziv;id('pfo').textContent=t.wall+': '+pf.ofR.toFixed(2)+' / '+pf.ofL.toFixed(2)+' m ('+(pf.opR||'')+')';
+ id('sl').value=q-R.q[0]}
+let mmPts=null;
+function buildMini(){const xs=R.x,ys=R.y;let x0=1e18,x1=-1e18,y0=1e18,y1=-1e18;for(let i=0;i<R.n;i++){x0=Math.min(x0,xs[i]);x1=Math.max(x1,xs[i]);y0=Math.min(y0,ys[i]);y1=Math.max(y1,ys[i])}
+ const w=mm.width-20,h=mm.height-20,sc=Math.min(w/((x1-x0)||1),h/((y1-y0)||1));mmPts={x0,y0,sc,ox:10+(w-(x1-x0)*sc)/2,oy:10+(h-(y1-y0)*sc)/2,h:mm.height}}
+function mini(e){const m=mmPts;mx.clearRect(0,0,mm.width,mm.height);mx.lineWidth=3;mx.lineCap="round";const X=i=>m.ox+(R.x[i]-m.x0)*m.sc,Y=i=>m.h-(m.oy+(R.y[i]-m.y0)*m.sc);
+ for(let i=0;i<R.n-1;i++){mx.strokeStyle=R.ok[i]&&R.D[i]<R.Lz[i]?"#ff5a4f":(DATA.profili[R.pf[i]].tip==="tunel"?"#8a8f99":DATA.profili[R.pf[i]].tip==="most"?"#d19a66":"#cfd8e6");mx.beginPath();mx.moveTo(X(i),Y(i));mx.lineTo(X(i+1),Y(i+1));mx.stroke()}
+ const px=m.ox+(e.x-m.x0)*m.sc,py=m.h-(m.oy+(e.y-m.y0)*m.sc);mx.fillStyle="#4cc3ff";mx.beginPath();mx.arc(px,py,6,0,7);mx.fill();mx.strokeStyle="#fff";mx.lineWidth=2;mx.stroke()}
+let chBase=null;
+function buildChart(){chBase=null}
+function chart(){const w=ch.width,h=ch.height;chx.clearRect(0,0,w,h);const q0=R.q[0],q1=R.q[R.n-1],X=v=>8+(v-q0)/(q1-q0)*(w-16);
+ for(let i=0;i<R.n-1;i++){const t=DATA.profili[R.pf[i]].tip;if(t!=="otvorena"){chx.fillStyle=t==="tunel"?"rgba(150,155,165,.35)":"rgba(209,154,102,.35)";chx.fillRect(X(R.q[i]),0,X(R.q[i+1])-X(R.q[i])+1,h)}}
+ const vmax=Math.max(60,Math.ceil(Math.max(...R.v)/20)*20),Y=(v,m)=>h-8-(v/m)*(h-16);
+ chx.lineWidth=2;chx.strokeStyle="#3ddc84";chx.beginPath();for(let i=0;i<R.n;i++){const x=X(R.q[i]),y=Y(R.v[i],vmax);i?chx.lineTo(x,y):chx.moveTo(x,y)}chx.stroke();
+ chx.strokeStyle="#ffb020";chx.beginPath();for(let i=0;i<R.n;i++){const x=X(R.q[i]),y=Y(Math.min(R.Lz[i],500),500);i?chx.lineTo(x,y):chx.moveTo(x,y)}chx.stroke();
+ chx.strokeStyle="#4cc3ff";chx.beginPath();for(let i=0;i<R.n;i++){const x=X(R.q[i]),y=Y(Math.min(R.D[i],500),500);i?chx.lineTo(x,y):chx.moveTo(x,y)}chx.stroke();
+ for(let i=0;i<R.n-1;i++)if(R.ok[i]&&R.D[i]<R.Lz[i]){chx.fillStyle="rgba(255,90,79,.9)";chx.fillRect(X(R.q[i]),h-6,Math.max(2,X(R.q[i+1])-X(R.q[i])),6)}
+ chx.fillStyle="#9aa7b8";chx.font="18px system-ui";chx.fillText("— "+T().spd+"  — "+T().lr+"  — "+T().ln+" (0–500 m)",14,22);
+ chx.fillStyle="#fff";chx.fillRect(X(q)-1.5,0,3,h)}
+ch.addEventListener('click',e=>{const r=ch.getBoundingClientRect(),f=(e.clientX-r.left)/r.width;q=R.q[0]+f*(R.q[R.n-1]-R.q[0]);yawS=null});
+document.getElementById('sl').addEventListener('input',e=>{q=R.q[0]+(+e.target.value);yawS=null});
+document.getElementById('pl').onclick=()=>{playing=!playing;document.getElementById('pl').textContent=playing?'⏸':'▶'};
+document.getElementById('sp').onchange=e=>speedF=+e.target.value;rtSel.onchange=e=>setRoute(e.target.value);
+const eh=document.getElementById('eh');eh.value=eyeH;eh.onchange=()=>{eyeH=Math.min(3,Math.max(.5,+eh.value||1))};
+document.getElementById('lg').onclick=()=>{lang=lang==='en'?'bs':'en';document.getElementById('lg').textContent=lang==='en'?'BS':'EN';stat()};
+function stat(){document.getElementById('t_h').textContent=T().eye}
+window.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();document.getElementById('pl').click()}if(e.code==='ArrowRight'){q+=40;yawS=null}if(e.code==='ArrowLeft'){q-=40;yawS=null}});
+function loop(t){const dt=Math.min(.1,(t-last)/1000||0);last=t;if(playing){const e=smp(q);q+=Math.max(5,e.v)/3.6*dt*speedF;if(q>=R.q[R.n-1]-2)q=R.q[0]}
+ q=Math.min(Math.max(q,R.q[0]),R.q[R.n-1]-2);frame();requestAnimationFrame(loop)}
+document.getElementById('lg').textContent=lang==='en'?'BS':'EN';stat();
+window.UNA={set:(v,p)=>{q=R.q[0]+v;playing=p===undefined?false:p;yawS=null;document.getElementById('pl').textContent=playing?'⏸':'▶'},route:setRoute,R:()=>R};
+setRoute(Object.keys(DATA.routes)[0]);requestAnimationFrame(loop);
+</script></body></html>

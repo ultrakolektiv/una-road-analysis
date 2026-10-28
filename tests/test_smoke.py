@@ -107,3 +107,23 @@ def test_ifc_export():
     assert "IFC4X3_ADD2" in t and t.count("IFCALIGNMENT(") == 3
     ids = set(re.findall(r"^#(\d+)=", t, re.M)); refs = set(re.findall(r"#(\d+)", t))
     assert refs <= ids
+
+
+def test_npp_vizura_landxml():
+    import os, json, tempfile, xml.etree.ElementTree as ET
+    from una import pipeline, licenca, npp
+    licenca.require = lambda *a, **k: {}; licenca.describe = lambda *a, **k: "test"; licenca.stamp = lambda *a, **k: {"id": "TEST"}
+    cfg = pipeline.load_cfg(os.path.join(os.path.dirname(__file__), "..", "primjer", "primjer_projekat.json"))
+    cfg["npp"] = {"zadani": "nasip", "dionice": [{"od": 1500, "do": 2300, "osovina": "desna", "profil": "tunel"}, {"od": 3000, "do": 3600, "osovina": "desna", "profil": "most"}]}
+    cfg["vizura"] = True; cfg["landxml"] = True; cfg["jezik"] = "en"
+    d = tempfile.mkdtemp()
+    outs, _ = pipeline.generate(cfg, d, log=lambda *a: None, word=False, excel=False, sight=True)
+    h = [o for o in outs if o.endswith(".html")]; x = [o for o in outs if o.endswith(".xml")]
+    assert h and x, outs
+    t = open(h[0], encoding="utf-8").read()
+    assert "const DATA={" in t and '"tunel"' in t and '"most"' in t
+    data = json.loads(t.split("const DATA=")[1].split(";\nconst L=")[0])
+    assert data["routes"] and all(len(r["s"]) == r["n"] for r in data["routes"].values())
+    root = ET.parse(x[0]).getroot(); ns = {"l": "http://www.landxml.org/schema/LandXML-1.2"}
+    assert len(root.findall(".//l:Alignment", ns)) == 3 and root.findall(".//l:Spiral", ns)
+    N = npp.resolve(cfg); assert npp.profile_at(N, "desna", 1800)[0] == "tunel" and npp.profile_at(N, "desna", 100)[0] == "nasip"

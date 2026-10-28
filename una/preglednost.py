@@ -134,10 +134,20 @@ def obstacle_offsets(c, par, s):
     if not pre and not dflt and not ztip: return oR, oL
     def val(en):
         if en.get("tip") not in (None, ""):
-            v = tipovi.get(en["tip"]); return None if v in (None, "") else float(v)
+            v = tipovi.get(en["tip"]); return None if v in (None, "") else (v if isinstance(v, dict) else float(v))
         return None if en.get("ofset") in (None, "") else float(en["ofset"])
+    def sides(v):                                          # NPP: ofset po strani; 'vani' = vanjska ivica, 'razdjelni' = strana razdjelnog pojasa (u smjeru STACIONAŽE)
+        vani = v.get("vani"); raz = v.get("razdjelni", vani)
+        if c.role == "desna": return (vani, raz)
+        if c.role == "lijeva": return (raz, vani)
+        return (vani, vani)
     els = element_rows(c)
     def put(mask, off, side, k):
+        if isinstance(off, dict):
+            r, l = sides(off)
+            if r is not None: oR[mask] = float(r)
+            if l is not None: oL[mask] = float(l)
+            return
         if side in ("desno", "D", "desna"): oR[mask] = off
         elif side in ("lijevo", "L", "lijeva"): oL[mask] = off
         else:                                            # 'unutra' / 'vani' prema zakrivljenosti (k>0: desna krivina, unutra = desno)
@@ -150,7 +160,7 @@ def obstacle_offsets(c, par, s):
         if not m.any(): continue
         key = {"PRAVAC": "pravac", "KRUZNI_LUK": "kruzni", "PRIJELAZNICA": 'prijelaznica'}[e["typ"]]
         if dflt.get(key) not in (None, ""): put(m, float(dflt[key]), "unutra", e["k"])
-        if ztip and e["typ"] != "PRAVAC" and tipovi.get(ztip) not in (None, ""): put(m, float(tipovi[ztip]), "unutra", e["k"])
+        if ztip and e["typ"] != "PRAVAC" and tipovi.get(ztip) not in (None, ""): put(m, tipovi[ztip] if isinstance(tipovi[ztip], dict) else float(tipovi[ztip]), "unutra", e["k"])
         for en in pre:
             if not _match(en, c): continue
             if en.get("element") not in (None, "") and int(en["element"]) == e["no"] and val(en) is not None:
@@ -423,6 +433,7 @@ def write_xlsx(path, P, par, out, cases=None):
                  (_T('Korak proračuna zraka [m]'), par["korak_proracun"]), (_T('Dodatak na zaustavnu dužinu Lz [m] (unosi korisnik)'), par["dodatak_L"]), (_T('Zahtijevana dužina zrake L [m] (unosi korisnik)'), par["L_zahtijevano"] or "nije zadana"), (_T('Najveća tražena dužina zrake (očekivana) [m]'), par["Lmax"]),
                  (_T('Strane osovine'), ", ".join(SIDE_NAME[s] for s in par["strane"])),
                  (_T('Zadani tip prepreke (sve krivine)'), par["zadani_tip"] or "-")) + tuple((_TF("Tip prepreke '{0}': ofset od ivice kolovoza [m]", k), v) for k, v in par["tipovi_prepreka"].items()):
+        if isinstance(v, dict): v = f"vani {v.get('vani')} / razdjelni {v.get('razdjelni')}"
         w(ws, r, 1, k); w(ws, r, 2, v); r += 1
     r += 1
     if cases:

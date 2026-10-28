@@ -21,7 +21,7 @@ async function api(name, body) {
 /* ---------------------------------------------------------------- i18n */
 const L = {
 sr: {
- nav_project:"Projekat", nav_sections:"Sekcije trase", nav_params:"Parametri", nav_sight:"Preglednost", nav_run:"Izrada",
+ nav_project:"Projekat", nav_sections:"Sekcije trase", nav_params:"Parametri", nav_sight:"Preglednost", nav_npp:"NPP", nav_run:"Izrada",
  new:"Novi", open:"Otvori…", save:"Spremi", save_as:"Spremi kao…", untitled:"Novi projekat", unsaved:"nije spremljeno",
  p_title:"Projekat", p_sub:"Osnovni podaci o dionici i izlazu.", p_name:"Naziv dionice", p_vr:"Računska brzina Vr [km/h]", p_out:"Izlazni folder", p_browse:"Odaberi…",
  p_lang:"Jezik dokumenata", p_lang_h:"Jezik (bosanski ili engleski) u kome se prave Word/Excel/DXF izlazi.", p_notes:"Tekst za elaborat", p_notes_h:"Naslovna strana i dodatni opisi koji ulaze u elaborat.",
@@ -62,7 +62,8 @@ sr: {
  o_title:"Elaborat optičkih analiza (preticanje)", o_on:"Napravi Elaborat 4 – optičke analize (Word)", o_tip:"Tip puta", o_tip_a:"auto (prema sekcijama)", o_tip_d:"dvosmjerni (Tabela 30, min. 25 %)", o_tip_r:"razdvojeni (kriterij Pzp)",
  o_grupa:"Tehnička grupa puta", o_Pp_po:"Brzina za Pp", o_min_proc:"Minimalni % preticajne preglednosti", o_h:"Visina predmeta pri preticanju [m]", o_korak:"Korak tabele u Wordu [m]",
  r_title:"Izrada elaborata", r_sub:"Odaberite izlaze i pokrenite proračun.", r_word:"Elaborat 3 (Word)", r_word_h:"Vozno-dinamičke analize", r_excel:"Excel radna knjiga", r_excel_h:"Formule, tablice i dijagrami",
- r_sight:"Preglednost (DXF + Excel)", r_sight_h:"Zrake, zahtijevana i očekivana preglednost", r_optika:"Elaborat 4 (Word)", r_optika_h:"Optičke analize i preticanje", r_ifc:"IFC 4.3 osovine", r_ifc_h:"IfcAlignment: horizontala, niveleta, 3D linija", r_dwg:"DWG crteži", r_dwg_h:"Iz DXF-a, preko besplatnog ODA File Converter-a",
+ r_sight:"Preglednost (DXF + Excel)", r_sight_h:"Zrake, zahtijevana i očekivana preglednost", r_optika:"Elaborat 4 (Word)", r_optika_h:"Optičke analize i preticanje", r_ifc:"IFC 4.3 osovine", r_ifc_h:"IfcAlignment: horizontala, niveleta, 3D linija", r_dwg:"DWG crteži", r_dwg_h:"Iz DXF-a, preko besplatnog ODA File Converter-a", r_viz:"Vožnja – oko vozača (HTML)", r_viz_h:"3D prikaz sa NPP-om, parametrima i preglednošću", r_lx:"LandXML (Civil 3D)", r_lx_h:"Osovine i nivelete za Civil 3D corridor",
+ n_title:"Normalni poprečni profili (NPP)", n_sub:"Otvorena trasa, most i tunel – mjere za vizualizaciju i za prepreke u proračunu preglednosti.", n_on:"Koristi NPP u proračunu i vizualizaciji", n_on_h:"Zadane mjere su očitane iz crteža NPP_BC_Budva, NPP_Mostovi i NPP_Tuneli. Ofset prepreke se mjeri od ivice vozne trake (ivična traka je uključena).", n_prof:"Profili", n_name:"Profil", n_type:"Vrsta", n_lane:"Traka [m]", n_off_o:"Ofset vani [m]", n_off_c:"Ofset razdj. [m]", n_h:"Visina [m]", n_def:"Zadani profil (cijela trasa)", n_secs:"Dionice (most, tunel, usjek…)", n_add:"Dodaj dionicu", n_reset:"Vrati zadane mjere", n_t_otvorena:"otvorena trasa", n_t_most:"most", n_t_tunel:"tunel", n_axis_all:"sve", n_load:"Učitavanje…",
  r_run:"Napravi elaborat", r_running:"Računam…", r_done:"Gotovo", r_files:"Napravljene datoteke", r_open:"Otvori", r_folder:"Folder", r_log:"Tok proračuna", r_errors:"Provjera unosa", r_nothing:"Odaberite bar jedan izlaz.", r_noout:"Odaberite izlazni folder (korak Projekat).", r_fail:"Greška pri izradi",
  r_open_folder:"Otvori izlazni folder", r_ready:"Spremno", r_summary:"Rezime",
  lic_ok:"Licenca aktivna", lic_bad:"Licenca nije aktivirana", lic_act:"Aktiviraj…", lic_title:"Aktivacija licence", lic_id:"Pošaljite ovaj ID računara dobavljaču da dobijete licencu:", lic_copy:"Kopiraj ID", lic_load:"Učitaj licencu (.lic)…", lic_done:"Licenca je aktivirana.", copied:"Kopirano",
@@ -72,7 +73,7 @@ sr: {
  dlg_out:"Izlazni folder", dlg_open:"Otvori projekat", dlg_save:"Spremi projekat", dlg_files3:"Odaberite 3 datoteke osovine (horizontala, uzdužni, poprečni)", dlg_file:"Odaberite datoteku", dlg_set_save:"Spremi postavke", dlg_set_load:"Učitaj postavke", dlg_tpl:"Word template", dlg_lic:"Datoteka licence",
 },
 en: {
- nav_project:"Project", nav_sections:"Alignment segments", nav_params:"Parameters", nav_sight:"Sight distance", nav_run:"Generate",
+ nav_project:"Project", nav_sections:"Alignment segments", nav_params:"Parameters", nav_sight:"Sight distance", nav_npp:"Typical sections", nav_run:"Generate",
  new:"New", open:"Open…", save:"Save", save_as:"Save as…", untitled:"New project", unsaved:"not saved",
  p_title:"Project", p_sub:"Basic data about the road section and the output.", p_name:"Section name", p_vr:"Design speed Vr [km/h]", p_out:"Output folder", p_browse:"Browse…",
  p_lang:"Document language", p_lang_h:"Language of the Word/Excel/DXF outputs.", p_notes:"Text for the study", p_notes_h:"Title page and additional descriptions included in the study.",
@@ -113,7 +114,8 @@ en: {
  o_title:"Optical analyses study (passing)", o_on:"Produce Study 4 – optical analyses (Word)", o_tip:"Road type", o_tip_a:"auto (from segments)", o_tip_d:"two-way (Table 30, min. 25 %)", o_tip_r:"divided (Pzp criterion)",
  o_grupa:"Technical group of the road", o_Pp_po:"Speed for Pp", o_min_proc:"Minimum % of passing sight distance", o_h:"Object height for passing [m]", o_korak:"Table step in Word [m]",
  r_title:"Generate study", r_sub:"Choose the outputs and start the calculation.", r_word:"Study 3 (Word)", r_word_h:"Driving-dynamics analyses", r_excel:"Excel workbook", r_excel_h:"Formulas, tables and charts",
- r_sight:"Sight distance (DXF + Excel)", r_sight_h:"Rays, required and expected sight distance", r_optika:"Study 4 (Word)", r_optika_h:"Optical analyses and passing", r_ifc:"IFC 4.3 alignments", r_ifc_h:"IfcAlignment: horizontal, vertical, 3D curve", r_dwg:"DWG drawings", r_dwg_h:"From DXF, via the free ODA File Converter",
+ r_sight:"Sight distance (DXF + Excel)", r_sight_h:"Rays, required and expected sight distance", r_optika:"Study 4 (Word)", r_optika_h:"Optical analyses and passing", r_ifc:"IFC 4.3 alignments", r_ifc_h:"IfcAlignment: horizontal, vertical, 3D curve", r_dwg:"DWG drawings", r_dwg_h:"From DXF, via the free ODA File Converter", r_viz:"Drive-through – driver's eye (HTML)", r_viz_h:"3D view with typical sections, parameters and sight distance", r_lx:"LandXML (Civil 3D)", r_lx_h:"Alignments and profiles for a Civil 3D corridor",
+ n_title:"Typical cross sections", n_sub:"Open road, bridge and tunnel – dimensions for the visualisation and for obstacles in the sight-distance calculation.", n_on:"Use typical sections in calculation and visualisation", n_on_h:"Defaults are read from the drawings NPP_BC_Budva, NPP_Mostovi and NPP_Tuneli. Obstacle offset is measured from the edge of the traffic lane (edge strip included).", n_prof:"Sections", n_name:"Section", n_type:"Kind", n_lane:"Lane [m]", n_off_o:"Offset outer [m]", n_off_c:"Offset c.reserve [m]", n_h:"Height [m]", n_def:"Default section (whole route)", n_secs:"Stretches (bridge, tunnel, cut…)", n_add:"Add stretch", n_reset:"Restore defaults", n_t_otvorena:"open road", n_t_most:"bridge", n_t_tunel:"tunnel", n_axis_all:"all", n_load:"Loading…",
  r_run:"Generate study", r_running:"Calculating…", r_done:"Done", r_files:"Generated files", r_open:"Open", r_folder:"Folder", r_log:"Calculation log", r_errors:"Input check", r_nothing:"Select at least one output.", r_noout:"Choose the output folder (Project step).", r_fail:"Error during generation",
  r_open_folder:"Open output folder", r_ready:"Ready", r_summary:"Summary",
  lic_ok:"Licence active", lic_bad:"Licence not activated", lic_act:"Activate…", lic_title:"Licence activation", lic_id:"Send this computer ID to the supplier to obtain a licence:", lic_copy:"Copy ID", lic_load:"Load licence (.lic)…", lic_done:"The licence has been activated.", copied:"Copied",
@@ -167,7 +169,7 @@ const confirmBox = (msg, okText) => modal({ title: t("close") === "Zatvori" ? "P
 const infoBox = msg => modal({ title: "UNA", small: true, body: h("p", {}, msg), okText: t("ok") });
 
 /* ---------------------------------------------------------------- shell */
-const PAGES = ["project", "sections", "params", "sight", "run"];
+const PAGES = ["project", "sections", "params", "npp", "sight", "run"];
 function renderNav() {
   const nav = $("#nav"); nav.replaceChildren();
   PAGES.forEach((p, i) => {
@@ -367,7 +369,7 @@ function pageParams() {
   return h("div", { class: "wrap" }, h("div", { class: "row" }, h("div", { class: "grow" }, h("h1", {}, t("pa_title")), h("p", { class: "sub" }, t("pa_sub"))),
       h("button", { class: "btn", onclick: () => { [...SCAL, ...TABS, "vozila"].forEach(k => delete c[k]); dirty(); render(); } }, t("pa_reset"))),
     h("div", { class: "card" }, h("div", { class: "tabs" }, tabs.map(([k, l]) => h("button", { class: S.tab === k ? "on" : "", onclick: () => { S.tab = k; render(); } }, l))), inner),
-    navButtons("sections", "sight"));
+    navButtons("sections", "npp"));
 }
 
 /* ================================================================ PAGE 4 – SIGHT DISTANCE */
@@ -395,6 +397,40 @@ function syncSight() { if (S.sightTouched || S.cfg.preglednost) { S.cfg.pregledn
 const optOn = k => (S.cfg.gui_opcije || {})[k];
 function setOpt(k, v) { S.cfg.gui_opcije = Object.assign({ word: true, excel: true, preglednost: false, optika: false }, S.cfg.gui_opcije || {}); S.cfg.gui_opcije[k] = v; dirty(); }
 const OPT_DEF = { tip_puta: "auto", grupa: "A", Pp_po: "Vr", min_proc: 25.0, h_predmeta_preticanje: "", korak_tabela: 50.0 };
+
+let NPPD = null;
+const nz = s => { try { return num(s); } catch (e) { return null; } };
+function pageNpp() {
+  const c = S.cfg; const box = h("div", { class: "wrap" });
+  const gv = (k, path) => { let v = c.npp && c.npp.profili && c.npp.profili[k]; for (const p of path) v = v == null ? v : v[p]; if (v == null) { v = NPPD.profili[k]; for (const p of path) v = v == null ? v : v[p]; } return v; };
+  const sv = (k, path, val) => { c.npp.profili = c.npp.profili || {}; let o = c.npp.profili[k] = c.npp.profili[k] || {}; path.slice(0, -1).forEach(p => { o = o[p] = o[p] || {}; }); o[path[path.length - 1]] = val; dirty(); };
+  const numIn = (k, path, w) => txt(String(gv(k, path) ?? ""), { style: "width:" + (w || 80) + "px", inputmode: "decimal", oninput: e => { const v = nz(e.target.value); if (v != null) sv(k, path, v); } });
+  const draw = () => {
+    if (!NPPD) return box.replaceChildren(h("p", { class: "sub" }, t("n_load")));
+    const keys = Object.keys(NPPD.profili);
+    const body = () => {
+      const prof = h("table", { class: "tb" }, h("thead", {}, h("tr", {}, [t("n_name"), t("n_type"), t("n_lane"), t("n_off_o"), t("n_off_c"), t("n_h")].map(x => h("th", {}, x)))),
+        h("tbody", {}, keys.map(k => h("tr", {}, h("td", {}, h("b", {}, NPPD.profili[k].naziv), h("div", { class: "hint" }, k)), h("td", {}, t("n_t_" + NPPD.profili[k].tip)), h("td", {}, numIn(k, ["sirina_trake"], 70)),
+          h("td", {}, numIn(k, ["vani", "ofset"], 70)), h("td", {}, numIn(k, ["razdjelni", "ofset"], 70)), h("td", {}, numIn(k, ["vani", "visina"], 70))))));
+      const defSel = h("select", { onchange: e => { c.npp.zadani = e.target.value; dirty(); } }, keys.map(k => h("option", { value: k }, NPPD.profili[k].naziv))); defSel.value = c.npp.zadani || NPPD.zadani;
+      const secBody = h("tbody"); const drawS = () => secBody.replaceChildren(...(c.npp.dionice = c.npp.dionice || []).map((e, i) => {
+        const pr = h("select", { onchange: ev => { e.profil = ev.target.value; dirty(); } }, keys.map(k => h("option", { value: k }, NPPD.profili[k].naziv))); pr.value = e.profil;
+        const ax = h("select", { onchange: ev => { e.osovina = ev.target.value; dirty(); } }, ["", "desna", "lijeva", "centralna"].map(v => h("option", { value: v }, v || t("n_axis_all")))); ax.value = e.osovina || "";
+        return h("tr", {}, h("td", {}, txt(String(e.od ?? ""), { style: "width:90px", oninput: ev => { e.od = nz(ev.target.value); dirty(); } })), h("td", {}, txt(String(e.do ?? ""), { style: "width:90px", oninput: ev => { e.do = nz(ev.target.value); dirty(); } })), h("td", {}, ax), h("td", {}, pr),
+          h("td", {}, h("button", { class: "btn sm ghost", onclick: () => { c.npp.dionice.splice(i, 1); drawS(); dirty(); } }, "✕"))); }));
+      drawS();
+      return h("div", {}, h("div", { class: "card" }, h("h3", {}, t("n_prof")), prof,
+          h("button", { class: "btn sm", style: "margin-top:10px", onclick: () => { c.npp.profili = {}; dirty(); draw(); } }, t("n_reset"))),
+        h("div", { class: "card" }, field(t("n_def"), defSel), h("h3", { style: "margin-top:14px" }, t("n_secs")),
+          h("table", { class: "tb" }, h("thead", {}, h("tr", {}, [t("g_from"), t("g_to"), t("g_exc_axis"), t("n_name"), ""].map(x => h("th", {}, x)))), secBody),
+          h("button", { class: "btn sm", style: "margin-top:8px", onclick: () => { c.npp.dionice.push({ od: 0, do: 100, osovina: "", profil: keys.find(k => NPPD.profili[k].tip === "most") || keys[0] }); drawS(); dirty(); } }, "+ " + t("n_add"))));
+    };
+    box.replaceChildren(h("div", {}, h("h1", {}, t("n_title")), h("p", { class: "sub" }, t("n_sub"))),
+      h("div", { class: "card" }, sw(t("n_on"), !!c.npp, v => { if (v) c.npp = c.npp || { zadani: NPPD.zadani, dionice: [], profili: {} }; else delete c.npp; dirty(); draw(); }), h("p", { class: "hint", style: "margin:6px 0 0 48px" }, t("n_on_h"))),
+      c.npp ? body() : null, navButtons("params", "sight"));
+  };
+  if (!NPPD) api("npp").then(d => { NPPD = d; draw(); }); draw(); return box;
+}
 
 function pageSight() {
   S.sightTouched = true; const P = S.pre; const c = S.cfg;
@@ -430,7 +466,7 @@ function pageSight() {
     h("div", { class: "card" }, h("h3", {}, t("o_title")), h("div", { style: "margin:8px 0 12px" }, sw(t("o_on"), !!optOn("optika"), v => setOpt("optika", v))),
       h("div", { class: "grid g3" }, sel("tip_puta", [["auto", t("o_tip_a")], ["dvosmjerni", t("o_tip_d")], ["razdvojeni", t("o_tip_r")]], t("o_tip")), sel("grupa", [["A", "A"], ["B", "B"], ["C", "C"]], t("o_grupa")), sel("Pp_po", [["Vr", "Vr"], ["Vp", "Vp"]], t("o_Pp_po")),
         field(t("o_min_proc"), txt(ov("min_proc"), { oninput: e => setO("min_proc", num(e.target.value, 25)) })), field(t("o_h"), txt(o.h_predmeta_preticanje ?? "", { oninput: e => setO("h_predmeta_preticanje", num(e.target.value)) })), field(t("o_korak"), txt(ov("korak_tabela"), { oninput: e => setO("korak_tabela", num(e.target.value, 50)) })))),
-    navButtons("params", "run"));
+    navButtons("npp", "run"));
 }
 async function loadElems(silent) {
   const r = await api("elements", { cfg: S.cfg }); S.elrows = r.rows || []; S.sel.clear();
@@ -468,8 +504,8 @@ async function excDialog(cur) {
 
 /* ================================================================ PAGE 5 – RUN */
 function pageRun() {
-  const o = Object.assign({ word: true, excel: true, preglednost: false, optika: false, ifc: false, dwg: false }, S.cfg.gui_opcije || {});
-  const R = S.run; const cards = [["word", "r_word", "r_word_h", "DOCX"], ["excel", "r_excel", "r_excel_h", "XLSX"], ["preglednost", "r_sight", "r_sight_h", "DXF"], ["optika", "r_optika", "r_optika_h", "DOCX"], ["ifc", "r_ifc", "r_ifc_h", "IFC"], ["dwg", "r_dwg", "r_dwg_h", "DWG"]];
+  const o = Object.assign({ word: true, excel: true, preglednost: false, optika: false, ifc: false, dwg: false, vizura: false, landxml: false }, S.cfg.gui_opcije || {});
+  const R = S.run; const cards = [["word", "r_word", "r_word_h", "DOCX"], ["excel", "r_excel", "r_excel_h", "XLSX"], ["preglednost", "r_sight", "r_sight_h", "DXF"], ["optika", "r_optika", "r_optika_h", "DOCX"], ["ifc", "r_ifc", "r_ifc_h", "IFC"], ["landxml", "r_lx", "r_lx_h", "XML"], ["vizura", "r_viz", "r_viz_h", "HTML"], ["dwg", "r_dwg", "r_dwg_h", "DWG"]];
   const grid = h("div", { class: "outs" }, cards.map(([k, a, b, ext]) => { const on = h("input", { type: "checkbox", checked: o[k], onchange: e => { setOpt(k, e.target.checked); render(); } }); return h("label", { class: "opt" + (o[k] ? " on" : ""), style: "cursor:pointer" }, h("span", { class: "sw" }, on), h("div", {}, h("b", {}, t(a)), h("small", {}, t(b)))); }));
   const secs = S.cfg.sekcije;
   const sum = h("div", { class: "row", style: "flex-wrap:wrap;gap:8px" }, h("span", { class: "chip" }, `${S.cfg.projekat || t("untitled")}`), h("span", { class: "chip" }, `Vr ${S.cfg.Vr} km/h`), h("span", { class: "chip" }, `${secs.length} ${t("nav_sections").toLowerCase()}`), h("span", { class: "chip" }, (S.cfg.jezik || LANG).toUpperCase()), h("span", { class: "chip" + (S.cfg.izlaz ? " ok" : " err") }, S.cfg.izlaz || "—"));
@@ -488,7 +524,7 @@ async function startRun() {
   try { syncSight(); } catch (e) { R.errs = [e.message]; return render(); }
   const o = Object.assign({ word: true, excel: true, preglednost: false, optika: false }, S.cfg.gui_opcije || {});
   if (!S.cfg.izlaz) { R.errs = [t("r_noout")]; return render(); }
-  if (!o.word && !o.excel && !o.preglednost && !o.optika && !o.ifc && !o.dwg) { R.errs = [t("r_nothing")]; return render(); }
+  if (!o.word && !o.excel && !o.preglednost && !o.optika && !o.ifc && !o.dwg && !o.vizura && !o.landxml) { R.errs = [t("r_nothing")]; return render(); }
   const cfg = buildCfg(); cfg.jezik = cfg.jezik || LANG;
   const v = await api("validate", { cfg, lang: LANG }); if (v.errors && v.errors.length) { R.errs = v.errors; return render(); }
   Object.assign(R, { running: true, done: false, lines: [], outs: [], error: null });
@@ -502,7 +538,7 @@ async function startRun() {
   tick();
 }
 
-const PAGE_FN = { project: pageProject, sections: pageSections, params: pageParams, sight: pageSight, run: pageRun };
+const PAGE_FN = { project: pageProject, sections: pageSections, params: pageParams, npp: pageNpp, sight: pageSight, run: pageRun };
 // buildCfg uključuje sinhronizaciju prepreka
 const _buildCfg = buildCfg; buildCfg = function () { try { syncSight(); } catch (e) { if (S.page === "sight") toast(e.message, true); } return _buildCfg(); };
 
