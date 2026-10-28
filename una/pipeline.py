@@ -124,6 +124,12 @@ def generate(cfg, outdir, log=print, word=True, excel=True, sight=None):
             log(_T('6/6 Elaborat optičkih analiza (preticajna preglednost, sadržaj grafičkih priloga) …'))
             from . import optika
             o2, _pp = optika.make(P, cases, par, out_, cfg, outdir, name, list(outs), log=log); outs += o2
+    if cfg.get("ifc") or (cfg.get("gui_opcije") or {}).get("ifc"):
+        from . import ifc as _ifc
+        outs.append(_ifc.write_ifc(os.path.join(outdir, _TF("Osovine_{0}.ifc", name)), cfg.get("projekat", "Projekat"), axes, log=log))
+    if cfg.get("dwg") or (cfg.get("gui_opcije") or {}).get("dwg"):
+        from . import dwg as _dwg
+        outs += _dwg.convert([o for o in outs], log=log)
     log(_TF('Gotovo za {0:.0f} s.', time.time() - t0))
     return outs, (P, sections, cases, axes, fw, bw, has_caps)
 

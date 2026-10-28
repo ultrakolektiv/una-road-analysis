@@ -92,3 +92,18 @@ def test_web_sucelje_api():
         assert r["errors"] and "segment" in r["errors"][0].lower()
     finally:
         srv.shutdown()
+
+
+def test_ifc_export():
+    import os, re, tempfile
+    from una import pipeline, licenca
+    licenca.require = lambda *a, **k: {}; licenca.describe = lambda *a, **k: "test"; licenca.stamp = lambda *a, **k: {"id": "TEST"}
+    cfg = pipeline.load_cfg(os.path.join(os.path.dirname(__file__), "..", "primjer", "primjer_projekat.json"))
+    d = tempfile.mkdtemp(); cfg["ifc"] = True; cfg["jezik"] = "en"
+    outs, _ = pipeline.generate(cfg, d, log=lambda *a: None, word=False, excel=False, sight=False)
+    f = [o for o in outs if o.endswith(".ifc")]
+    assert f, outs
+    t = open(f[0], encoding="utf-8").read()
+    assert "IFC4X3_ADD2" in t and t.count("IFCALIGNMENT(") == 3
+    ids = set(re.findall(r"^#(\d+)=", t, re.M)); refs = set(re.findall(r"#(\d+)", t))
+    assert refs <= ids

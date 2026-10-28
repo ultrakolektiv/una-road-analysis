@@ -67,3 +67,8 @@ X.update({
 "Licenca: {0} | ID {1} | važi do: {2}": "Licence: {0} | ID {1} | valid until: {2}", "bez isteka": "no expiry",
 })
 X.update({"{0}, st. {1:.0f} – {2:.0f}": "{0}, ch. {1:.0f} – {2:.0f}"})
+X.update({
+"Osovine_{0}.ifc": "Alignments_{0}.ifc",
+"DWG: nije pronađen ODA File Converter. Instalirajte besplatni ODA File Converter (opendesign.com) i ponovo pokrenite izradu – DWG se tada pravi automatski. Do tada otvorite DXF u AutoCAD-u i Save As → DWG.": "DWG: ODA File Converter not found. Install the free ODA File Converter (opendesign.com) and run again – DWG is then created automatically. Until then open the DXF in AutoCAD and Save As → DWG.",
+"DWG: napravljeno {0} od {1} crteža.": "DWG: created {0} of {1} drawings.",
+})

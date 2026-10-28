@@ -202,3 +202,9 @@ NOVO U VERZIJI 1.2 – MODERAN PROZOR I ENGLESKA VERZIJA
 * Engleski izlaz: Elaborat 3 i 4, Excel radna knjiga, DXF slojevi i natpisi, dijagrami i nazivi datoteka.
   Decimalni separator je tačka. Nazivi listova u Excelu ostaju isti u oba jezika (zbog formula).
 * Greške pri pokretanju upisuju se u  %LOCALAPPDATA%\UNA\error.log
+
+
+IFC I DWG IZLAZ (verzija 1.3)
+- IFC 4.3: na stranici "Izrada" uključite "IFC 4.3 osovine". Dobija se jedna datoteka sa IfcAlignment za svaku osovinu (horizontalni elementi, niveleta i 3D linija), za BIM softver (Civil 3D, Revit, BIMcollab, Tekla...).
+- DWG: UNA ne može sama pisati DWG (zatvoren format). Uključite "DWG crteži" i instalirajte besplatni ODA File Converter (opendesign.com); UNA tada svaki DXF automatski pretvori u DWG (AutoCAD 2018). Bez konvertera, otvorite DXF u AutoCAD-u i uradite Save As → DWG.
+- Jezik izvještaja se zove "Bosanski" (ranije "Srpski").

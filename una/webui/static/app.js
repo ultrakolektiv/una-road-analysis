@@ -24,7 +24,7 @@ sr: {
  nav_project:"Projekat", nav_sections:"Sekcije trase", nav_params:"Parametri", nav_sight:"Preglednost", nav_run:"Izrada",
  new:"Novi", open:"Otvori…", save:"Spremi", save_as:"Spremi kao…", untitled:"Novi projekat", unsaved:"nije spremljeno",
  p_title:"Projekat", p_sub:"Osnovni podaci o dionici i izlazu.", p_name:"Naziv dionice", p_vr:"Računska brzina Vr [km/h]", p_out:"Izlazni folder", p_browse:"Odaberi…",
- p_lang:"Jezik dokumenata", p_lang_h:"Jezik u kome se prave Word/Excel/DXF izlazi.", p_notes:"Tekst za elaborat", p_notes_h:"Naslovna strana i dodatni opisi koji ulaze u elaborat.",
+ p_lang:"Jezik dokumenata", p_lang_h:"Jezik (bosanski ili engleski) u kome se prave Word/Excel/DXF izlazi.", p_notes:"Tekst za elaborat", p_notes_h:"Naslovna strana i dodatni opisi koji ulaze u elaborat.",
  p_date:"Datum / verzija (naslovna strana)", p_desc:"Dodatni opis trase (Uvod)", p_scen:"Obrazloženje scenarija sa ograničenjem", p_remarks:"Dodatne napomene / pretpostavke (jedna po redu, Prilog C)",
  p_settings:"Postavke za sljedeći projekat", p_settings_h:"Spremite napredne parametre (bez sekcija i ispisa) i učitajte ih u novom projektu.", p_save_set:"Spremi postavke…", p_load_set:"Učitaj postavke…",
  s_title:"Sekcije trase", s_sub:"Redom po stacionaži. Svaka sekcija ima svoj tip: razdvojene osovine, centralna ili jedna osovina.", s_add:"Dodaj sekciju", s_edit:"Uredi", s_del:"Ukloni", s_up:"Gore", s_down:"Dolje",
@@ -62,7 +62,7 @@ sr: {
  o_title:"Elaborat optičkih analiza (preticanje)", o_on:"Napravi Elaborat 4 – optičke analize (Word)", o_tip:"Tip puta", o_tip_a:"auto (prema sekcijama)", o_tip_d:"dvosmjerni (Tabela 30, min. 25 %)", o_tip_r:"razdvojeni (kriterij Pzp)",
  o_grupa:"Tehnička grupa puta", o_Pp_po:"Brzina za Pp", o_min_proc:"Minimalni % preticajne preglednosti", o_h:"Visina predmeta pri preticanju [m]", o_korak:"Korak tabele u Wordu [m]",
  r_title:"Izrada elaborata", r_sub:"Odaberite izlaze i pokrenite proračun.", r_word:"Elaborat 3 (Word)", r_word_h:"Vozno-dinamičke analize", r_excel:"Excel radna knjiga", r_excel_h:"Formule, tablice i dijagrami",
- r_sight:"Preglednost (DXF + Excel)", r_sight_h:"Zrake, zahtijevana i očekivana preglednost", r_optika:"Elaborat 4 (Word)", r_optika_h:"Optičke analize i preticanje",
+ r_sight:"Preglednost (DXF + Excel)", r_sight_h:"Zrake, zahtijevana i očekivana preglednost", r_optika:"Elaborat 4 (Word)", r_optika_h:"Optičke analize i preticanje", r_ifc:"IFC 4.3 osovine", r_ifc_h:"IfcAlignment: horizontala, niveleta, 3D linija", r_dwg:"DWG crteži", r_dwg_h:"Iz DXF-a, preko besplatnog ODA File Converter-a",
  r_run:"Napravi elaborat", r_running:"Računam…", r_done:"Gotovo", r_files:"Napravljene datoteke", r_open:"Otvori", r_folder:"Folder", r_log:"Tok proračuna", r_errors:"Provjera unosa", r_nothing:"Odaberite bar jedan izlaz.", r_noout:"Odaberite izlazni folder (korak Projekat).", r_fail:"Greška pri izradi",
  r_open_folder:"Otvori izlazni folder", r_ready:"Spremno", r_summary:"Rezime",
  lic_ok:"Licenca aktivna", lic_bad:"Licenca nije aktivirana", lic_act:"Aktiviraj…", lic_title:"Aktivacija licence", lic_id:"Pošaljite ovaj ID računara dobavljaču da dobijete licencu:", lic_copy:"Kopiraj ID", lic_load:"Učitaj licencu (.lic)…", lic_done:"Licenca je aktivirana.", copied:"Kopirano",
@@ -113,7 +113,7 @@ en: {
  o_title:"Optical analyses study (passing)", o_on:"Produce Study 4 – optical analyses (Word)", o_tip:"Road type", o_tip_a:"auto (from segments)", o_tip_d:"two-way (Table 30, min. 25 %)", o_tip_r:"divided (Pzp criterion)",
  o_grupa:"Technical group of the road", o_Pp_po:"Speed for Pp", o_min_proc:"Minimum % of passing sight distance", o_h:"Object height for passing [m]", o_korak:"Table step in Word [m]",
  r_title:"Generate study", r_sub:"Choose the outputs and start the calculation.", r_word:"Study 3 (Word)", r_word_h:"Driving-dynamics analyses", r_excel:"Excel workbook", r_excel_h:"Formulas, tables and charts",
- r_sight:"Sight distance (DXF + Excel)", r_sight_h:"Rays, required and expected sight distance", r_optika:"Study 4 (Word)", r_optika_h:"Optical analyses and passing",
+ r_sight:"Sight distance (DXF + Excel)", r_sight_h:"Rays, required and expected sight distance", r_optika:"Study 4 (Word)", r_optika_h:"Optical analyses and passing", r_ifc:"IFC 4.3 alignments", r_ifc_h:"IfcAlignment: horizontal, vertical, 3D curve", r_dwg:"DWG drawings", r_dwg_h:"From DXF, via the free ODA File Converter",
  r_run:"Generate study", r_running:"Calculating…", r_done:"Done", r_files:"Generated files", r_open:"Open", r_folder:"Folder", r_log:"Calculation log", r_errors:"Input check", r_nothing:"Select at least one output.", r_noout:"Choose the output folder (Project step).", r_fail:"Error during generation",
  r_open_folder:"Open output folder", r_ready:"Ready", r_summary:"Summary",
  lic_ok:"Licence active", lic_bad:"Licence not activated", lic_act:"Activate…", lic_title:"Licence activation", lic_id:"Send this computer ID to the supplier to obtain a licence:", lic_copy:"Copy ID", lic_load:"Load licence (.lic)…", lic_done:"The licence has been activated.", copied:"Copied",
@@ -227,7 +227,7 @@ function pageProject() {
   const name = txt(c.projekat, { oninput: e => { c.projekat = e.target.value; dirty(); } });
   const vr = txt(c.Vr, { inputmode: "decimal", oninput: e => { const v = num(e.target.value, 100); c.Vr = v; dirty(); } });
   const out = txt(c.izlaz || "", { oninput: e => { c.izlaz = e.target.value.trim(); dirty(); }, placeholder: "C:\\…\\izlaz" });
-  const lang = h("select", { onchange: e => { c.jezik = e.target.value; dirty(); } }, h("option", { value: "sr" }, "Srpski / Bosanski / Hrvatski"), h("option", { value: "en" }, "English"));
+  const lang = h("select", { onchange: e => { c.jezik = e.target.value; dirty(); } }, h("option", { value: "sr" }, "Bosanski"), h("option", { value: "en" }, "English"));
   lang.value = c.jezik || LANG;
   const ta = (k, rows = 3) => { const e = h("textarea", { rows, oninput: ev => { c[k] = ev.target.value; dirty(); } }); e.value = c[k] || ""; return e; };
   const rem = h("textarea", { rows: 4, oninput: ev => { c.napomene = ev.target.value.split("\n").map(x => x.trim()).filter(Boolean); dirty(); } });
@@ -468,8 +468,8 @@ async function excDialog(cur) {
 
 /* ================================================================ PAGE 5 – RUN */
 function pageRun() {
-  const o = Object.assign({ word: true, excel: true, preglednost: false, optika: false }, S.cfg.gui_opcije || {});
-  const R = S.run; const cards = [["word", "r_word", "r_word_h", "DOCX"], ["excel", "r_excel", "r_excel_h", "XLSX"], ["preglednost", "r_sight", "r_sight_h", "DXF"], ["optika", "r_optika", "r_optika_h", "DOCX"]];
+  const o = Object.assign({ word: true, excel: true, preglednost: false, optika: false, ifc: false, dwg: false }, S.cfg.gui_opcije || {});
+  const R = S.run; const cards = [["word", "r_word", "r_word_h", "DOCX"], ["excel", "r_excel", "r_excel_h", "XLSX"], ["preglednost", "r_sight", "r_sight_h", "DXF"], ["optika", "r_optika", "r_optika_h", "DOCX"], ["ifc", "r_ifc", "r_ifc_h", "IFC"], ["dwg", "r_dwg", "r_dwg_h", "DWG"]];
   const grid = h("div", { class: "outs" }, cards.map(([k, a, b, ext]) => { const on = h("input", { type: "checkbox", checked: o[k], onchange: e => { setOpt(k, e.target.checked); render(); } }); return h("label", { class: "opt" + (o[k] ? " on" : ""), style: "cursor:pointer" }, h("span", { class: "sw" }, on), h("div", {}, h("b", {}, t(a)), h("small", {}, t(b)))); }));
   const secs = S.cfg.sekcije;
   const sum = h("div", { class: "row", style: "flex-wrap:wrap;gap:8px" }, h("span", { class: "chip" }, `${S.cfg.projekat || t("untitled")}`), h("span", { class: "chip" }, `Vr ${S.cfg.Vr} km/h`), h("span", { class: "chip" }, `${secs.length} ${t("nav_sections").toLowerCase()}`), h("span", { class: "chip" }, (S.cfg.jezik || LANG).toUpperCase()), h("span", { class: "chip" + (S.cfg.izlaz ? " ok" : " err") }, S.cfg.izlaz || "—"));
@@ -488,7 +488,7 @@ async function startRun() {
   try { syncSight(); } catch (e) { R.errs = [e.message]; return render(); }
   const o = Object.assign({ word: true, excel: true, preglednost: false, optika: false }, S.cfg.gui_opcije || {});
   if (!S.cfg.izlaz) { R.errs = [t("r_noout")]; return render(); }
-  if (!o.word && !o.excel && !o.preglednost && !o.optika) { R.errs = [t("r_nothing")]; return render(); }
+  if (!o.word && !o.excel && !o.preglednost && !o.optika && !o.ifc && !o.dwg) { R.errs = [t("r_nothing")]; return render(); }
   const cfg = buildCfg(); cfg.jezik = cfg.jezik || LANG;
   const v = await api("validate", { cfg, lang: LANG }); if (v.errors && v.errors.length) { R.errs = v.errors; return render(); }
   Object.assign(R, { running: true, done: false, lines: [], outs: [], error: null });
