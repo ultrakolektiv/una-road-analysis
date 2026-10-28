@@ -54,3 +54,16 @@ X.update({
 "Elaborat_3_Vozno-dinamicke_analize_{0}.docx": "Study_3_Driving-dynamics_analyses_{0}.docx", "Elaborat_3_Vozno-dinamicke_analize_{0}_po_templateu.docx": "Study_3_Driving-dynamics_analyses_{0}_from_template.docx",
 "Proracun_vozno-dinamicke_analize_{0}.xlsx": "Calculation_driving-dynamics_analyses_{0}.xlsx",
 })
+X.update({
+"Nije unesena nijedna sekcija.": "No segment has been entered.",
+"Sekcija {0}: nepoznat tip '{1}'.": "Segment {0}: unknown type '{1}'.",
+"Sekcija {0} ({1}): '{2}' mora biti lista brojeva.": "Segment {0} ({1}): '{2}' must be a list of numbers.",
+"Word template ne postoji: {0}": "Word template does not exist: {0}",
+"Sekcije se preklapaju: {0}–{1} i {2}–{3}.": "Segments overlap: {0}–{1} and {2}–{3}.",
+"  {0}: {1}: Vp {2:.1f}–{3:.1f} km/h, Dh = {4:.2f} %, vrijeme {5:.1f} s": "  {0}: {1}: Vp {2:.1f}–{3:.1f} km/h, Dh = {4:.2f} %, time {5:.1f} s",
+"3/4 Izrada Word elaborata …": "3/4 Creating the Word study …", "3b/4 Izrada Word elaborata prema templatu …": "3b/4 Creating the Word study from the template …",
+"Word: {0}": "Word: {0}", "DXF: {0} ({1} entiteta)": "DXF: {0} ({1} entities)", "DXF dijagram: {0}": "DXF chart: {0}", "Nepoznat tip sekcije: {0}": "Unknown segment type: {0}", "Word (template): {0}": "Word (template): {0}",
+", odstupanje kraja {0:.0f} mm": ", end-point deviation {0:.0f} mm", ", odstupanje nivelete {0:.0f} mm": ", grade-line deviation {0:.0f} mm",
+"Licenca: {0} | ID {1} | važi do: {2}": "Licence: {0} | ID {1} | valid until: {2}", "bez isteka": "no expiry",
+})
+X.update({"{0}, st. {1:.0f} – {2:.0f}": "{0}, ch. {1:.0f} – {2:.0f}"})

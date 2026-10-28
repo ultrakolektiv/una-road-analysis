@@ -4,6 +4,7 @@ Datoteka licence (licenca.lic) = JSON { "podaci": {...}, "potpis": base64 }.
 Aplikacija sadrži samo javni ključ; licence može izdati samo vlasnik privatnog ključa.
 """
 import os, sys, json, base64, hashlib, datetime, subprocess, shutil
+from .i18n import _T, _TF
 
 APP = "UNA"; _HASH_ID = "Elaborat3"            # _HASH_ID se ne mijenja (ID računara ostaje isti kao u ranijim verzijama)
 
@@ -135,8 +136,8 @@ def install(src):
 
 
 def describe(lic):
-    ist = lic.get("istice") or "bez isteka"
-    return f"Licenca: {lic.get('kupac', '?')} | ID {lic.get('id', '?')} | važi do: {ist}"
+    ist = lic.get("istice") or _T("bez isteka")
+    return _TF("Licenca: {0} | ID {1} | važi do: {2}", lic.get("kupac", "?"), lic.get("id", "?"), ist)
 
 
 def stamp(lic):

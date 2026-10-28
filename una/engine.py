@@ -100,15 +100,15 @@ def build_cases(cfg, P, log=print):
         elif tip == "jedna_nazad":
             specs = [("B", -1, 'osovina', _TF('osovina (sekcija {0})', si), _T('osovina ←'))]
         else:
-            raise ValueError(f"Nepoznat tip sekcije: {tip}")
+            raise ValueError(_TF("Nepoznat tip sekcije: {0}", tip))
         for tag, sg, role, aname, short in specs:
             c = Case(); c.sec = sec; c.no = si; c.tag = tag; c.sg = sg; c.role = role
             c.key = f"{tag}{si}"; c.axis = axis(sec[role], aname)
             c.short = f"{short} [{sa:.0f}–{sb:.0f}]"; c.shortname = short
             c.SA, c.SB = sa, sb
             c.caps = [(float(z["od"]), float(z["do"]), float(z["v"])) for z in sec.get("ogranicenja", [])]
-            c.label = f"{_T('Desni kolovoz') if tag=='D' and tip=='razdvojene' else _T('Lijevi kolovoz') if tag=='L' and tip=='razdvojene' else _T('Centralna osovina') if tip=='centralna' else _T('Osovina')}, " \
-                      f"{_T('smjer stacionaže') if sg==1 else _T('suprotno smjeru stacionaže')}, st. {sa:.0f} – {sb:.0f}" 
+            c.label = f"{_T('Desni kolovoz') if tag=='D' and tip=='razdvojene' else _T('Lijevi kolovoz') if tag=='L' and tip=='razdvojene' else _T('Centralna osovina') if tip=='centralna' else _T('Osovina')}, " + \
+                      _TF("{0}, st. {1:.0f} – {2:.0f}", _T('smjer stacionaže') if sg==1 else _T('suprotno smjeru stacionaže'), sa, sb)
             cases.append(c)
     return sections, cases, list(axes.values())
 

@@ -149,8 +149,8 @@ class Axis:
 
     def info(self):
         return (_TF('{0}: {1} elemenata, dužina {2:.3f} m (st. {3:.3f}–{4:.3f}), K = {5:.3f} gon/km', self.name, len(self.elems), self.length, self.s_min, self.s_max, self.K) + (_TF(' (ispis {0})', self.K_file) if self.K_file else "") +
-                f", odstupanje kraja {max(abs(self.end_err[0]), abs(self.end_err[1])) * 1000:.0f} mm" +
-                (f", odstupanje nivelete {self.vdev * 1000:.0f} mm" if self.vdev is not None else ""))
+                _TF(", odstupanje kraja {0:.0f} mm", max(abs(self.end_err[0]), abs(self.end_err[1])) * 1000) +
+                (_TF(", odstupanje nivelete {0:.0f} mm", self.vdev * 1000) if self.vdev is not None else ""))
 
 
 def detect_kind(path):

@@ -27,7 +27,7 @@ $fv = ($ver + ".0")
 if (Test-Path dist) { Remove-Item dist -Recurse -Force }
 python -m nuitka --standalone --assume-yes-for-downloads --msvc=latest `
   --enable-plugin=tk-inter --windows-console-mode=disable `
-  --include-package=una --include-data-dir=una\data=una\data --include-package=docx --include-package-data=docx `
+  --include-package=una --include-data-dir=una\data=una\data --include-data-dir=una\webui\static=una\webui\static --include-package=docx --include-package-data=docx `
   --nofollow-import-to=pytest,IPython,scipy.tests,numpy.tests `
   --product-name="UNA - ROAD ENGINEERING ANALYSIS" --company-name="VAŠA FIRMA" --product-version=$fv --file-version=$fv `
   --output-dir=dist --output-filename=UNA.exe UNA.py

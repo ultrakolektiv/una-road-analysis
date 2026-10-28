@@ -180,7 +180,7 @@ def build_md(P, par, out, pp, o, cfg, figs, att, name, template_mode=False):
     if not template_mode: A(_TF('---\ntitle: "ELABORAT OPTIČKIH ANALIZA"\nsubtitle: "{0}"\n---\n', proj))
     A("# Uvod\n")
     A(_TF('Optičke analize sprovedene su za usvojeno rješenje trase. Vozač svoje manevre podešava prema sadržaju u vidnom polju, pa je za svaku traku i svaki smjer vožnje numerički modelom trase (plan, niveleta, poprečni profil, prepreke uz kolovoz) određena raspoloživa preglednost. Proračun je urađen programom {0}; ulazna projektna brzina Vp preuzeta je iz Elaborata 3 (vozno-dinamičke analize, rezultirajući profil projektne brzine).\n', APP_NAME))
-    A(_TF('Oko vozača je {0} m iznad nivelete, a visina predmeta {1} (za zaustavnu preglednost i preticanje{2}). Zrake preglednosti polaze od ose oka vozača, na rastojanju od ose kolovoza prema usvojenom ofsetu.\n', fm(par['h_oka'],2), _T('h2 prema Tabeli 29 Smjernica (0–0,15 m, zavisi od brzine Vp)') if par['h_auto'] else fm(par['h_prepreke'],2) + ' m', '; za preticanje zadato ' + fm(o['h_predmeta_preticanje'],2) + ' m' if o['h_predmeta_preticanje'] is not None else ''))
+    A(_TF('Oko vozača je {0} m iznad nivelete, a visina predmeta {1} (za zaustavnu preglednost i preticanje{2}). Zrake preglednosti polaze od ose oka vozača, na rastojanju od ose kolovoza prema usvojenom ofsetu.\n', fm(par['h_oka'],2), _T('h2 prema Tabeli 29 Smjernica (0–0,15 m, zavisi od brzine Vp)') if par['h_auto'] else fm(par['h_prepreke'],2) + ' m', _T('; za preticanje zadato ') + fm(o['h_predmeta_preticanje'],2) + ' m' if o['h_predmeta_preticanje'] is not None else ''))
     A(_T('# Zahtijevana preglednost, Pzp = f(Vp)\n'))
     RS = False   # Pzp/Pz uvijek po Crtežu 52 BiH Smjernica
     A(_T('Da bi se ostvarila brzina veća od računske, na svakom mjestu trase mora biti obezbijeđena preglednost koja zavisi od projektne brzine Vp i stvarnog podužnog nagiba (zahtijevana preglednost Pzp). Mora biti ispunjen uslov **Pzp ≥ Pz**, gdje je Pz zaustavna preglednost u funkciji računske brzine deonice. ')
@@ -309,7 +309,7 @@ def make(P, cases, par, out, cfg, outdir, name, files, log=print):
         mdp = os.path.join(td, "doc.md"); open(mdp, "w", encoding="utf-8").write(md)
         raw = os.path.join(td, "raw.docx"); report.run_pandoc(mdp, raw, td, os.path.join(report.HERE, "data", "ref.docx"))
         report.postprocess(raw, docx, _TF('Elaborat 4 – Optičke analize | {0}', cfg.get('projekat', '')))
-    log(f"Word: {docx}"); outs.append(docx)
+    log(_TF("Word: {0}", docx)); outs.append(docx)
     tp = cfg.get("template") or {}
     if tp.get("file"):
         from . import template_export

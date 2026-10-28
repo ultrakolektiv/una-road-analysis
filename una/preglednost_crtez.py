@@ -216,7 +216,7 @@ def draw(P, cases, par, res, cfg, path, mode="vp", log=print, preview_png=None, 
             if lay == "IVICA_KOLOVOZA": d.poly(lay, [(bx0 + 4 * u, cy + 2.5 * u), (bx0 + 24 * u, cy + 2.5 * u)], width=par["ivica_debljina"] * u)
             else: d.line(lay, bx0 + 4 * u, cy + 2.5 * u, bx0 + 24 * u, cy + 2.5 * u, ltype=lt)
             d.text("LEGENDA", bx0 + 28 * u, cy + 1.2 * u, H, txt)
-    d.save(path); log(f"DXF: {path} ({len(d.items)} entiteta)")
+    d.save(path); log(_TF("DXF: {0} ({1} entiteta)", path, len(d.items)))
     if preview_png:
         from .dxf import preview
         preview(d, preview_png)

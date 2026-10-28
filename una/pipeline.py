@@ -7,10 +7,10 @@ from .texts import SYM
 
 def validate(cfg):
     errs = []
-    if not cfg.get("sekcije"): errs.append("Nije unesena nijedna sekcija.")
+    if not cfg.get("sekcije"): errs.append(_T("Nije unesena nijedna sekcija."))
     for i, s in enumerate(cfg.get("sekcije", []), 1):
         t = s.get("tip")
-        if t not in engine.TIPOVI: errs.append(f"Sekcija {i}: nepoznat tip '{t}'."); continue
+        if t not in engine.TIPOVI: errs.append(_TF("Sekcija {0}: nepoznat tip '{1}'.", i, t)); continue
         try:
             if float(s["do"]) <= float(s["od"]): errs.append(_TF("Sekcija {0}: 'do' mora biti veće od 'od'.", i))
         except Exception: errs.append(_TF('Sekcija {0}: stacionaže nisu brojevi.', i))
@@ -41,13 +41,13 @@ def validate(cfg):
                     v = sp.get(k)
                     try:
                         if v not in (None, "") and any(float(x) <= 0 for x in (v if isinstance(v, (list, tuple)) else [v])): errs.append(_TF('Sekcija {0} ({1}): širine traka moraju biti > 0.', i, r))
-                    except Exception: errs.append(f"Sekcija {i} ({r}): '{k}' mora biti lista brojeva.")
+                    except Exception: errs.append(_TF("Sekcija {0} ({1}): '{2}' mora biti lista brojeva.", i, r, k))
     tp = cfg.get("template") or {}
-    if tp.get("file") and not os.path.isfile(tp["file"]): errs.append(f"Word template ne postoji: {tp['file']}")
+    if tp.get("file") and not os.path.isfile(tp["file"]): errs.append(_TF("Word template ne postoji: {0}", tp['file']))
     secs = sorted(cfg.get("sekcije", []), key=lambda s: float(s.get("od", 0)))
     for a, b in zip(secs, secs[1:]):
         try:
-            if float(b["od"]) < float(a["do"]) - 1e-6: errs.append(f"Sekcije se preklapaju: {a['od']}–{a['do']} i {b['od']}–{b['do']}.")
+            if float(b["od"]) < float(a["do"]) - 1e-6: errs.append(_TF("Sekcije se preklapaju: {0}–{1} i {2}–{3}.", a['od'], a['do'], b['od'], b['do']))
         except Exception: pass
     return errs
 
@@ -75,7 +75,7 @@ def generate(cfg, outdir, log=print, word=True, excel=True, sight=None):
     for a, b in zip(secs, secs[1:]):
         if abs(b["od"] - a["do"]) > 0.01: log(_TF('UPOZORENJE: sekcije nisu povezane (kraj {0} ≠ početak {1}); brzina se prenosi preko praznine.', a['do'], b['od']))
     for c in cases:
-        log(f"  {c.key}: {c.label}: Vp {c.stc['vmin']:.1f}–{c.stc['vmax']:.1f} km/h, Dh = {c.stc['Dh']:.2f} %, vrijeme {c.stc['time']:.1f} s")
+        log(_TF("  {0}: {1}: Vp {2:.1f}–{3:.1f} km/h, Dh = {4:.2f} %, vrijeme {5:.1f} s", c.key, c.label, c.stc['vmin'], c.stc['vmax'], c.stc['Dh'], c.stc['time']))
     outs = []
     tr = str.maketrans({"č": "c", "ć": "c", "ž": "z", "š": "s", "đ": "dj", "Č": "C", "Ć": "C", "Ž": "Z", "Š": "S", "Đ": "Dj"})
     import re as _re
@@ -85,12 +85,12 @@ def generate(cfg, outdir, log=print, word=True, excel=True, sight=None):
         import tempfile
         with tempfile.TemporaryDirectory() as td:
             F = figs.make_all(P, sections, cases, axes, fw, bw, has_caps, td, log=log)
-            log("3/4 Izrada Word elaborata …")
+            log(_T("3/4 Izrada Word elaborata …"))
             p = os.path.join(outdir, _TF("Elaborat_3_Vozno-dinamicke_analize_{0}.docx", name))
             report.write_docx(P, sections, cases, axes, fw, bw, has_caps, F, cfg, p, log=log); _stamp_docx(p, lic); outs.append(p)
             tp = cfg.get("template") or {}
             if tp.get("file"):
-                log("3b/4 Izrada Word elaborata prema templatu …")
+                log(_T("3b/4 Izrada Word elaborata prema templatu …"))
                 p2 = os.path.join(outdir, _TF("Elaborat_3_Vozno-dinamicke_analize_{0}_po_templateu.docx", name))
                 report.write_docx_template(P, sections, cases, axes, fw, bw, has_caps, F, cfg, p2, log=log); _stamp_docx(p2, lic); outs.append(p2)
     else:

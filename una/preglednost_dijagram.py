@@ -116,7 +116,7 @@ def make_dxf(P, par, out, path, log=print, hs=10.0, vs=2.0, ds=5.0):
             d.line(lay, lx, ly, lx + 12, ly); d.text("TEKST", lx + 15, ly - 0.9, H * 0.9, txt); ly -= 6
         d.text("TEKST", 0, yD0 - 16, H * 0.9, _TF('Razmjera: 1 mm = {0:g} m (stacionaža), {1:g} km/h (brzina), {2:g} m (preglednost). Jedinica crteža: mm.', hs, vs, ds))
         y0 = yV0 + hV + 40
-    d.save(path); log(f"DXF dijagram: {path}")
+    d.save(path); log(_TF("DXF dijagram: {0}", path))
     return path
 
 

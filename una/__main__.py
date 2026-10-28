@@ -10,6 +10,7 @@ def main(argv=None):
     ap.add_argument("--preglednost", action="store_true", help=_T('dodatno: zrake preglednosti i DXF crtež'))
     ap.add_argument("--id", action="store_true", help=_T('ispiši ID ovog računara (za zahtjev licence)'))
     ap.add_argument("--licenca", metavar="FAJL.lic", help=_T('aktiviraj licencu iz datoteke'))
+    ap.add_argument("--classic", action="store_true", help="stari (tkinter) prozor")
     ap.add_argument("--lang", choices=["sr", "en"], default=None, help="jezik izlaza / output language")
     a = ap.parse_args(argv)
     from . import licenca
@@ -18,7 +19,9 @@ def main(argv=None):
         try: print("Aktivirano.", licenca.describe(licenca.install(a.licenca))); return 0
         except licenca.LicencaError as e: print(_T('Greška:'), e); return 2
     if not a.config:
-        from . import gui; gui.main(); return 0
+        if a.classic:
+            from . import gui; gui.main(); return 0
+        from .webui import server; return server.run()
     cfg = pipeline.load_cfg(a.config)
     if a.lang: cfg["jezik"] = a.lang
     out = a.out or cfg.get("izlaz") or os.path.join(os.path.dirname(os.path.abspath(a.config)), "izlaz")

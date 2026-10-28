@@ -190,3 +190,15 @@ NOVO – usklađivanje s Prilogom 2 Pravilnika (Elaborat 3 i 4)
 - Upozorenje o uslovu Vri ≤ Vp u poglavlju 4 Elaborata 3 (Vp se ne podiže na Vr, nego se element označava).
 - Poglavlje 5: „Tegljač (Pravilnik)" koristi krivu sile vuče izvedenu iz dijagrama 3-10 (ravnotežne brzine 68…15 km/h pri 2…7 %); „Tegljač (savremeni)", autovoz i putničko vozilo računaju se konstantnom snagom (pretpostavke). Potrošnja i prazan hod su po vozilu.
 - Elaborat 4: provjera Pr (Pzp) ≥ Xd (Xd = 0,1·Vsr·ΔV) na zonama usporenja profila Vp.
+
+
+NOVO U VERZIJI 1.2 – MODERAN PROZOR I ENGLESKA VERZIJA
+------------------------------------------------------
+* Program se sada otvara u modernom prozoru (5 koraka: Projekat → Sekcije trase → Parametri → Preglednost → Izrada),
+  sa svijetlom i tamnom temom. Prozor koristi Microsoft Edge (ili Chrome) koji je već na računaru; ništa se dodatno ne instalira.
+  Stari prozor je dostupan sa:  UNA.exe --classic
+* Jezik sučelja: dugmad SR / EN (lijevo dolje). Jezik dokumenata (Word, Excel, DXF, slike) bira se u koraku "Projekat"
+  (polje "Jezik dokumenata") ili iz komandne linije:  UNA.exe projekat.json --lang en
+* Engleski izlaz: Elaborat 3 i 4, Excel radna knjiga, DXF slojevi i natpisi, dijagrami i nazivi datoteka.
+  Decimalni separator je tačka. Nazivi listova u Excelu ostaju isti u oba jezika (zbog formula).
+* Greške pri pokretanju upisuju se u  %LOCALAPPDATA%\UNA\error.log

@@ -71,3 +71,24 @@ def test_engleski_elaborat(tmp_path):
     names = [os.path.basename(o) for o in outs]
     assert any(n.startswith("Study_3") and n.endswith(".docx") for n in names)
     assert any(n.startswith("Calculation_") and n.endswith(".xlsx") for n in names)
+
+
+def test_web_sucelje_api():
+    """Lokalni poslužitelj web sučelja: statika, token i osnovni API pozivi."""
+    import threading, urllib.request, urllib.error
+    from http.server import ThreadingHTTPServer
+    from una.webui import server
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), server.H); port = srv.server_address[1]
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        base = f"http://127.0.0.1:{port}"
+        html = urllib.request.urlopen(base + "/").read().decode()
+        assert "UNA" in html and "__TOKEN__" not in html
+        req = urllib.request.Request(base + "/api/state", data=b"{}", method="POST", headers={"Content-Type": "application/json"})
+        with pytest.raises(urllib.error.HTTPError) as ei: urllib.request.urlopen(req)       # bez tokena → 403
+        assert ei.value.code == 403
+        req = urllib.request.Request(base + "/api/validate", data=json.dumps({"cfg": {"sekcije": []}, "lang": "en"}).encode(), method="POST", headers={"X-UNA-Token": server.S.token})
+        r = json.loads(urllib.request.urlopen(req).read())
+        assert r["errors"] and "segment" in r["errors"][0].lower()
+    finally:
+        srv.shutdown()

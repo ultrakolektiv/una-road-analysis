@@ -321,4 +321,4 @@ def export(raw_path, t, out_path, log=print):
         u = OxmlElement("w:updateFields"); u.set(qn("w:val"), "true"); st.append(u)
     normalize_order(tpl.element)
     tpl.save(out_path)
-    log(f"Word (template): {out_path}")
+    log(_TF("Word (template): {0}", out_path))

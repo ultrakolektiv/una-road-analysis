@@ -621,7 +621,7 @@ def write_docx(P, sections, cases, axes, fw, bw, has_caps, F, cfg, out_docx, log
         raw = os.path.join(td, "raw.docx")
         run_pandoc(mdp, raw, td, os.path.join(HERE, "data", "ref.docx"))
         postprocess(raw, out_docx, _TF('Elaborat 3 – Vozno-dinamičke analize | {0}', cfg.get('projekat', '')))
-    log(f"Word: {out_docx}")
+    log(_TF("Word: {0}", out_docx))
 
 
 def write_docx_template(P, sections, cases, axes, fw, bw, has_caps, F, cfg, out_docx, log=print):
