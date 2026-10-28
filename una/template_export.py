@@ -1,4 +1,5 @@
 """Izvoz elaborata u korisnički Word template (naslovna strana, sadržaj, stilovi, zaglavlja/podnožja iz templata)."""
+from .i18n import _T, _TF
 import copy, io, re
 import docx
 from docx.oxml.ns import qn
@@ -110,8 +111,8 @@ def set_text(p, text, keep_highlight=False):
 
 def fill_cover(body, t):
     """Popunjava naslovnu stranu: polja označena žutom bojom i redove sa nazivima uloga."""
-    labels = {"VODEĆI PROJEKTANT": t.get("vodeci"), "LEAD DESIGNER": t.get("vodeci"), "ODGOVORNI PROJEKTANT": t.get("odgovorni"), "RESPONSIBLE DESIGNER": t.get("odgovorni"),
-              "SARADNICI NA PROJEKTU": t.get("saradnici"), "PROJECT TEAM MEMBERS": t.get("saradnici_en") or t.get("saradnici")}
+    labels = {_T('VODEĆI PROJEKTANT'): t.get("vodeci"), "LEAD DESIGNER": t.get("vodeci"), _T('ODGOVORNI PROJEKTANT'): t.get("odgovorni"), "RESPONSIBLE DESIGNER": t.get("odgovorni"),
+              _T('SARADNICI NA PROJEKTU'): t.get("saradnici"), "PROJECT TEAM MEMBERS": t.get("saradnici_en") or t.get("saradnici")}
     for tbl in body.iter(qn("w:tbl")):
         for tr in tbl.findall(qn("w:tr")):
             tcs = tr.findall(qn("w:tc"))
@@ -191,7 +192,7 @@ def make_caption(proto, kind, title, num=1):
         if fld: f = OxmlElement("w:fldChar"); f.set(qn("w:fldCharType"), fld); r.append(f)
         if instr: i = OxmlElement("w:instrText"); i.set("{http://www.w3.org/XML/1998/namespace}space", "preserve"); i.text = instr; r.append(i)
         return r
-    label, seq = ("Tabela/Table ", " SEQ Tabela_/_Table \\* ARABIC ") if kind == "T" else ("Slika / Figure  ", " SEQ Slika_/_Figure_ \\* ARABIC ")
+    label, seq = (_T('Tabela/Table '), " SEQ Tabela_/_Table \\* ARABIC ") if kind == "T" else (_T('Slika / Figure  '), " SEQ Slika_/_Figure_ \\* ARABIC ")
     for r in (run(label), run(fld="begin"), run(instr=seq), run(fld="separate"), run(str(num)), run(fld="end"), run(". " + title)): p.append(r)
     if kind == "F":
         jc = OxmlElement("w:jc"); jc.set(qn("w:val"), "center"); oins(ppr, jc, PPR_ORDER)
@@ -207,14 +208,14 @@ def export(raw_path, t, out_path, log=print):
             if pred(els[i]): return i
         return None
     i_nas1 = idx(lambda e: e.tag == qn("w:p") and pstyle(e) == "NASLOV" and "TEKSTUALNA" in ptext(e).upper())
-    if i_nas1 is None: raise ValueError("Template nema naslov 'TEKSTUALNA DOKUMENTACIJA' (stil NASLOV) – ne mogu odrediti mjesto za tekst elaborata.")
+    if i_nas1 is None: raise ValueError(_T("Template nema naslov 'TEKSTUALNA DOKUMENTACIJA' (stil NASLOV) – ne mogu odrediti mjesto za tekst elaborata."))
     i_tr = i_nas1 + 1                      # PODNASLOV 1 – Tehnički izvještaj
     i_sec1 = idx(lambda e: e.tag == qn("w:p") and e.find(".//" + qn("w:sectPr")) is not None, i_tr)   # kraj tekstualnog dijela
     i_nas2 = idx(lambda e: e.tag == qn("w:p") and pstyle(e) == "NASLOV" and "NUMERI" in ptext(e).upper(), i_sec1)
     i_nas3 = idx(lambda e: e.tag == qn("w:p") and pstyle(e) == "NASLOV" and "GRAFI" in ptext(e).upper(), i_nas2 or i_sec1)
-    if None in (i_sec1, i_nas2, i_nas3): raise ValueError("Template nema očekivane dijelove (NUMERIČKA / GRAFIČKA DOKUMENTACIJA).")
-    proto_cap = next((e for e in els if e.tag == qn("w:p") and pstyle(e) == "Caption" and "Tabela/Table" in ptext(e)), None)
-    if proto_cap is None: raise ValueError("Template nema primjer naslova tabele (stil Caption).")
+    if None in (i_sec1, i_nas2, i_nas3): raise ValueError(_T('Template nema očekivane dijelove (NUMERIČKA / GRAFIČKA DOKUMENTACIJA).'))
+    proto_cap = next((e for e in els if e.tag == qn("w:p") and pstyle(e) == "Caption" and _T('Tabela/Table') in ptext(e)), None)
+    if proto_cap is None: raise ValueError(_T('Template nema primjer naslova tabele (stil Caption).'))
     fill_cover(body, t)
     # --- priprema sadržaja iz pandoc dokumenta
     listfmt = count_list_info(raw)
@@ -257,7 +258,7 @@ def export(raw_path, t, out_path, log=print):
         elif st in ("Heading3", "Heading4"):
             set_pstyle(e, "GLAVNITEKST"); set_rpr_all(e, bold=True, italic=True)
         else:
-            m1 = re.match(r"^Tabela (\d+) – (.+)$", txt); m2 = re.match(r"^Slika (\d+) – (.+)$", txt)
+            m1 = re.match(_T('^Tabela (\\d+) – (.+)$'), txt); m2 = re.match(_T('^Slika (\\d+) – (.+)$'), txt)
             if m1: capn["T"] += 1; return make_caption(proto_cap, "T", m1.group(2), capn["T"])
             if m2: capn["F"] += 1; return make_caption(proto_cap, "F", m2.group(2), capn["F"])
             has_img = e.find(".//" + qn("w:drawing")) is not None
@@ -293,7 +294,7 @@ def export(raw_path, t, out_path, log=print):
     gfirst = els[gi]
     for e in els[gi + 1:]:
         if e.tag != qn("w:sectPr"): body.remove(e)
-    retitle(gfirst, t.get("naslov_graficki", "Grafički prilozi – vozno-dinamičke analize / Graphical Appendices – Driving Dynamics Analysis"))
+    retitle(gfirst, t.get("naslov_graficki", _T('Grafički prilozi – vozno-dinamičke analize / Graphical Appendices – Driving Dynamics Analysis')))
     insert_after(gfirst, segs["B"])
     # numerički dio: PODNASLOV 1 odmah iza NASLOV (i_nas2+1); do sectPr paragrafa uklanjamo ostale podnaslove, a paragraf sa sectPr čistimo
     nfirst = els[i_nas2 + 1]
@@ -305,13 +306,13 @@ def export(raw_path, t, out_path, log=print):
             for n in ppr.findall(qn("w:numPr")): ppr.remove(n)
             sect_par = e
         else: body.remove(e)
-    retitle(nfirst, t.get("naslov_numericki", "Numerički proračun profila brzina / Numerical Calculation of Speed Profiles"))
+    retitle(nfirst, t.get("naslov_numericki", _T('Numerički proračun profila brzina / Numerical Calculation of Speed Profiles')))
     insert_after(nfirst, segs["A"])
     # tekstualni dio
     tfirst = els[i_tr]
     for e in els[i_tr + 1: i_sec1]:
         body.remove(e)
-    retitle(tfirst, t.get("naslov_izvjestaj", "Vozno-dinamičke analize (Elaborat 3) / Driving Dynamics Analyses (Elaborate 3)"))
+    retitle(tfirst, t.get("naslov_izvjestaj", _T('Vozno-dinamičke analize (Elaborat 3) / Driving Dynamics Analyses (Elaborate 3)')))
     insert_after(tfirst, segs["M"] + segs["C"])
     # zadnji tekstualni element ne smije završiti tabelom neposredno ispred sectPr paragrafa – dodaj prazan paragraf
     # ažuriranje polja pri otvaranju

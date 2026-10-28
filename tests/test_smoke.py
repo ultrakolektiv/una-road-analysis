@@ -49,3 +49,25 @@ def test_proracun_i_preglednost(tmp_path):
 def test_word_elaborat(tmp_path):
     outs, _ = pipeline.generate(_cfg(tmp_path), str(tmp_path), log=lambda s: None, word=True, excel=False, sight=False)
     assert any(o.endswith(".docx") for o in outs)
+
+
+def test_engleski_katalog_placeholderi():
+    """Svaki prevod mora zadržati iste {n} / <<x>> oznake kao izvorni tekst."""
+    import re
+    cat = json.load(open(os.path.join(ROOT, "una", "data", "en.json"), encoding="utf-8"))
+    sig = lambda s: (sorted(re.findall(r"\{\d*(?:![rsa])?(?::[^{}]*)?\}", s)), sorted(re.findall(r"<<\w+>>", s)))
+    lose = [k[:60] for k, v in cat.items() if sig(k) != sig(v) and "{pk}" not in k]
+    assert not lose, lose
+
+
+@pytest.mark.skipif(shutil.which("pandoc") is None, reason="pandoc nije instaliran")
+def test_engleski_elaborat(tmp_path):
+    from una import i18n
+    cfg = _cfg(tmp_path); cfg["jezik"] = "en"
+    try:
+        outs, _ = pipeline.generate(cfg, str(tmp_path), log=lambda s: None, word=True, excel=True, sight=False)
+    finally:
+        i18n.set_lang("sr")
+    names = [os.path.basename(o) for o in outs]
+    assert any(n.startswith("Study_3") and n.endswith(".docx") for n in names)
+    assert any(n.startswith("Calculation_") and n.endswith(".xlsx") for n in names)

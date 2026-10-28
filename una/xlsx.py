@@ -1,4 +1,5 @@
 """Excel radna knjiga sa formulama i dijagramima (za proizvoljan broj sekcija i osovina)."""
+from .i18n import _T, _TF, cell as _cell
 import math
 import numpy as np
 from openpyxl import Workbook
@@ -17,12 +18,12 @@ PAL = ["1F77B4", "D62728", "2CA02C", "FF7F0E", "9467BD", "8C564B", "E377C2", "7F
 
 def hdr(ws, row, vals, col=1):
     for i, v in enumerate(vals):
-        c = ws.cell(row, col + i, v); c.font = BOLD; c.fill = HFILL
+        c = ws.cell(row, col + i, _cell(v)); c.font = BOLD; c.fill = HFILL
         c.alignment = Alignment(wrap_text=True, horizontal="center", vertical="center"); c.border = BOX
 
 
 def put(ws, ref, v, font=BLK, fmt=None):
-    c = ws[ref]; c.value = v; c.font = font
+    c = ws[ref]; c.value = _cell(v); c.font = font
     if fmt: c.number_format = fmt
     return c
 
@@ -33,43 +34,43 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
     nveh = len(P.vozila)
     # ------------------------------------------------------------ Pretpostavke
     ws = wb.active; ws.title = "Pretpostavke"
-    lines = [f"VOZNO-DINAMIČKA ANALIZA – {P.projekat} – radna knjiga uz Elaborat 3",
-        "Sekcije: " + "; ".join(f"{s['no']}. {TIPOVI[s['tip']]}, st. {s['od']}–{s['do']}" for s in sections) + ". Preglednost (Elaborat 4) NIJE obuhvaćena.", "",
+    lines = [_TF('VOZNO-DINAMIČKA ANALIZA – {0} – radna knjiga uz Elaborat 3', P.projekat),
+        "Sekcije: " + "; ".join(f"{s['no']}. {_T(TIPOVI[s['tip']])}, st. {s['od']}–{s['do']}" for s in sections) + _T('. Preglednost (Elaborat 4) NIJE obuhvaćena.'), "",
         "KAKO SE KORISTI:",
-        " 1. Na listovima Ulaz_* zamijenite plave podatke ispisima projektanta: elementi horizontalne osovine (A–H), prelomne tačke nivelete (O–U), poprečni nagibi (AC i dalje). Dodajete li redove, UMETNITE ih unutar tablice (iznad zadnjeg reda).",
-        " 2. Na listovima Profil_* podesite početnu/krajnju stacionažu i korak (plava polja u redu 3).",
-        " 3. Sve ostalo se računa formulama: Vp–R, Vp–iN, profil brzine, teška vozila, vrijeme, gorivo, statistika, provjere nagiba i dijagrami (list Dijagrami).",
-        " 4. Skup susjednih elemenata (Provjere_*) i spisak lukova za provjeru su ulazni podaci (plavo).", "",
-        "BOJE: plavo = ulaz/pretpostavka; crno = formula; zeleno = veza na drugi list.",
-        "LANAC: brzina na granici sekcija prenosi se između listova (ulazna brzina, a usporenje 'gleda unaprijed' na početak sljedeće sekcije).", "",
-        "METODA: Prilog 2 pravilnika (Sl. glasnik RS 50/2011; naziv provjeriti) i Priručnik za projektovanje puteva u RS (4.0): Vp (=V85) je posljedica geometrije, Vri ≤ Vp ≤ maxVr; zakoni Vp–R i Vp–iN; a = d = 0,8 m/s².", "",
-        "PRETPOSTAVKE (provjeriti!): 1) Vp–R = interpolacija tablice Rmin(Vr) sastavljene na osnovu dijagrama (slika 3-07, Prilog 2 pravilnika); 2) Vp–iN = tablica sastavljena na osnovu dijagrama (slika 3-08, Prilog 2 pravilnika); 3) teška vozila: parametri pretpostavljeni (list Parametri); 4) mreža " + f"{P.korak:g} m, statistika ponderisana po dužini, vrijeme = ∫ds/v; 5) poprečni nagib luka = nagib odabrane trake (Ulaz_*), apsolutna vrijednost; 6) kriterij ΔV: ≤10 dobro, 10–20 zadovoljavajuće, >20 loše (Lamm); ocjena po ciljnim brzinama.",
-        "SCENARIJ: Parametri!B14 = 1 samo geometrija; 2 = dodatno ograničenje brzine iz tabele ograničenja (Parametri, red 59 i dalje)."]
+        _T(' 1. Na listovima Ulaz_* zamijenite plave podatke ispisima projektanta: elementi horizontalne osovine (A–H), prelomne tačke nivelete (O–U), poprečni nagibi (AC i dalje). Dodajete li redove, UMETNITE ih unutar tablice (iznad zadnjeg reda).'),
+        _T(' 2. Na listovima Profil_* podesite početnu/krajnju stacionažu i korak (plava polja u redu 3).'),
+        _T(' 3. Sve ostalo se računa formulama: Vp–R, Vp–iN, profil brzine, teška vozila, vrijeme, gorivo, statistika, provjere nagiba i dijagrami (list Dijagrami).'),
+        _T(' 4. Skup susjednih elemenata (Provjere_*) i spisak lukova za provjeru su ulazni podaci (plavo).'), "",
+        _T('BOJE: plavo = ulaz/pretpostavka; crno = formula; zeleno = veza na drugi list.'),
+        _T("LANAC: brzina na granici sekcija prenosi se između listova (ulazna brzina, a usporenje 'gleda unaprijed' na početak sljedeće sekcije)."), "",
+        _T('METODA: Prilog 2 pravilnika (Sl. glasnik RS 50/2011; naziv provjeriti) i Priručnik za projektovanje puteva u RS (4.0): Vp (=V85) je posljedica geometrije, Vri ≤ Vp ≤ maxVr; zakoni Vp–R i Vp–iN; a = d = 0,8 m/s².'), "",
+        _T('PRETPOSTAVKE (provjeriti!): 1) Vp–R = interpolacija tablice Rmin(Vr) sastavljene na osnovu dijagrama (slika 3-07, Prilog 2 pravilnika); 2) Vp–iN = tablica sastavljena na osnovu dijagrama (slika 3-08, Prilog 2 pravilnika); 3) teška vozila: parametri pretpostavljeni (list Parametri); 4) mreža ') + _TF('{0:g} m, statistika ponderisana po dužini, vrijeme = ∫ds/v; 5) poprečni nagib luka = nagib odabrane trake (Ulaz_*), apsolutna vrijednost; 6) kriterij ΔV: ≤10 dobro, 10–20 zadovoljavajuće, >20 loše (Lamm); ocjena po ciljnim brzinama.', P.korak),
+        _T('SCENARIJ: Parametri!B14 = 1 samo geometrija; 2 = dodatno ograničenje brzine iz tabele ograničenja (Parametri, red 59 i dalje).')]
     for i, l in enumerate(lines, 1):
         c = ws.cell(i, 1, l); c.font = BOLD if i in (1, 4) else BLK; c.alignment = Alignment(wrap_text=True, vertical="top")
     ws.column_dimensions["A"].width = 150
     # ------------------------------------------------------------ Oznake
-    o = wb.create_sheet("Oznake"); put(o, "A1", "OZNAKE I SIMBOLI (isto kao Tabela O1 u elaboratu)", BOLD)
-    hdr(o, 3, ["Oznaka", "Značenje", "Jedinica", "Izvor vrijednosti", "Gdje se koristi"])
+    o = wb.create_sheet("Oznake"); put(o, "A1", _T('OZNAKE I SIMBOLI (isto kao Tabela O1 u elaboratu)'), BOLD)
+    hdr(o, 3, ["Oznaka", _T('Značenje'), "Jedinica", "Izvor vrijednosti", "Gdje se koristi"])
     for i, r in enumerate(SYM):
         for j, v in enumerate(r): put(o, f"{CL(1 + j)}{4 + i}", v.replace("~", ""))
-    r0 = 6 + len(SYM); hdr(o, r0, ["Tabela", "Značenje kolona"])
+    r0 = 6 + len(SYM); hdr(o, r0, [_T('Tabela'), _T('Značenje kolona')])
     for i, r in enumerate(TABCOL): put(o, f"A{r0 + 1 + i}", r[0]); put(o, f"B{r0 + 1 + i}", r[1].replace("~", ""))
     for c, w in zip("ABCDE", (22, 70, 12, 34, 34)): o.column_dimensions[c].width = w
     # ------------------------------------------------------------ Parametri
     u = wb.create_sheet("Parametri"); put(u, "A1", "ULAZNI PARAMETRI I TABLICE", BOLD)
-    rows = [("Računska brzina Vr", P.Vr, "km/h", "Projektni zadatak"), ("Najveća projektna brzina maxVr", P.maxVr, "km/h", "Vr + dodatak (Prilog 2)"),
-            ("Ubrzanje a", P.a, "m/s²", "ekvivalent obrasca 0,1·Vsr·ΔV (slika 3-09), nominalno 0,8"), ("Usporenje d", P.d, "m/s²", "ekvivalent obrasca 0,1·Vsr·ΔV (slika 3-09), nominalno 0,8"), ("Zadani korak mreže", P.korak, "m", "koristi se u Profil_* (H3)"),
-            ("g", P.g, "m/s²", ""), ("Gustina zraka ρ", P.rho, "kg/m³", ""), ("Specifična potrošnja goriva b", P.b, "l/kWh", "pretpostavka"),
-            ("Potrošnja u praznom hodu", P.prazan_hod, "l/h", "pretpostavka"),
-            ("Ulazna brzina putničkog na ulazu u lanac", P.ulazna_brzina, "km/h", "slobodan tok"),
-            ("SCENARIJ: 1 = geometrija, 2 = sa ograničenjima (tabela dolje)", 1, "–", ""),
-            ("f_rl0 (otpor kotrljanja)", P.frl0, "–", "f_rl = f_rl0·(1+V/44,73)"), ("Brzinski parametar f_rl", P.frl_v, "m/s", "")]
+    rows = [(_T('Računska brzina Vr'), P.Vr, "km/h", _T('Projektni zadatak')), (_T('Najveća projektna brzina maxVr'), P.maxVr, "km/h", "Vr + dodatak (Prilog 2)"),
+            ("Ubrzanje a", P.a, "m/s²", _T('ekvivalent obrasca 0,1·Vsr·ΔV (slika 3-09), nominalno 0,8')), ("Usporenje d", P.d, "m/s²", _T('ekvivalent obrasca 0,1·Vsr·ΔV (slika 3-09), nominalno 0,8')), (_T('Zadani korak mreže'), P.korak, "m", "koristi se u Profil_* (H3)"),
+            ("g", P.g, "m/s²", ""), ("Gustina zraka ρ", P.rho, "kg/m³", ""), (_T('Specifična potrošnja goriva b'), P.b, "l/kWh", "pretpostavka"),
+            (_T('Potrošnja u praznom hodu'), P.prazan_hod, "l/h", "pretpostavka"),
+            (_T('Ulazna brzina putničkog na ulazu u lanac'), P.ulazna_brzina, "km/h", "slobodan tok"),
+            (_T('SCENARIJ: 1 = geometrija, 2 = sa ograničenjima (tabela dolje)'), 1, "–", ""),
+            ("f_rl0 (otpor kotrljanja)", P.frl0, "–", "f_rl = f_rl0·(1+V/44,73)"), (_T('Brzinski parametar f_rl'), P.frl_v, "m/s", "")]
     for i, (a, b, c, d) in enumerate(rows):
         r = 4 + i; put(u, f"A{r}", a); put(u, f"B{r}", b, BLUE); put(u, f"C{r}", c); put(u, f"D{r}", d)
     # adrese: B4 Vr,B5 maxVr,B6 a,B7 d,B8 step,B9 g,B10 rho,B11 b,B12 idle,B13 vin,B14 scen,B15 frl0,B16 frl_v
-    hdr(u, 20, ["Parametar vozila"] + [v["kratko"] for v in P.vozila])
-    vp = [("Masa m [kg]", "m"), ("Snaga motora P [kW]", "P"), ("CdA [m²]", "CdA"), ("Stepen iskorištenja η", "eta"), ("Ograničenje brzine v_lim [km/h]", "vlim"), ("Faktor rotirajućih masa γm", "gam"), ("Koef. prianjanja μ", "mu"), ("Specifična potrošnja goriva b [l/kWh]", "b"), ("Potrošnja u praznom hodu [l/h]", "prazan_hod")]
+    hdr(u, 20, [_T('Parametar vozila')] + [v["kratko"] for v in P.vozila])
+    vp = [("Masa m [kg]", "m"), ("Snaga motora P [kW]", "P"), ("CdA [m²]", "CdA"), (_T('Stepen iskorištenja η'), "eta"), (_T('Ograničenje brzine v_lim [km/h]'), "vlim"), (_T('Faktor rotirajućih masa γm'), "gam"), ("Koef. prianjanja μ", "mu"), (_T('Specifična potrošnja goriva b [l/kWh]'), "b"), (_T('Potrošnja u praznom hodu [l/h]'), "prazan_hod")]
     for i, (lab, k) in enumerate(vp):
         r = 21 + i; put(u, f"A{r}", lab)
         for q, v in enumerate(P.vozila): put(u, f"{CL(2 + q)}{r}", v[k], BLUE)
@@ -84,13 +85,13 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
     for i in range(nt):
         r = T1 + i; put(u, f"A{r}", P.Vr_tab[i], BLUE); put(u, f"B{r}", P.Rmin_tab[i], BLUE); put(u, f"C{r}", P.fT[i], BLUE); put(u, f"D{r}", P.fR[i], BLUE)
     T1e = T1 + nt - 1
-    put(u, f"E{T1 - 1}", "Tabela 1 (Prilog 2 pravilnika)")
+    put(u, f"E{T1 - 1}", _T('Tabela 1 (Prilog 2 pravilnika)'))
     T2 = T1e + 5; ni = len(P.iN_tab)
-    hdr(u, T2 - 1, ["Nagib iN [%]", "Vp(iN) [km/h]"])
+    hdr(u, T2 - 1, [_T('Nagib iN [%]'), "Vp(iN) [km/h]"])
     for i in range(ni): put(u, f"A{T2 + i}", P.iN_tab[i], BLUE); put(u, f"B{T2 + i}", P.ViN_tab[i], BLUE)
-    T2e = T2 + ni - 1; put(u, f"C{T2 - 1}", "Tabela 2: sastavljena na osnovu dijagrama (slika 3-08, Prilog 2 pravilnika)")
+    T2e = T2 + ni - 1; put(u, f"C{T2 - 1}", _T('Tabela 2: sastavljena na osnovu dijagrama (slika 3-08, Prilog 2 pravilnika)'))
     T3 = T2e + 5; NZ = 10
-    hdr(u, T3 - 1, ["Ograničenje od st. [m]", "do st. [m]", "brzina [km/h]"]); put(u, f"D{T3 - 1}", "Tabela ograničenja brzine (važi kad je B14 = 2), oba smjera")
+    hdr(u, T3 - 1, [_T('Ograničenje od st. [m]'), _T('do st. [m]'), _T('brzina [km/h]')]); put(u, f"D{T3 - 1}", _T('Tabela ograničenja brzine (važi kad je B14 = 2), oba smjera'))
     zones = []
     for c in cases:
         for z in c.caps:
@@ -111,9 +112,9 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
     for a in axes:
         i = axid[id(a)]; w = wb.create_sheet(f"Ulaz_{i}")
         put(w, "A1", f"ULAZNI PODACI GEOMETRIJE – {a.name} ({', '.join(f.replace(chr(92), '/').split('/')[-1] for f in a.files)})", BOLD)
-        put(w, "A2", "Radijus: + desna krivina, − lijeva, 0 = beskonačno. Plave kolone su ulazni podaci.", BLK)
-        put(w, "A3", "TABELA – ELEMENTI HORIZONTALNE OSOVINE", BOLD)
-        hdr(w, 4, ["Br.", "Tip", "St. početka [m]", "St. kraja [m]", "L [m]", "R početak [m]", "R kraj [m]", "A [m]", "Vp,R [km/h]", "Kontrola A²=R·L [m]", "Smjer", "k početak [1/km]", "k kraj [1/km]"]); w.row_dimensions[4].height = 42
+        put(w, "A2", _T('Radijus: + desna krivina, − lijeva, 0 = beskonačno. Plave kolone su ulazni podaci.'), BLK)
+        put(w, "A3", _T('TABELA – ELEMENTI HORIZONTALNE OSOVINE'), BOLD)
+        hdr(w, 4, ["Br.", "Tip", _T('St. početka [m]'), "St. kraja [m]", "L [m]", _T('R početak [m]'), "R kraj [m]", "A [m]", "Vp,R [km/h]", "Kontrola A²=R·L [m]", "Smjer", _T('k početak [1/km]'), "k kraj [1/km]"]); w.row_dimensions[4].height = 42
         e0 = 5; e1 = 4 + len(a.elems)
         for q, e in enumerate(a.elems):
             r = 5 + q
@@ -122,10 +123,10 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
             m = f"MATCH(ABS(F{r}),{Pm}$B${T1}:$B${T1e},1)"
             put(w, f"I{r}", (f'=IF(B{r}="KRUZNI_LUK",MIN({Pm}$B$5,IF(ABS(F{r})<={Pm}$B${T1},{Pm}$A${T1},IF(ABS(F{r})>={Pm}$B${T1e},{Pm}$A${T1e},'
                 f'INDEX({Pm}$A${T1}:$A${T1e},{m})+(ABS(F{r})-INDEX({Pm}$B${T1}:$B${T1e},{m}))*(INDEX({Pm}$A${T1}:$A${T1e},{m}+1)-INDEX({Pm}$A${T1}:$A${T1e},{m}))/(INDEX({Pm}$B${T1}:$B${T1e},{m}+1)-INDEX({Pm}$B${T1}:$B${T1e},{m}))))),{Pm}$B$5)'), BLK, "0.0")
-            put(w, f"J{r}", f'=IF(B{r}="PRIJELAZNICA",SQRT(MAX(ABS(F{r}),ABS(G{r}))*E{r}),"")', BLK, "0.000")
+            put(w, f"J{r}", _TF('=IF(B{0}="PRIJELAZNICA",SQRT(MAX(ABS(F{1}),ABS(G{2}))*E{3}),"")', r, r, r, r), BLK, "0.000")
             put(w, f"K{r}", f'=IF(B{r}="PRAVAC","",IF(IF(F{r}=0,G{r},F{r})>0,"desno","lijevo"))', BLK)
             put(w, f"L{r}", f"=IF(F{r}=0,0,1000/F{r})", BLK, "0.000"); put(w, f"M{r}", f"=IF(G{r}=0,0,1000/G{r})", BLK, "0.000")
-        put(w, "O3", "TABELA – PRELOMNE TAČKE NIVELETE", BOLD)
+        put(w, "O3", _T('TABELA – PRELOMNE TAČKE NIVELETE'), BOLD)
         hdr(w, 4, ["PT", "Stac. [m]", "Kota [m]", "Rv [m]", "i izl. [%]", "TZ [m]", "TK [m]", "Δi [%]", "Lvk [m]", "T [m]", "e [m]", "Tip", "i ul. [%]"], 15)
         p0 = 5; p1 = 4 + len(a.pis)
         for q, p in enumerate(a.pis):
@@ -134,9 +135,9 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
             put(w, f"T{r}", p[4], BLUE, "0.000"); put(w, f"U{r}", p[5], BLUE, "0.000")
             put(w, f"AA{r}", (f"=S{r - 1}" if q > 0 else f"=S{r}"), BLK, "0.000")
             put(w, f"V{r}", f"=ABS(S{r}-AA{r})", BLK, "0.000"); put(w, f"W{r}", f"=U{r}-T{r}", BLK, "0.0"); put(w, f"X{r}", f"=W{r}/2", BLK, "0.0")
-            put(w, f"Y{r}", f"=IF(R{r}>0,X{r}^2/(2*R{r}),0)", BLK, "0.00"); put(w, f"Z{r}", f'=IF(W{r}>0,IF(S{r}>AA{r},"udubljena","ispupčena"),"–")', BLK)
-        put(w, "AC3", f"POPREČNI NAGIBI (po trakama; za provjeru: lijeva {a.cs_heads[a.cs_left]}, desna {a.cs_heads[a.cs_right]})", BOLD)
-        hdr(w, 4, ["Stacionaža [m]"] + [h + " [%]" for h in a.cs_heads], 29)
+            put(w, f"Y{r}", f"=IF(R{r}>0,X{r}^2/(2*R{r}),0)", BLK, "0.00"); put(w, f"Z{r}", _TF('=IF(W{0}>0,IF(S{1}>AA{2},"udubljena","ispupčena"),"–")', r, r, r), BLK)
+        put(w, "AC3", _TF('POPREČNI NAGIBI (po trakama; za provjeru: lijeva {0}, desna {1})', a.cs_heads[a.cs_left], a.cs_heads[a.cs_right]), BOLD)
+        hdr(w, 4, [_T('Stacionaža [m]')] + [h + " [%]" for h in a.cs_heads], 29)
         for q in range(len(a.cs_s)):
             r = 5 + q; put(w, f"AC{r}", float(a.cs_s[q]), BLUE, "0.000")
             for j in range(a.cs_val.shape[1]): put(w, f"{CL(30 + j)}{r}", float(a.cs_val[q, j]), BLUE, "0.000")
@@ -162,19 +163,19 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
     for c in cases:
         U = ULAZ[id(c.axis)]; ug = U["sheet"]; N = c.N; sg = c.sg
         p = wb.create_sheet(f"Profil_{c.key}")
-        put(p, "A1", f"REZULTIRAJUĆI PROFIL PROJEKTNE BRZINE – PUTNIČKO VOZILO – {c.label}", BOLD)
-        put(p, "A2", f"Osovina: {c.axis.name}. Cilj T = min(Vp,R ; Vp,iN u smjeru vožnje ; ograničenje po scenariju). Prolaz 1: ubrzanje a; prolaz 2: usporenje d (v² = v₀² + 2·a·Δs). Kota i nagib iz prelomnih tačaka ({ug}).", BLK)
-        put(p, "A3", "Smjer (+1/−1)"); put(p, "B3", sg, BLUE, "0"); put(p, "C3", "SA [m]"); put(p, "D3", float(c.SA), BLUE, "0.000"); put(p, "E3", "SB [m]"); put(p, "F3", float(c.SB), BLUE, "0.000")
-        put(p, "G3", "Korak [m]"); put(p, "H3", f"={Pm}B8", GREEN, "0.0"); put(p, "I3", "Ulazna brzina [km/h]")
+        put(p, "A1", _TF('REZULTIRAJUĆI PROFIL PROJEKTNE BRZINE – PUTNIČKO VOZILO – {0}', c.label), BOLD)
+        put(p, "A2", _TF('Osovina: {0}. Cilj T = min(Vp,R ; Vp,iN u smjeru vožnje ; ograničenje po scenariju). Prolaz 1: ubrzanje a; prolaz 2: usporenje d (v² = v₀² + 2·a·Δs). Kota i nagib iz prelomnih tačaka ({1}).', c.axis.name, ug), BLK)
+        put(p, "A3", "Smjer (+1/−1)"); put(p, "B3", sg, BLUE, "0"); put(p, "C3", _T('SA [m]')); put(p, "D3", float(c.SA), BLUE, "0.000"); put(p, "E3", "SB [m]"); put(p, "F3", float(c.SB), BLUE, "0.000")
+        put(p, "G3", "Korak [m]"); put(p, "H3", f"={Pm}B8", GREEN, "0.0"); put(p, "I3", _T('Ulazna brzina [km/h]'))
         ch, q = chain_pos(c)
         if q == 0: put(p, "J3", f"={Pm}B13", GREEN, "0.000")
         else:
             pc = ch[q - 1]; put(p, "J3", f"=Profil_{pc.key}!J{trow(pc, 'last')}", GREEN, "0.000")
-        put(p, "K3", "Granični uslov na izlazu [km/h]")
+        put(p, "K3", _T('Granični uslov na izlazu [km/h]'))
         if q == len(ch) - 1: put(p, "L3", 999, BLUE, "0")
         else:
             nc = ch[q + 1]; put(p, "L3", f"=Profil_{nc.key}!K{trow(nc, 'first')}", GREEN, "0.000")
-        hdr(p, 5, ["Stac. s [m]", "Δs [m]", "Kota z [m]", "Nagib g [%]", "R [m] (0=∞)", "El. indeks", "Vp,R [km/h]", "Vp,iN u smjeru vožnje [km/h]", "Cilj T [km/h]", "Nakon ubrzanja [km/h]", "REZULTIRAJUĆA Vp [km/h]", "dt [s]", "Krivina 1000/R [1/km]", "Poprečni nagib lijeve strane [%]", "Vr [km/h]", "Idx PT", "Poprečni nagib desne strane [%]"]); p.row_dimensions[5].height = 48
+        hdr(p, 5, ["Stac. s [m]", "Δs [m]", "Kota z [m]", _T('Nagib g [%]'), "R [m] (0=∞)", "El. indeks", "Vp,R [km/h]", _T('Vp,iN u smjeru vožnje [km/h]'), "Cilj T [km/h]", "Nakon ubrzanja [km/h]", _T('REZULTIRAJUĆA Vp [km/h]'), "dt [s]", _T('Krivina 1000/R [1/km]'), _T('Poprečni nagib lijeve strane [%]'), "Vr [km/h]", "Idx PT", _T('Poprečni nagib desne strane [%]')]); p.row_dimensions[5].height = 48
         E = lambda col: f"{ug}!${col}${U['e0']}:${col}${U['e1']}"
         Pp = lambda col: f"{ug}!${col}${U['p0']}:${col}${U['p1']}"
         Cc = lambda col: f"{ug}!${col}${U['c0']}:${col}${U['c1']}"
@@ -218,14 +219,14 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
         N = c.N; sg = c.sg; ch, q = chain_pos(c)
         for k, veh in enumerate(P.vozila):
             sn = f"Voz{k + 1}_{c.key}"; t = wb.create_sheet(sn)
-            put(t, "A1", f"{veh['naziv'].upper()} – profil brzine, vrijeme i potrošnja goriva – {c.label}", BOLD)
-            put(t, "A2", "Fr = f_rl·m·g + ½ρ·CdA·v² + m·g·G; Ft = min(η·P/v ; μ·m·g) – za vozilo s krivom vuče (slika 3-10): Ft(v) interpolirano iz tabele na listu Parametri; v² = v₀² + 2·(Ft−Fr)/(γm·m)·Δs; gorivo = b·(Fu·v/η)·dt (Fu=Fr pri v_lim; Fu=Ft pri punom opterećenju; prazan hod pri Fr≤0).", BLK)
-            put(t, "A3", "Početna brzina [km/h]")
+            put(t, "A1", _TF('{0} – profil brzine, vrijeme i potrošnja goriva – {1}', veh['naziv'].upper(), c.label), BOLD)
+            put(t, "A2", _T('Fr = f_rl·m·g + ½ρ·CdA·v² + m·g·G; Ft = min(η·P/v ; μ·m·g) – za vozilo s krivom vuče (slika 3-10): Ft(v) interpolirano iz tabele na listu Parametri; v² = v₀² + 2·(Ft−Fr)/(γm·m)·Δs; gorivo = b·(Fu·v/η)·dt (Fu=Fr pri v_lim; Fu=Ft pri punom opterećenju; prazan hod pri Fr≤0).'), BLK)
+            put(t, "A3", _T('Početna brzina [km/h]'))
             if q == 0: put(t, "B3", f"={vrow(k, 4)}", GREEN, "0.000")
             else:
                 pc = ch[q - 1]; put(t, "B3", f"=Voz{k + 1}_{pc.key}!O{trow(pc, 'last')}", GREEN, "0.000")
             m, Pw, CdA, eta, vl, gam, mu = (vrow(k, j) for j in range(7))
-            hdr(t, 5, ["Stac. [m]", "Nagib [%]", "Δs koraka [m]"]); hdr(t, 5, ["v [m/s]", "G", "Fr [N]", "Ft [N]", "v sljedeće [m/s]", "Fu [N]", "v sr [m/s]", "dt [s]", "gorivo [l]", "Σt [s]", "Σgorivo [l]", "v [km/h]"], 4); t.row_dimensions[5].height = 40
+            hdr(t, 5, ["Stac. [m]", _T('Nagib [%]'), "Δs koraka [m]"]); hdr(t, 5, ["v [m/s]", "G", "Fr [N]", "Ft [N]", _T('v sljedeće [m/s]'), "Fu [N]", "v sr [m/s]", "dt [s]", "gorivo [l]", "Σt [s]", "Σgorivo [l]", "v [km/h]"], 4); t.row_dimensions[5].height = 40
             for i in range(N):
                 r = R0 + i
                 put(t, f"A{r}", f"=Profil_{c.key}!A{r}", GREEN, "0.000"); put(t, f"B{r}", f"=Profil_{c.key}!D{r}", GREEN, "0.000")
@@ -257,9 +258,9 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
     for c in cases:
         U = ULAZ[id(c.axis)]; ug = U["sheet"]; N = c.N; R1 = R0 + N - 1
         h = wb.create_sheet(f"Provjere_{c.key}")
-        put(h, "A1", f"USKLAĐENOST SUSJEDNIH ELEMENATA I PROVJERA POPREČNIH NAGIBA – {c.label}", BOLD)
-        put(h, "A2", "ΔVp između susjednih elemenata (krivine: najmanja brzina; pravci: najveća). Jedinice su ulazni podatak.", BLK)
-        hdr(h, 3, ["Br.", "Tip (P=pravac, K=krivina)", "St. početka [m]", "St. kraja [m]", "L [m]", "R kružnog luka [m]", "Smjer krivine", "Vp,i – cilj T [km/h]", "ΔVp,cilj [km/h]", "Ocjena (po ΔVp,cilj)", "Vp,i – rezultirajuća [km/h]", "ΔV rezultirajuća [km/h]"]); h.row_dimensions[3].height = 55
+        put(h, "A1", _TF('USKLAĐENOST SUSJEDNIH ELEMENATA I PROVJERA POPREČNIH NAGIBA – {0}', c.label), BOLD)
+        put(h, "A2", _T('ΔVp između susjednih elemenata (krivine: najmanja brzina; pravci: najveća). Jedinice su ulazni podatak.'), BLK)
+        hdr(h, 3, ["Br.", _T('Tip (P=pravac, K=krivina)'), _T('St. početka [m]'), "St. kraja [m]", "L [m]", _T('R kružnog luka [m]'), _T('Smjer krivine'), "Vp,i – cilj T [km/h]", "ΔVp,cilj [km/h]", _T('Ocjena (po ΔVp,cilj)'), _T('Vp,i – rezultirajuća [km/h]'), _T('ΔV rezultirajuća [km/h]')]); h.row_dimensions[3].height = 55
         rg = f"Profil_{c.key}!$K${R0}:$K${R1}"; tg = f"Profil_{c.key}!$I${R0}:$I${R1}"; ag = f"Profil_{c.key}!$A${R0}:$A${R1}"
         for i, un in enumerate(c.units):
             r = 4 + i; a_ = max(un["s0"], c.SA); b_ = min(un["s1"], c.SB)
@@ -268,11 +269,11 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
             for col, rng_ in (("H", tg), ("K", rg)):
                 put(h, f"{col}{r}", f'=IF(B{r}="K",_xlfn.MINIFS({rng_},{ag},">="&C{r},{ag},"<="&D{r}),_xlfn.MAXIFS({rng_},{ag},">="&C{r},{ag},"<="&D{r}))', GREEN, "0.0")
             if i < len(c.units) - 1:
-                put(h, f"I{r}", f"=ABS(H{r}-H{r + 1})", BLK, "0.0"); put(h, f"J{r}", f'=IF(I{r}<=10,"dobro",IF(I{r}<=20,"zadovoljavajuće","loše"))'); put(h, f"L{r}", f"=ABS(K{r}-K{r + 1})", BLK, "0.0")
+                put(h, f"I{r}", f"=ABS(H{r}-H{r + 1})", BLK, "0.0"); put(h, f"J{r}", _TF('=IF(I{0}<=10,"dobro",IF(I{1}<=20,"zadovoljavajuće","loše"))', r, r)); put(h, f"L{r}", f"=ABS(K{r}-K{r + 1})", BLK, "0.0")
         q0 = 4 + len(c.units) + 3
-        put(h, f"A{q0 - 2}", "PROVJERA POPREČNOG NAGIBA NA KRUŽNIM LUKOVIMA", BOLD)
-        put(h, f"A{q0 - 1}", "ipk(Vr) = 7·(R_min(Vr)/R)^0,74 [%], 2,5 ≤ ipk ≤ 7; ip,potr = V²/(127R) − fR(V); f_pot = V²/(127R) − ip/100 ≤ fR(V). V = najmanja rezultirajuća brzina na luku (dio unutar granica).", BLK)
-        hdr(h, q0, ["El. br.", "R [m]", "Smjer", "St. početka [m]", "St. kraja [m]", "Vp,R [km/h]", "V rezultirajuća (min) [km/h]", "ipk(Vr) [%]", "ipk zaokr. 0,1 [%]", "Primijenjeni ip [%]", "Uslov ip ≥ ipk(Vr)", "fR(V)", "ip,potr za V [%]", "f_pot pri ip primijenjenom", "Uslov f_pot ≤ fR", "R_min(Vr) [m]", "Uslov R ≥ R_min(Vr)"]); h.row_dimensions[q0].height = 55
+        put(h, f"A{q0 - 2}", _T('PROVJERA POPREČNOG NAGIBA NA KRUŽNIM LUKOVIMA'), BOLD)
+        put(h, f"A{q0 - 1}", _T('ipk(Vr) = 7·(R_min(Vr)/R)^0,74 [%], 2,5 ≤ ipk ≤ 7; ip,potr = V²/(127R) − fR(V); f_pot = V²/(127R) − ip/100 ≤ fR(V). V = najmanja rezultirajuća brzina na luku (dio unutar granica).'), BLK)
+        hdr(h, q0, ["El. br.", "R [m]", "Smjer", _T('St. početka [m]'), "St. kraja [m]", "Vp,R [km/h]", _T('V rezultirajuća (min) [km/h]'), "ipk(Vr) [%]", "ipk zaokr. 0,1 [%]", "Primijenjeni ip [%]", "Uslov ip ≥ ipk(Vr)", "fR(V)", _T('ip,potr za V [%]'), "f_pot pri ip primijenjenom", "Uslov f_pot ≤ fR", "R_min(Vr) [m]", "Uslov R ≥ R_min(Vr)"]); h.row_dimensions[q0].height = 55
         arcs = [e for e in c.axis.elems if e["typ"] == "KRUZNI_LUK" and min(e["s1"], c.SB) - max(e["s0"], c.SA) >= 20]
         for i, e in enumerate(arcs):
             r = q0 + 1 + i; a_ = max(e["s0"], c.SA); b_ = min(e["s1"], c.SB)
@@ -291,9 +292,9 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
             put(h, f"P{r}", f"=INDEX({Pm}$B${T1}:$B${T1e},MATCH({Pm}$B$4,{Pm}$A${T1}:$A${T1e},0))", GREEN, "0"); put(h, f"Q{r}", f'=IF(B{r}>=P{r},"da","NE – R < R_min(Vr)")')
         for cc in "ABCDEFGHIJKLMNOPQ": h.column_dimensions[cc].width = 15
     # ------------------------------------------------------------ Statistika
-    s = wb.create_sheet("Statistika"); put(s, "A1", "STATISTIKA REZULTIRAJUĆIH PROFILA BRZINE", BOLD)
-    hdr(s, 3, ["Dionica / vozilo", "Vp,sr [km/h]", "σ [km/h]", "Dh = σ/Vp,sr [%]", "V_min [km/h]", "V_max [km/h]", "Vrijeme [s]", "Vrijeme [min]", "Gorivo [l]", "Gorivo [l/km]", "L [m]", "∫V ds", "∫V² ds"]); s.row_dimensions[3].height = 40
-    vehlab = ["putničko"] + [v["kratko"].lower() for v in P.vozila]
+    s = wb.create_sheet("Statistika"); put(s, "A1", _T('STATISTIKA REZULTIRAJUĆIH PROFILA BRZINE'), BOLD)
+    hdr(s, 3, [_T('Dionica / vozilo'), "Vp,sr [km/h]", "σ [km/h]", "Dh = σ/Vp,sr [%]", "V_min [km/h]", "V_max [km/h]", "Vrijeme [s]", "Vrijeme [min]", "Gorivo [l]", "Gorivo [l/km]", "L [m]", "∫V ds", "∫V² ds"]); s.row_dimensions[3].height = 40
+    vehlab = [_T('putničko')] + [v["kratko"].lower() for v in P.vozila]
     SROW = {}
     def statrow(r, label, sheet, col, key, timecell, fuelcell=None):
         N = PROF[key]["N"]; R1 = R0 + N - 1
@@ -307,14 +308,14 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
     rr = 4
     for c in cases:
         N = PROF[c.key]["N"]; R1 = R0 + N - 1
-        statrow(rr, f"{c.label} – putničko", f"Profil_{c.key}", "K", c.key, f"=SUM(Profil_{c.key}!L{R0 + 1}:L{R1})"); SROW[(c.key, 0)] = rr; rr += 1
+        statrow(rr, _TF('{0} – putničko', c.label), f"Profil_{c.key}", "K", c.key, f"=SUM(Profil_{c.key}!L{R0 + 1}:L{R1})"); SROW[(c.key, 0)] = rr; rr += 1
         for k in range(nveh):
             t = TRS[(c.key, k)]
             statrow(rr, f"{c.label} – {vehlab[k + 1]}", t["sn"], "O", c.key, f"={t['sn']}!M{t['end']}", f"={t['sn']}!N{t['end']}"); SROW[(c.key, k + 1)] = rr; rr += 1
-    rr += 1; put(s, f"A{rr}", "UKUPNO PO SMJERU VOŽNJE (lanac sekcija)", BOLD); rr += 1
-    hdr(s, rr, ["Smjer / vozilo", "Vp,sr [km/h]", "σ [km/h]", "Dh [%]", "V_min [km/h]", "V_max [km/h]", "Vrijeme [s]", "Vrijeme [min]", "Gorivo [l]", "Gorivo [l/km]", "L [m]", "∫V ds", "∫V² ds"]); rr += 1
+    rr += 1; put(s, f"A{rr}", _T('UKUPNO PO SMJERU VOŽNJE (lanac sekcija)'), BOLD); rr += 1
+    hdr(s, rr, [_T('Smjer / vozilo'), "Vp,sr [km/h]", "σ [km/h]", "Dh [%]", "V_min [km/h]", "V_max [km/h]", "Vrijeme [s]", "Vrijeme [min]", "Gorivo [l]", "Gorivo [l/km]", "L [m]", "∫V ds", "∫V² ds"]); rr += 1
     RROW = {}
-    for tag, lab, chn in (("F", "Smjer stacionaže", fw), ("B", "Suprotno smjeru stacionaže", bw)):
+    for tag, lab, chn in (("F", _T('Smjer stacionaže'), fw), ("B", _T('Suprotno smjeru stacionaže'), bw)):
         if not chn: continue
         for v in range(nveh + 1):
             rws = [SROW[(c.key, v)] for c in chn]
@@ -327,11 +328,11 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
             RROW[(tag, v)] = rr; rr += 1
     for cc in "ABCDEFGHIJKLM": s.column_dimensions[cc].width = 16
     s.column_dimensions["A"].width = 70
-    put(s, f"A{rr + 1}", "σ = √(∫V²ds/L − Vp,sr²) (algebarski jednako ∫(V−Vp,sr)²ds/L za trapeznu integraciju). Vrijeme = Σ Δs/v.", BLK)
+    put(s, f"A{rr + 1}", _T('σ = √(∫V²ds/L − Vp,sr²) (algebarski jednako ∫(V−Vp,sr)²ds/L za trapeznu integraciju). Vrijeme = Σ Δs/v.'), BLK)
     # ------------------------------------------------------------ Rezime
-    z = wb.create_sheet("Rezime"); put(z, "A1", "REZIME REZULTATA (veze na list Statistika)", BOLD)
+    z = wb.create_sheet("Rezime"); put(z, "A1", _T('REZIME REZULTATA (veze na list Statistika)'), BOLD)
     colsz = [(c.shortname + f" [{c.SA:.0f}–{c.SB:.0f}]", c.key) for c in cases]
-    heads = ["Pokazatelj / vozilo"] + [x[0] for x in colsz] + (["Cijela trasa →"] if fw else []) + (["Cijela trasa ←"] if bw else [])
+    heads = [_T('Pokazatelj / vozilo')] + [x[0] for x in colsz] + ([_T('Cijela trasa →')] if fw else []) + ([_T('Cijela trasa ←')] if bw else [])
     hdr(z, 3, heads); z.row_dimensions[3].height = 40
     labs = [("Vp,sr [km/h]", "B", "0.0"), ("σ [km/h]", "C", "0.00"), ("Dh [%]", "D", "0.00"), ("V_min [km/h]", "E", "0.0"), ("V_max [km/h]", "F", "0.0"), ("Vrijeme [min]", "H", "0.00"), ("Gorivo [l]", "I", "0.00"), ("Gorivo [l/km]", "J", "0.000")]
     rz = 4
@@ -348,7 +349,7 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
     z.column_dimensions["A"].width = 26
     for cc in range(2, 2 + len(heads)): z.column_dimensions[CL(cc)].width = 18
     # ------------------------------------------------------------ Prilozi_A
-    pa = wb.create_sheet("Prilozi_A"); put(pa, "A1", "PRILOZI A – profili brzina na koraku od svaka 10 tačaka mreže (veze na Profil_* i Voz*_*)", BOLD)
+    pa = wb.create_sheet("Prilozi_A"); put(pa, "A1", _T('PRILOZI A – profili brzina na koraku od svaka 10 tačaka mreže (veze na Profil_* i Voz*_*)'), BOLD)
     rowp = 3
     for c in cases:
         N = c.N; put(pa, f"A{rowp}", c.label, BOLD); rowp += 1
@@ -362,7 +363,7 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
         rowp += 2
     for cc in range(1, 12): pa.column_dimensions[CL(cc)].width = 16
     # ------------------------------------------------------------ Plan_podaci
-    pl = wb.create_sheet("Plan_podaci"); put(pl, "A1", "SITUACIONI PLAN – koordinate osovina (Y, X) integrisane iz elemenata (vrijednosti, ≈10 m); služe za dijagram plana", BOLD)
+    pl = wb.create_sheet("Plan_podaci"); put(pl, "A1", _T('SITUACIONI PLAN – koordinate osovina (Y, X) integrisane iz elemenata (vrijednosti, ≈10 m); služe za dijagram plana'), BOLD)
     col = 1; PLAN = {}
     for a in axes:
         lo = min(c.SA for c in cases if c.axis is a); hi = max(c.SB for c in cases if c.axis is a)
@@ -373,7 +374,7 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
         PLAN[id(a)] = (col, 4, 3 + len(arr)); col += 4
     for cc in range(1, col): pl.column_dimensions[CL(cc)].width = 14
     # ------------------------------------------------------------ Dijagrami
-    dg = wb.create_sheet("Dijagrami"); put(dg, "A1", "DIJAGRAMI (isti kao slike u elaboratu) – ažuriraju se automatski", BOLD)
+    dg = wb.create_sheet("Dijagrami"); put(dg, "A1", _T('DIJAGRAMI (isti kao slike u elaboratu) – ažuriraju se automatski'), BOLD)
     def mkchart(title, xt, yt, ymin=None, ymax=None, w=24, h=11):
         ch = ScatterChart(); ch.title = title; ch.style = 13; ch.x_axis.title = xt; ch.y_axis.title = yt
         ch.x_axis.delete = False; ch.y_axis.delete = False; ch.width = w; ch.height = h
@@ -389,7 +390,7 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
         ch.series.append(se)
     pos = [3]
     def place(ch): dg.add_chart(ch, f"A{pos[0]}"); pos[0] += 24
-    ch = mkchart("Situacioni plan osovina", "Y [m]", "X [m]", w=24, h=14)
+    ch = mkchart(_T('Situacioni plan osovina'), "Y [m]", "X [m]", w=24, h=14)
     for i, a in enumerate(axes):
         c0, ra, rb = PLAN[id(a)]; x = Reference(pl, min_col=c0 + 1, min_row=ra, max_row=rb); y = Reference(pl, min_col=c0 + 2, min_row=ra, max_row=rb)
         se = Series(y, x, title=a.name); se.marker.symbol = "none"; se.graphicalProperties.line.solidFill = PAL[i % 10]; se.graphicalProperties.line.width = 19050; ch.series.append(se)
@@ -398,33 +399,33 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
     for c in cases:
         if (id(c.axis), c.SA) not in first_case: first_case[(id(c.axis), c.SA)] = c
     base = list(first_case.values())
-    for title, ycol, yt in (("Uzdužni profil nivelete", 3, "Kota [m n.m.]"), ("Podužni nagib nivelete", 4, "Nagib [%]"), ("Krivina 1000/R (+ desno, − lijevo)", 13, "1000/R [1/km]")):
-        ch = mkchart(title, "Stacionaža [m]", yt)
+    for title, ycol, yt in ((_T('Uzdužni profil nivelete'), 3, "Kota [m n.m.]"), (_T('Podužni nagib nivelete'), 4, _T('Nagib [%]')), (_T('Krivina 1000/R (+ desno, − lijevo)'), 13, "1000/R [1/km]")):
+        ch = mkchart(title, _T('Stacionaža [m]'), yt)
         for i, c in enumerate(base): addser(ch, f"Profil_{c.key}", 1, ycol, f"{c.axis.name} [{c.SA:.0f}–{c.SB:.0f}]", c.key, PAL[i % 10], width=1.3)
         place(ch)
-    ch = mkchart("Poprečni nagib kolovoza (lijeva i desna strana)", "Stacionaža [m]", "Nagib [%]")
+    ch = mkchart(_T('Poprečni nagib kolovoza (lijeva i desna strana)'), _T('Stacionaža [m]'), _T('Nagib [%]'))
     for i, c in enumerate(base):
         addser(ch, f"Profil_{c.key}", 1, 14, f"{c.axis.name} – lijeva", c.key, PAL[i % 10], width=1); addser(ch, f"Profil_{c.key}", 1, 17, f"{c.axis.name} – desna", c.key, PAL[i % 10], "dash", 1)
     place(ch)
-    for tag, chn, lab in (("F", fw, "smjer stacionaže"), ("B", bw, "suprotno smjeru stacionaže")):
+    for tag, chn, lab in (("F", fw, _T('smjer stacionaže')), ("B", bw, _T('suprotno smjeru stacionaže'))):
         if not chn: continue
-        ch = mkchart(f"Rezultirajući profil Vp – putničko vozilo – {lab}", "Stacionaža [m]", "Brzina [km/h]", ymin=40, ymax=P.maxVr + 5)
+        ch = mkchart(_TF('Rezultirajući profil Vp – putničko vozilo – {0}', lab), _T('Stacionaža [m]'), _T('Brzina [km/h]'), ymin=40, ymax=P.maxVr + 5)
         for i, c in enumerate(chn):
             addser(ch, f"Profil_{c.key}", 1, 9, f"Cilj T – {c.key}", c.key, "999999", "dash", 1); addser(ch, f"Profil_{c.key}", 1, 11, f"Vp – {c.shortname} [{c.SA:.0f}–{c.SB:.0f}]", c.key, PAL[i % 10], width=1.8)
         addser(ch, f"Profil_{chn[0].key}", 1, 15, f"Vr = {P.Vr:g} km/h", chn[0].key, "FF0000", "sysDot", 1); place(ch)
-        ch = mkchart(f"Brzine teških vozila – {lab}", "Stacionaža [m]", "Brzina [km/h]", ymin=30, ymax=P.maxVr + 5)
+        ch = mkchart(_TF('Brzine teških vozila – {0}', lab), _T('Stacionaža [m]'), _T('Brzina [km/h]'), ymin=30, ymax=P.maxVr + 5)
         for i, c in enumerate(chn):
-            addser(ch, f"Profil_{c.key}", 1, 11, f"Putničko – {c.key}", c.key, "999999", width=1)
+            addser(ch, f"Profil_{c.key}", 1, 11, _TF('Putničko – {0}', c.key), c.key, "999999", width=1)
             for k in range(nveh): addser(ch, TRS[(c.key, k)]["sn"], 1, 15, f"{P.vozila[k]['kratko']} – {c.key}", c.key, PAL[i % 10], "dash" if k else None, 1.8 - 0.3 * k)
         place(ch)
     for k in range(nveh):
-        for ycol, ttl, yt in ((13, "Kumulativno vrijeme putovanja", "Vrijeme [s]"), (14, "Kumulativna potrošnja goriva", "Gorivo [l]")):
-            ch = mkchart(f"{ttl} – {P.vozila[k]['kratko']} (po sekciji, od ulaza u sekciju)", "Stacionaža [m]", yt)
+        for ycol, ttl, yt in ((13, "Kumulativno vrijeme putovanja", "Vrijeme [s]"), (14, _T('Kumulativna potrošnja goriva'), "Gorivo [l]")):
+            ch = mkchart(_TF('{0} – {1} (po sekciji, od ulaza u sekciju)', ttl, P.vozila[k]['kratko']), _T('Stacionaža [m]'), yt)
             for i, c in enumerate(cases): addser(ch, TRS[(c.key, k)]["sn"], 1, ycol, c.key, c.key, PAL[i % 10])
             place(ch)
     for c in cases:
-        p = wb[f"Profil_{c.key}"]; ch = mkchart(f"Profil brzina – {c.label}", "Stacionaža [m]", "Brzina [km/h]", ymin=30, ymax=P.maxVr + 5, w=26, h=12)
-        addser(ch, f"Profil_{c.key}", 1, 11, "Putničko Vp", c.key, "000000", width=1.8)
+        p = wb[f"Profil_{c.key}"]; ch = mkchart(_TF('Profil brzina – {0}', c.label), _T('Stacionaža [m]'), _T('Brzina [km/h]'), ymin=30, ymax=P.maxVr + 5, w=26, h=12)
+        addser(ch, f"Profil_{c.key}", 1, 11, _T('Putničko Vp'), c.key, "000000", width=1.8)
         for k in range(nveh): addser(ch, TRS[(c.key, k)]["sn"], 1, 15, P.vozila[k]["kratko"], c.key, PAL[k % 10], "dash" if k else None)
         addser(ch, f"Profil_{c.key}", 1, 15, "Vr", c.key, "FF0000", "sysDot", 1); p.add_chart(ch, "S3")
     order = ["Pretpostavke", "Oznake", "Parametri", "Rezime", "Statistika", "Dijagrami"] + [f"Ulaz_{axid[id(a)]}" for a in axes]
@@ -432,6 +433,6 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
     order += ["Prilozi_A", "Plan_podaci"]
     wb._sheets = [wb[n] for n in order]
     wb.calculation.fullCalcOnLoad = True
-    if stamp: wb.properties.description = f"UNA licenca {stamp['id']}"; wb.properties.keywords = f"lic:{stamp['id']}"
-    wb.save(path); log(f"Excel sačuvan: {path} ({len(order)} listova)")
+    if stamp: wb.properties.description = _TF('UNA licenca {0}', stamp['id']); wb.properties.keywords = f"lic:{stamp['id']}"
+    wb.save(path); log(_TF('Excel sačuvan: {0} ({1} listova)', path, len(order)))
     return dict(SROW=SROW, RROW=RROW, TRS=TRS, PROF=PROF)

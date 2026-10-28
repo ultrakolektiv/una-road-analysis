@@ -1,4 +1,5 @@
 """Proračun profila brzine (V85) prema srpskim smjernicama + teška vozila."""
+from .i18n import _T, _TF, TrDict, tr_obj
 import math, copy
 import numpy as np
 from .parse import Axis
@@ -42,8 +43,8 @@ DEFAULTS = dict(
             dict(naziv="putničko vozilo (srednja klasa)", kratko="Putničko vozilo", m=1500, P=90, CdA=0.66, eta=0.90, vlim=None, gam=1.10, mu=0.6, b=0.28, prazan_hod=0.8)],
 )
 
-TIPOVI = {"razdvojene": "dvije odvojene osovine (desna i lijeva)", "centralna": "centralna osovina (oba smjera)",
-          "jedna_naprijed": "jedna osovina – smjer stacionaže", "jedna_nazad": "jedna osovina – suprotno smjeru stacionaže"}
+TIPOVI = TrDict({"razdvojene": "dvije odvojene osovine (desna i lijeva)", "centralna": "centralna osovina (oba smjera)",
+          "jedna_naprijed": "jedna osovina – smjer stacionaže", "jedna_nazad": "jedna osovina – suprotno smjeru stacionaže"})
 
 
 class Params:
@@ -57,7 +58,7 @@ class Params:
         for v in self.vozila:
             if v.get("Ft_kriva") and v.get("P") in (None, "", 0):
                 v["P"] = round(max(F * vk / 3.6 for vk, F in v["Ft_kriva"]) / (v["eta"] * 1000), 0)      # najveća snaga na krivoj (informativno)
-        self.vozila = [dict(v, vlim=(self.maxVr if v.get("vlim") in (None, "", 0) else v["vlim"]),
+        self.vozila = [dict(v, naziv=_T(v["naziv"]), kratko=_T(v["kratko"]), vlim=(self.maxVr if v.get("vlim") in (None, "", 0) else v["vlim"]),
                             b=(self.b if v.get("b") in (None, "") else v["b"]), prazan_hod=(self.prazan_hod if v.get("prazan_hod") in (None, "") else v["prazan_hod"])) for v in self.vozila]
         if self.ulazna_brzina is None: self.ulazna_brzina = self.maxVr
 
@@ -91,13 +92,13 @@ def build_cases(cfg, P, log=print):
         sec = dict(sec); sec["no"] = si; tip = sec["tip"]; sections.append(sec)
         sa, sb = float(sec["od"]), float(sec["do"])
         if tip == "razdvojene":
-            specs = [("D", +1, "desna", f"desna osovina (D{si})", "desni kolovoz"), ("L", -1, "lijeva", f"lijeva osovina (L{si})", "lijevi kolovoz")]
+            specs = [("D", +1, "desna", _TF('desna osovina (D{0})', si), _T('desni kolovoz')), ("L", -1, "lijeva", _TF('lijeva osovina (L{0})', si), _T('lijevi kolovoz'))]
         elif tip == "centralna":
-            specs = [("F", +1, "centralna", f"centralna osovina (sekcija {si})", "centralna →"), ("B", -1, "centralna", f"centralna osovina (sekcija {si})", "centralna ←")]
+            specs = [("F", +1, "centralna", _TF('centralna osovina (sekcija {0})', si), _T("centralna →")), ("B", -1, "centralna", _TF('centralna osovina (sekcija {0})', si), _T("centralna ←"))]
         elif tip == "jedna_naprijed":
-            specs = [("F", +1, "osovina", f"osovina (sekcija {si})", "osovina →")]
+            specs = [("F", +1, 'osovina', _TF('osovina (sekcija {0})', si), _T('osovina →'))]
         elif tip == "jedna_nazad":
-            specs = [("B", -1, "osovina", f"osovina (sekcija {si})", "osovina ←")]
+            specs = [("B", -1, 'osovina', _TF('osovina (sekcija {0})', si), _T('osovina ←'))]
         else:
             raise ValueError(f"Nepoznat tip sekcije: {tip}")
         for tag, sg, role, aname, short in specs:
@@ -106,8 +107,8 @@ def build_cases(cfg, P, log=print):
             c.short = f"{short} [{sa:.0f}–{sb:.0f}]"; c.shortname = short
             c.SA, c.SB = sa, sb
             c.caps = [(float(z["od"]), float(z["do"]), float(z["v"])) for z in sec.get("ogranicenja", [])]
-            c.label = f"{'Desni kolovoz' if tag=='D' and tip=='razdvojene' else 'Lijevi kolovoz' if tag=='L' and tip=='razdvojene' else 'Centralna osovina' if tip=='centralna' else 'Osovina'}, " \
-                      f"{'smjer stacionaže' if sg==1 else 'suprotno smjeru stacionaže'}, st. {sa:.0f} – {sb:.0f}" 
+            c.label = f"{_T('Desni kolovoz') if tag=='D' and tip=='razdvojene' else _T('Lijevi kolovoz') if tag=='L' and tip=='razdvojene' else _T('Centralna osovina') if tip=='centralna' else _T('Osovina')}, " \
+                      f"{_T('smjer stacionaže') if sg==1 else _T('suprotno smjeru stacionaže')}, st. {sa:.0f} – {sb:.0f}" 
             cases.append(c)
     return sections, cases, list(axes.values())
 
@@ -121,7 +122,7 @@ def grid(SA, SB, step):
 def prepare(c, P):
     ax = c.axis; S = grid(c.SA, c.SB, P.korak); c.S = S; c.N = len(S); c.DSA = np.diff(S)
     if S[0] < ax.s_min - 1e-6 or S[-1] > ax.s_max + 1e-6:
-        raise ValueError(f"Raspon {c.SA}–{c.SB} ({c.label}) izlazi iz osovine {ax.name} (st. {ax.s_min:.1f}–{ax.s_max:.1f})")
+        raise ValueError(_TF('Raspon {0}–{1} ({2}) izlazi iz osovine {3} (st. {4:.1f}–{5:.1f})', c.SA, c.SB, c.label, ax.name, ax.s_min, ax.s_max))
     c.IDX = np.array([ax.elem_index(s) for s in S])
     zg = [ax.vert(s) for s in S]; c.Z = np.array([a for a, b in zg]); c.G = np.array([b for a, b in zg])
     c.RR = np.array([abs(ax.elems[i]["R0"]) if ax.elems[i]["typ"] == "KRUZNI_LUK" else 0.0 for i in c.IDX])

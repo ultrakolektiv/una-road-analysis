@@ -1,6 +1,7 @@
 """Minimalni pisac DXF (R12, ASCII) bez vanjskih biblioteka – otvara se u AutoCAD-u, BricsCAD-u, DraftSight-u, LibreCAD-u…
 Kodna strana ANSI_1250 (č ć š ž đ). Jedinica crteža: metar."""
 import math
+from .i18n import cell as _cell
 
 LTYPES = {
     "CONTINUOUS": ("Solid line", []),
@@ -50,6 +51,7 @@ class Dxf:
         self.ents += self._head("CIRCLE", layer, color) + ["10", self._f(x), "20", self._f(y), "30", "0.0", "40", self._f(r)]
 
     def text(self, layer, x, y, h, txt, rot=0.0, align="l", color=None):
+        txt = _cell(txt)
         self.items.append(("T", layer, color, None, (x, y, h, txt, rot, align), None))
         """align: l (lijevo), c (sredina), r (desno) – vertikalno: osnovna linija."""
         self._e(x, y); self._e(x + h * len(txt) * 0.6 * math.cos(math.radians(rot)), y + h * len(txt) * 0.6 * math.sin(math.radians(rot)))

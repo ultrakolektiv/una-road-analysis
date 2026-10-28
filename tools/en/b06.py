@@ -54,7 +54,7 @@ T = {
 702: "Vehicle parameter",
 703: "R start [m]",
 704: "k start [1/km]",
-705: "=IF(B{0}=\"TRANSITION\",SQRT(MAX(ABS(F{1}),ABS(G{2}))*E{3}),\"\")",
+705: "=IF(B{0}=\"PRIJELAZNICA\",SQRT(MAX(ABS(F{1}),ABS(G{2}))*E{3}),\"\")",
 706: "=IF(W{0}>0,IF(S{1}>AA{2},\"sag\",\"crest\"),\"–\")",
 707: "Grade g [%]",
 708: "Vp,iN in the direction of travel [km/h]",

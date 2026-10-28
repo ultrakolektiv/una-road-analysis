@@ -22,6 +22,11 @@ for i, k in enumerate(keys):
     cat[k] = e
 for i, a, b in bad:
     print("MISMATCH", i, "\n  SR:", keys[i][:90].replace("\n", "⏎"), "\n  ", a, "\n  ", b)
+ex = {}
+for p2 in glob.glob(os.path.join(HERE, "en", "extra.py")):
+    spec = importlib.util.spec_from_file_location("x", p2); m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m); ex.update(m.X)
+for k, v in ex.items(): cat.setdefault(k, v)
+print("extra", len(ex))
 print("keys", len(keys), "translated", len(cat), "mismatches", len(bad))
 if "--write" in sys.argv:
     out = os.path.join(HERE, "..", "una", "data", "en.json")

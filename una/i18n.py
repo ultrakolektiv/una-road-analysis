@@ -43,5 +43,36 @@ def dec(sep_text):
     return sep_text if _LANG == "sr" else sep_text.replace(",", ".")
 
 
+def dec(s):
+    """Decimalni separator prema jeziku: zarez (sr) / tačka (en)."""
+    return s.replace(".", ",") if _LANG == "sr" else s
+
+
+def tr_obj(x):
+    """Rekurzivno prevodi tekstove u strukturi (list/tuple/dict-vrijednosti) – za modulske konstante."""
+    if isinstance(x, str): return _(x)
+    if isinstance(x, list): return [tr_obj(i) for i in x]
+    if isinstance(x, tuple): return tuple(tr_obj(i) for i in x)
+    if isinstance(x, dict): return {k: tr_obj(v) for k, v in x.items()}
+    return x
+
+
+class TrDict(dict):
+    """Rječnik čije se vrijednosti prevode pri čitanju (jezik se bira u trenutku upotrebe)."""
+    def __getitem__(self, k): return tr_obj(dict.__getitem__(self, k))
+    def get(self, k, d=None): return tr_obj(dict.get(self, k, d))
+    def values(self): return [tr_obj(v) for v in dict.values(self)]
+    def items(self): return [(k, tr_obj(v)) for k, v in dict.items(self)]
+
+
+def cell(v):
+    """Prevod vrijednosti ćelije/zaglavlja: tekst se traži u katalogu; u formulama se prevode navodnicima ograđeni literali."""
+    if _LANG == "sr" or not isinstance(v, str): return v
+    if v.startswith("="):
+        import re
+        return re.sub(r'"([^"]+)"', lambda m: '"' + _(m.group(1)) + '"' if m.group(1) in _catalog() else m.group(0), v)
+    return _(v)
+
+
 _T = _      # kratki nazivi za izvorni kod (izbjegavaju sudar sa promjenljivom '_')
 _TF = _f

@@ -1,5 +1,6 @@
 """DXF crteži preglednosti: osovina puta, ivice kolovoza (crvene, debljine 0,3 mm na papiru), osovine vozne trake (obje strane osovine),
 zrake, omotač / prepreke, stacionaže i legenda. Tri crteža: Vp, zahtijevana (L zadaje korisnik) i očekivana (prepreke po elementima trase)."""
+from .i18n import _T, _TF, TrDict, tr_obj
 import math, datetime, textwrap
 import numpy as np
 from .dxf import Dxf
@@ -7,9 +8,9 @@ from . import preglednost as pg
 
 # boje po tragu (smjer_strana): osovina trake, zrake, omotač
 PAL = {"F_D": (5, 3, 30), "F_L": (150, 4, 40), "B_D": (6, 82, 202), "B_L": (200, 74, 210)}
-TNAME = {"F": "smjer rastuće stacionaže", "B": "suprotno smjeru stacionaže", "D": "traka desno od osovine", "L": "traka lijevo od osovine"}
-TITLES = {"vp": "ZAHTIJEVANA PREGLEDNOST Pzp NA OSNOVU PROJEKTNE BRZINE Vp (V85) I NAGIBA", "zaht": "ZAHTIJEVANA PREGLEDNOST (zadana dužina zrake)", "ocek": "OČEKIVANA (RASPOLOŽIVA) PREGLEDNOST", "vr": "PREGLEDNOST ZA RAČUNSKU BRZINU Vr"}
-FILES = {"vp": "Preglednost_Vp", "zaht": "Preglednost_zahtijevana", "ocek": "Preglednost_ocekivana", "vr": "Preglednost_Vr"}
+TNAME = TrDict({"F": "smjer rastuće stacionaže", "B": "suprotno smjeru stacionaže", "D": "traka desno od osovine", "L": "traka lijevo od osovine"})
+TITLES = TrDict({"vp": "ZAHTIJEVANA PREGLEDNOST Pzp NA OSNOVU PROJEKTNE BRZINE Vp (V85) I NAGIBA", "zaht": "ZAHTIJEVANA PREGLEDNOST (zadana dužina zrake)", "ocek": "OČEKIVANA (RASPOLOŽIVA) PREGLEDNOST", "vr": "PREGLEDNOST ZA RAČUNSKU BRZINU Vr"})
+FILES = TrDict({"vp": "Preglednost_Vp", "zaht": "Preglednost_zahtijevana", "ocek": "Preglednost_ocekivana", "vr": "Preglednost_Vr"})
 
 
 def A_has_ob(R): return bool(R["A"]["has_ob"])
@@ -46,7 +47,7 @@ def _runs(xs, ys):
 def draw(P, cases, par, res, cfg, path, mode="vp", log=print, preview_png=None, title=None):
     u = par["mjerilo"] / 1000.0            # metara na crtežu po 1 mm papira
     d = Dxf(ltscale=u * 1.0)
-    base = [("OSOVINA_PUTA", 8, "CONTINUOUS"), ("IVICA_KOLOVOZA", 1, "CONTINUOUS"), ("STACIONAZA", 7, "CONTINUOUS"), ("TEKST_ZRAKA", 8, "CONTINUOUS"),
+    base = [(_T('OSOVINA_PUTA'), 8, "CONTINUOUS"), ("IVICA_KOLOVOZA", 1, "CONTINUOUS"), ("STACIONAZA", 7, "CONTINUOUS"), ("TEKST_ZRAKA", 8, "CONTINUOUS"),
             ("LEGENDA", 7, "CONTINUOUS"), ("OKVIR_LEGENDE", 7, "CONTINUOUS")]
     with_ob = par["ima_prepreke"]
     if with_ob or mode == "ocek": base += [("PREPREKA_DESNO", 52, "CONTINUOUS"), ("PREPREKA_LIJEVO", 53, "CONTINUOUS")]
@@ -55,7 +56,7 @@ def draw(P, cases, par, res, cfg, path, mode="vp", log=print, preview_png=None, 
     LAY = list(base)
     for k in res:
         t, r, e = PAL[k]
-        LAY += [(f"OSOVINA_TRAKE_{k}", t, "CONTINUOUS"), (f"ZRAKE_{k}", r, "CONTINUOUS")]
+        LAY += [(_TF('OSOVINA_TRAKE_{0}', k), t, "CONTINUOUS"), (f"ZRAKE_{k}", r, "CONTINUOUS")]
         if mode != "ocek": LAY.append((f"OMOTAC_{k}", e, "DASHED"))
     for n, c, lt in LAY: d.layer(n, c, lt)
     H = 2.5 * u
@@ -65,7 +66,7 @@ def draw(P, cases, par, res, cfg, path, mode="vp", log=print, preview_png=None, 
         key = (id(c.axis), c.SA, c.SB)
         if key not in seen:
             seen.add(key); S, Y, X, NU = pg.dense_plan(c.axis); m = (S >= c.SA - 1e-6) & (S <= c.SB + 1e-6)
-            pts = list(zip(Y[m], X[m])); d.poly("OSOVINA_PUTA", pts[::2] if len(pts) > 4000 else pts)
+            pts = list(zip(Y[m], X[m])); d.poly(_T('OSOVINA_PUTA'), pts[::2] if len(pts) > 4000 else pts)
             for s0 in np.arange(math.ceil(c.SA / 100) * 100, c.SB + 1e-6, 100):
                 i = int(np.argmin(abs(S - s0))); x, y, nu = Y[i], X[i], NU[i]
                 tx, ty = math.sin(nu), math.cos(nu); nx, ny = -ty, tx
@@ -95,7 +96,7 @@ def draw(P, cases, par, res, cfg, path, mode="vp", log=print, preview_png=None, 
     # --- tragovi
     for ti, R in enumerate(res.values()):
         A = R["A"]; ch = R["chain"]; k = R["key"]
-        for ci, pts in case_polys(ch, A): d.poly(f"OSOVINA_TRAKE_{k}", pts)
+        for ci, pts in case_polys(ch, A): d.poly(_TF('OSOVINA_TRAKE_{0}', k), pts)
         nxt = 0.0; lab_next = 60.0 * ti; x, y, xa, ya = A["x"], A["y"], A["xa"], A["ya"]
         lay_bad = "ZRAKE_NEDOVOLJNO" if mode == "ocek" else "ZRAKE_VERT_NEDOVOLJNO"
         for ri, r in enumerate(R["rows"]):
@@ -120,7 +121,7 @@ def draw(P, cases, par, res, cfg, path, mode="vp", log=print, preview_png=None, 
                 if mode == "vp": tx_ = f"Lz={r['Lz']:.0f} m (Vp={r['V']:.0f}, i={r['g']:+.1f}%)"
                 elif mode == "vr": tx_ = f"Pz={r['Lz']:.0f} m (Vr={par['Vr']:g}, i={r['g']:+.1f}%)"
                 elif mode == "zaht": tx_ = f"Pzp={r['Lz']:.0f} m" + ("" if par["L_zahtijevano"] else f" (Vp={r['V']:.0f})")
-                else: tx_ = f"raspoloživo {r['D']:.0f} m (potrebno {r['Lz']:.0f} m)"
+                else: tx_ = _TF('raspoloživo {0:.0f} m (potrebno {1:.0f} m)', r['D'], r['Lz'])
                 d.text("TEKST_ZRAKA", mx, my, 0.8 * H, tx_, rot=ang, align="c")
         if mode == "ocek":
             for b_ in R["deficits"][:60]:                      # oznaka na mjestu najmanje preglednosti u rasponu
@@ -158,48 +159,48 @@ def draw(P, cases, par, res, cfg, path, mode="vp", log=print, preview_png=None, 
         for q, w_ in enumerate(textwrap.wrap(t, max(20, int((W - (ind + 6) * u) / (0.75 * h))))): items.append(("t", w_, ind if q == 0 else ind + 3, h, gap))
     ttl = (title or TITLES[mode]) + ((f" – L = {par['L_zahtijevano']:.0f} m" if par["L_zahtijevano"] else " – Pzp") if mode == "zaht" else "")
     items.append(("t", "LEGENDA – " + ttl, 4, 3.5 * u, 8))
-    T_(f"Dionica: {proj}   |   Računska brzina Vr = {P.Vr:g} km/h; Vp = V85 iz Elaborata 3 (a = d = {P.a:g} m/s²)", gap=7)
+    T_(_TF('Dionica: {0}   |   Računska brzina Vr = {1:g} km/h; Vp = V85 iz Elaborata 3 (a = d = {2:g} m/s²)', proj, P.Vr, P.a), gap=7)
     items.append(("sep",))
-    ent = [("OSOVINA_PUTA", "Osovina puta (stacionaže svakih 100 m, oznaka na 500 m)")]
-    if par["ivice"]: ent.append(("IVICA_KOLOVOZA", f"Ivica kolovoza (crvena linija debljine {par['ivica_debljina']:g} mm na papiru; širine traka zadaje korisnik)"))
+    ent = [(_T('OSOVINA_PUTA'), _T('Osovina puta (stacionaže svakih 100 m, oznaka na 500 m)'))]
+    if par["ivice"]: ent.append(("IVICA_KOLOVOZA", _TF('Ivica kolovoza (crvena linija debljine {0:g} mm na papiru; širine traka zadaje korisnik)', par['ivica_debljina'])))
     for k in res:
-        ent.append((f"OSOVINA_TRAKE_{k}", f"Osovina oka vozača – {tname(k)}"))
+        ent.append((_TF('OSOVINA_TRAKE_{0}', k), _TF('Osovina oka vozača – {0}', tname(k))))
         ent.append((f"ZRAKE_{k}", f"Zrake – {tname(k)} (svakih {par['korak_crtez']:.0f} m)"))
         if mode != "ocek": ent.append((f"OMOTAC_{k}", f"Granica slobodnog prostora – {tname(k)}"))
-    if with_ob and mode != "ocek": ent += [("PREPREKA_DESNO", "Prepreka desno od osovine puta (ofset od ivice kolovoza)"), ("PREPREKA_LIJEVO", "Prepreka lijevo od osovine puta (ofset od ivice kolovoza)")]
+    if with_ob and mode != "ocek": ent += [("PREPREKA_DESNO", _T('Prepreka desno od osovine puta (ofset od ivice kolovoza)')), ("PREPREKA_LIJEVO", _T('Prepreka lijevo od osovine puta (ofset od ivice kolovoza)'))]
     if mode == "ocek":
-        ent += [("DODIR_PREPREKA", "Dodirna tačka zrake i linije prepreke (zraka je tu najduža moguća)"), ("PREPREKA_DESNO", "Prepreka desno od osovine puta (ofset od ivice kolovoza)"), ("PREPREKA_LIJEVO", "Prepreka lijevo od osovine puta (ofset od ivice kolovoza)"),
-                ("ZRAKE_NEDOVOLJNO", "Zraka sa raspoloživom preglednošću manjom od potrebne (prepreka ili niveleta)")]
+        ent += [("DODIR_PREPREKA", _T('Dodirna tačka zrake i linije prepreke (zraka je tu najduža moguća)')), ("PREPREKA_DESNO", _T('Prepreka desno od osovine puta (ofset od ivice kolovoza)')), ("PREPREKA_LIJEVO", _T('Prepreka lijevo od osovine puta (ofset od ivice kolovoza)')),
+                ("ZRAKE_NEDOVOLJNO", _T('Zraka sa raspoloživom preglednošću manjom od potrebne (prepreka ili niveleta)'))]
     else:
-        ent.append(("ZRAKE_VERT_NEDOVOLJNO", "Zraka sa nedovoljnom VERTIKALNOM preglednošću (zaklon nivelete)"))
-        if with_ob: ent.append(("ZRAKE_HOR_NEDOVOLJNO", "Zraka sa nedovoljnom HORIZONTALNOM preglednošću (prepreka uz kolovoz)"))
+        ent.append(("ZRAKE_VERT_NEDOVOLJNO", _T('Zraka sa nedovoljnom VERTIKALNOM preglednošću (zaklon nivelete)')))
+        if with_ob: ent.append(("ZRAKE_HOR_NEDOVOLJNO", _T('Zraka sa nedovoljnom HORIZONTALNOM preglednošću (prepreka uz kolovoz)')))
     for lay, txt in ent: items.append(("e", lay, txt))
     items.append(("sep",))
     if mode in ("vp", "vr"):
-        T_((f"Pz = skraćena zaustavna preglednost (Crtež 52, fT50 %) za računsku brzinu Vr = {par['Vr']:g} km/h (projektni zadatak) i podužni nagib u smjeru vožnje.") if mode == "vr" else "Lz = skraćena zaustavna preglednost (Smjernice BiH, Crtež 52, fT50 %) u funkciji Vp (V85) i podužnog nagiba u smjeru vožnje; vrijednosti očitane iz dijagrama." + (f" Na očitanu vrijednost dodato je {par['dodatak_L']:g} m (dodatak zadao projektant)." if par["dodatak_L"] else ""))
+        T_((_TF('Pz = skraćena zaustavna preglednost (Crtež 52, fT50 %) za računsku brzinu Vr = {0:g} km/h (projektni zadatak) i podužni nagib u smjeru vožnje.', par['Vr'])) if mode == "vr" else _T('Lz = skraćena zaustavna preglednost (Smjernice BiH, Crtež 52, fT50 %) u funkciji Vp (V85) i podužnog nagiba u smjeru vožnje; vrijednosti očitane iz dijagrama.') + (_TF(' Na očitanu vrijednost dodato je {0:g} m (dodatak zadao projektant).', par['dodatak_L']) if par["dodatak_L"] else ""))
     elif mode == "zaht":
-        if par["L_zahtijevano"]: T_(f"Zahtijevana dužina zrake L = {par['L_zahtijevano']:.0f} m zadana je od strane projektanta (ne zavisi od Vp ni od nagiba).")
-        else: T_("Zahtijevana preglednost Pzp = Lz(Vp) očitana iz Crteža 52 (fT50 %) za projektnu brzinu Vp iz Elaborata 3 u tom presjeku i stvarni podužni nagib niveleta" + (f"; dodato {par['dodatak_L']:g} m." if par["dodatak_L"] else "."))
+        if par["L_zahtijevano"]: T_(_TF('Zahtijevana dužina zrake L = {0:.0f} m zadana je od strane projektanta (ne zavisi od Vp ni od nagiba).', par['L_zahtijevano']))
+        else: T_(_T('Zahtijevana preglednost Pzp = Lz(Vp) očitana iz Crteža 52 (fT50 %) za projektnu brzinu Vp iz Elaborata 3 u tom presjeku i stvarni podužni nagib niveleta') + (f"; dodato {par['dodatak_L']:g} m." if par["dodatak_L"] else "."))
     else:
-        Lt = f"zadana dužina L = {par['L_zahtijevano']:.0f} m" if par["L_zahtijevano"] else "Pzp = Lz(Vp, nagib) (Crtež 52, fT50 %)"
-        T_(f"Očekivana preglednost = najduža zraka od oka vozača koju dopuštaju prepreka (linija na unesenom ofsetu od krajnje ivice kolovoza, po elementima trase: pravac, prijelaznica, kružni luk) i niveleta. Poređenje sa potrebnom dužinom: {Lt}.")
-    T_(f"Zraka = tetiva od oka vozača (osovina vozne trake) do tačke ispred, mjereno duž osovine vozne trake. Oko {par['h_oka']:.2f} m i predmet {('h2 = 0–0,15 m po Tabeli 29 (zavisi od Vp)' if par.get('h_auto') else format(par['h_prepreke'], '.2f') + ' m')} iznad nivelete (vertikalna provjera).")
-    if mode != "ocek": T_("Prostor između osovine trake i granice (isprekidano) mora ostati slobodan od prepreka (usjek, ograda, zelenilo, objekti). m = potreban slobodni prostor od osovine vozne trake; oznake = lokalni maksimumi ≥ 1,0 m.")
-    T_("Poprečni profil (u smjeru stacionaže: širine traka od osovine puta) i ofset osovine oka vozača od osovine kolovoza svog smjera (u smjeru vožnje):")
+        Lt = _TF('zadana dužina L = {0:.0f} m', par['L_zahtijevano']) if par["L_zahtijevano"] else _T('Pzp = Lz(Vp, nagib) (Crtež 52, fT50 %)')
+        T_(_TF('Očekivana preglednost = najduža zraka od oka vozača koju dopuštaju prepreka (linija na unesenom ofsetu od krajnje ivice kolovoza, po elementima trase: pravac, prijelaznica, kružni luk) i niveleta. Poređenje sa potrebnom dužinom: {0}.', Lt))
+    T_(_TF('Zraka = tetiva od oka vozača (osovina vozne trake) do tačke ispred, mjereno duž osovine vozne trake. Oko {0:.2f} m i predmet {1} iznad nivelete (vertikalna provjera).', par['h_oka'], _T('h2 = 0–0,15 m po Tabeli 29 (zavisi od Vp)') if par.get('h_auto') else format(par['h_prepreke'], '.2f') + ' m'))
+    if mode != "ocek": T_(_T('Prostor između osovine trake i granice (isprekidano) mora ostati slobodan od prepreka (usjek, ograda, zelenilo, objekti). m = potreban slobodni prostor od osovine vozne trake; oznake = lokalni maksimumi ≥ 1,0 m.'))
+    T_(_T('Poprečni profil (u smjeru stacionaže: širine traka od osovine puta) i ofset osovine oka vozača od osovine kolovoza svog smjera (u smjeru vožnje):'))
     for c in cases:
         pr = pg.case_prof(c, par)
-        T_(f"{c.key}  {c.short}: trake desno {', '.join(f'{v:g}' for v in pr['tR'])} m (ivica {pr['eR']:.2f} m), lijevo {', '.join(f'{v:g}' for v in pr['tL'])} m (ivica {pr['eL']:.2f} m); osovina kolovoza {pr['hC']:.2f} m od osovine puta; ofset oka desno {pr['dDR']:.2f} m, lijevo {pr['dDL']:.2f} m" + (f"; razdjelni pojas: pola {pr['gR']:.2f} / {pr['gL']:.2f} m" if pr['gR'] or pr['gL'] else ""), ind=8, h=0.9 * H, gap=6)
+        T_(_TF('{0}  {1}: trake desno {2} m (ivica {3:.2f} m), lijevo {4} m (ivica {5:.2f} m); osovina kolovoza {6:.2f} m od osovine puta; ofset oka desno {7:.2f} m, lijevo {8:.2f} m', c.key, c.short, ', '.join(f'{v:g}' for v in pr['tR']), pr['eR'], ', '.join(f'{v:g}' for v in pr['tL']), pr['eL'], pr['hC'], pr['dDR'], pr['dDL']) + (f"; razdjelni pojas: pola {pr['gR']:.2f} / {pr['gL']:.2f} m" if pr['gR'] or pr['gL'] else ""), ind=8, h=0.9 * H, gap=6)
     for R in res.values():
         rr = R["rows"]; nb = len(R["deficits"]); lab = tname(R["key"])
         if mode == "ocek":
-            T_(f"{lab}: raspoloživo {pg.dminmax(rr)} (horizontalno nedovoljno na {len(R['defH'])}, vertikalno na {len(R['defV'])} mjesta). " + ("Zadovoljava na cijeloj dužini." if nb == 0 else "NEDOVOLJNO na: " + "; ".join(
+            T_(_TF('{0}: raspoloživo {1} (horizontalno nedovoljno na {2}, vertikalno na {3} mjesta). ', lab, pg.dminmax(rr), len(R['defH']), len(R['defV'])) + (_T('Zadovoljava na cijeloj dužini.') if nb == 0 else _T('NEDOVOLJNO na: ') + "; ".join(
                 f"km {kmfmt(min(b['s0'], b['s1']))}–{kmfmt(max(b['s0'], b['s1']))} (min {b['dmin']:.0f} m < {b['need']:.0f} m)" for b in R["deficits"][:8])), ind=8)
         else:
-            T_(f"{lab}: Lz {min(r['Lz'] for r in rr):.0f}–{max(r['Lz'] for r in rr):.0f} m; max m desno {R['mR'].max():.2f} m, lijevo {R['mL'].max():.2f} m. Vertikalno: " + ("zadovoljava." if not R["defV"] else "NEDOVOLJNO na: " + "; ".join(
-                f"km {kmfmt(min(b['s0'], b['s1']))}–{kmfmt(max(b['s0'], b['s1']))} (min {b['dmin']:.0f} m < {b['need']:.0f} m)" for b in R["defV"][:8])) + (" Horizontalno (prepreke): " + ("zadovoljava." if not R["defH"] else "NEDOVOLJNO na: " + "; ".join(
+            T_(f"{lab}: Lz {min(r['Lz'] for r in rr):.0f}–{max(r['Lz'] for r in rr):.0f} m; max m desno {R['mR'].max():.2f} m, lijevo {R['mL'].max():.2f} m. Vertikalno: " + ("zadovoljava." if not R["defV"] else _T('NEDOVOLJNO na: ') + "; ".join(
+                f"km {kmfmt(min(b['s0'], b['s1']))}–{kmfmt(max(b['s0'], b['s1']))} (min {b['dmin']:.0f} m < {b['need']:.0f} m)" for b in R["defV"][:8])) + (" Horizontalno (prepreke): " + ("zadovoljava." if not R["defH"] else _T('NEDOVOLJNO na: ') + "; ".join(
                 f"km {kmfmt(min(b['s0'], b['s1']))}–{kmfmt(max(b['s0'], b['s1']))} (min {b['dmin']:.0f} m < {b['need']:.0f} m)" for b in R["defH"][:8])) if A_has_ob(R) else ""), ind=8)
     items.append(("sep",))
-    T_(f"Mjerilo crteža {('1:%d' % par['mjerilo'])} (jedinica: m)  |  Koordinate: Y (istok), X (sjever) iz ispisa projektanta  |  Izrada: UNA - ROAD ENGINEERING ANALYSIS  |  {datetime.date.today().strftime('%d.%m.%Y')}", h=0.9 * H, gap=6)
+    T_(_TF('Mjerilo crteža {0} (jedinica: m)  |  Koordinate: Y (istok), X (sjever) iz ispisa projektanta  |  Izrada: UNA - ROAD ENGINEERING ANALYSIS  |  {1}', '1:%d' % par['mjerilo'], datetime.date.today().strftime('%d.%m.%Y')), h=0.9 * H, gap=6)
     hh = 4 * u
     for it in items: hh += {"t": it[4] * u if it[0] == "t" else 0, "sep": 3 * u, "e": 7 * u}[it[0]]
     bx0 = x0; by1 = y0 - 40 * u; by0 = by1 - hh

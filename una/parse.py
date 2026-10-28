@@ -1,4 +1,5 @@
 """Čitanje ispisa projektanta: horizontalna osovina, uzdužni profil, poprečni nagibi."""
+from .i18n import _T, _TF
 import re, math
 import numpy as np
 
@@ -47,7 +48,7 @@ class Axis:
                                   R0=rd(k[4]), R1=rd(R1), Y0=float(k[5]), X0=float(k[6]), nu0=_ang(k[7]),
                                   dnu=(_ang(t[i + 1]) or 0.0) if k[1] != "PRAVAC" else 0.0))
         if not elems:
-            raise ValueError(f"{path}: nije pronađen nijedan element (PRAVAC / KRUZNI_LUK / PRIJELAZNICA)")
+            raise ValueError(_TF('{0}: nije pronađen nijedan element (PRAVAC / KRUZNI_LUK / PRIJELAZNICA)', path))
         self.elems = elems
         Y, X = elems[0]["Y0"], elems[0]["X0"]; nu = math.radians(elems[0]["nu0"])
         plan = [(elems[0]["s0"], Y, X)]
@@ -85,7 +86,7 @@ class Axis:
                 try: pis.append([float(x) for x in p])
                 except ValueError: pass
         if not pis:
-            raise ValueError(f"{path}: nije pronađena tabela prelomnih tačaka nivelete")
+            raise ValueError(_TF('{0}: nije pronađena tabela prelomnih tačaka nivelete', path))
         pis[0][5] = pis[0][4]; pis[-1][5] = pis[-1][4]
         self.pis = pis
         # kontrolne kote iz ispisa poprečnih profila (ako postoje)
@@ -127,7 +128,7 @@ class Axis:
                 try: rows.append([float(x) for x in p])
                 except ValueError: pass
         if not rows:
-            raise ValueError(f"{path}: nisu pronađeni poprečni nagibi")
+            raise ValueError(_TF('{0}: nisu pronađeni poprečni nagibi', path))
         n = len(rows[0]) - 2
         self.cs_heads = heads if heads and len(heads) == n else [f"TRAK_{i + 1}" for i in range(n)]
         self.cs_s = np.array([r[0] * 1000 + r[1] for r in rows])
@@ -147,8 +148,7 @@ class Axis:
         return float(np.interp(s, self.cs_s, self.cs_l))
 
     def info(self):
-        return (f"{self.name}: {len(self.elems)} elemenata, dužina {self.length:.3f} m (st. {self.s_min:.3f}–{self.s_max:.3f}), "
-                f"K = {self.K:.3f} gon/km" + (f" (ispis {self.K_file})" if self.K_file else "") +
+        return (_TF('{0}: {1} elemenata, dužina {2:.3f} m (st. {3:.3f}–{4:.3f}), K = {5:.3f} gon/km', self.name, len(self.elems), self.length, self.s_min, self.s_max, self.K) + (_TF(' (ispis {0})', self.K_file) if self.K_file else "") +
                 f", odstupanje kraja {max(abs(self.end_err[0]), abs(self.end_err[1])) * 1000:.0f} mm" +
                 (f", odstupanje nivelete {self.vdev * 1000:.0f} mm" if self.vdev is not None else ""))
 

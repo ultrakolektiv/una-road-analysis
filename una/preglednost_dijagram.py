@@ -1,5 +1,6 @@
 """Dijagrami: brzina Vp (V85) i preglednost na istoj stacionaži (gore brzina, dolje potrebna i raspoloživa preglednost).
 Izlaz: PNG + PDF po osovini vozne trake (smjer / strana) i jedan DXF sa svim dijagramima (jedinica: mm papira)."""
+from .i18n import _T, _TF
 import math
 import numpy as np
 from .dxf import Dxf
@@ -33,39 +34,39 @@ def make_png(P, par, out, base, log=print):
     for key in out["vp"]:
         d = _series(out, key)
         fig, (a1, a2) = plt.subplots(2, 1, figsize=(15, 8.5), sharex=True, gridspec_kw=dict(height_ratios=[1, 1.25], hspace=0.08))
-        a1.plot(d["s"], d["V"], color="#1f3fd0", lw=1.6, label=("Računska brzina Vr (projektni zadatak)" if par.get("_vr") else "Projektna brzina Vp (V85)"))
-        a1.axhline(P.Vr, color="#888", ls="--", lw=1, label=f"Računska brzina Vr = {P.Vr:g} km/h")
-        a1.set_ylabel("Brzina [km/h]"); a1.grid(alpha=0.3); a1.legend(loc="lower right", fontsize=8)
-        a1.set_title(f"{P.projekat} – brzina i preglednost – {tname(key)}", fontsize=11)
+        a1.plot(d["s"], d["V"], color="#1f3fd0", lw=1.6, label=(_T('Računska brzina Vr (projektni zadatak)') if par.get("_vr") else _T('Projektna brzina Vp (V85)')))
+        a1.axhline(P.Vr, color="#888", ls="--", lw=1, label=_TF('Računska brzina Vr = {0:g} km/h', P.Vr))
+        a1.set_ylabel(_T('Brzina [km/h]')); a1.grid(alpha=0.3); a1.legend(loc="lower right", fontsize=8)
+        a1.set_title(_TF('{0} – brzina i preglednost – {1}', P.projekat, tname(key)), fontsize=11)
         a1.set_ylim(0, max(P.Vr * 1.1, float(d["V"].max()) * 1.05))
-        a2.plot(d["s"], d["Lz"], color="#2ca02c", lw=1.4, label=("Potrebna preglednost Pz za Vr, nagib" if par.get("_vr") else "Potrebna preglednost Lz (Vp, nagib") + (f", +{par['dodatak_L']:g} m" if par["dodatak_L"] else "") + ")")
-        if d["Lfix"]: a2.axhline(d["Lfix"], color="#ff7f00", ls="-.", lw=1.2, label=f"Zahtijevana preglednost L = {d['Lfix']:g} m")
+        a2.plot(d["s"], d["Lz"], color="#2ca02c", lw=1.4, label=(_T('Potrebna preglednost Pz za Vr, nagib') if par.get("_vr") else _T('Potrebna preglednost Lz (Vp, nagib')) + (f", +{par['dodatak_L']:g} m" if par["dodatak_L"] else "") + ")")
+        if d["Lfix"]: a2.axhline(d["Lfix"], color="#ff7f00", ls="-.", lw=1.2, label=_TF('Zahtijevana preglednost L = {0:g} m', d['Lfix']))
         cap = float(par["Lmax"])
-        if d["Dv"] is not None: a2.plot(d["sa"], np.minimum(d["Dv"], cap), color="#1f77b4", lw=1.0, ls="--", label="Vertikalna raspoloživa preglednost (niveleta)")
-        if d["Dh"] is not None: a2.plot(d["sa"], np.minimum(d["Dh"], cap), color="#8c564b", lw=1.0, ls=":", label="Horizontalna raspoloživa preglednost (prepreke)")
+        if d["Dv"] is not None: a2.plot(d["sa"], np.minimum(d["Dv"], cap), color="#1f77b4", lw=1.0, ls="--", label=_T('Vertikalna raspoloživa preglednost (niveleta)'))
+        if d["Dh"] is not None: a2.plot(d["sa"], np.minimum(d["Dh"], cap), color="#8c564b", lw=1.0, ls=":", label=_T('Horizontalna raspoloživa preglednost (prepreke)'))
         if d["D"] is not None:
-            a2.plot(d["se"], d["D"], color="#c0105a", lw=1.2, label="Očekivana (raspoloživa) preglednost – manja od horizontalne i vertikalne")
-            bad = (~d["ok"]); a2.fill_between(d["se"], d["D"], d["Lreq"], where=bad, color="#e41a1c", alpha=0.35, label="Preglednost nedovoljna")
+            a2.plot(d["se"], d["D"], color="#c0105a", lw=1.2, label=_T('Očekivana (raspoloživa) preglednost – manja od horizontalne i vertikalne'))
+            bad = (~d["ok"]); a2.fill_between(d["se"], d["D"], d["Lreq"], where=bad, color="#e41a1c", alpha=0.35, label=_T('Preglednost nedovoljna'))
             a2.set_ylim(0, min(float(par["Lmax"]) * 1.05, max(float(d["Lz"].max()) * 2.5, float(np.nanpercentile(d["D"], 90)) * 1.1)))
         else:
             top = float(d["Lz"].max()) * 1.3
             if d["Dv"] is not None: top = max(top, min(cap, float(np.nanpercentile(d["Dv"], 90))) * 1.1)
             a2.set_ylim(0, min(cap * 1.05, top))
-        a2.set_ylabel("Preglednost [m]"); a2.set_xlabel("Stacionaža [m]"); a2.grid(alpha=0.3); a2.legend(loc="upper right", fontsize=8)
+        a2.set_ylabel(_T('Preglednost [m]')); a2.set_xlabel(_T('Stacionaža [m]')); a2.grid(alpha=0.3); a2.legend(loc="upper right", fontsize=8)
         a2.ticklabel_format(useOffset=False, style="plain")
         fig.tight_layout()
         for ext in ("png", "pdf"):
             p = f"{base}_{key}.{ext}"; fig.savefig(p, dpi=140); files.append(p)
         plt.close(fig)
-    log("Dijagrami brzine i preglednosti: " + ", ".join(f.rsplit("/", 1)[-1] for f in files if f.endswith("png")))
+    log(_T('Dijagrami brzine i preglednosti: ') + ", ".join(f.rsplit("/", 1)[-1] for f in files if f.endswith("png")))
     return files
 
 
 def make_dxf(P, par, out, path, log=print, hs=10.0, vs=2.0, ds=5.0):
     """DXF dijagram (jedinica mm papira): 1 mm = hs m po stacionaži, vs km/h po brzini, ds m po preglednosti."""
     d = Dxf(ltscale=1.0)
-    for n, c, lt in (("OKVIR", 7, "CONTINUOUS"), ("MREZA", 253, "CONTINUOUS"), ("TEKST", 7, "CONTINUOUS"), ("BRZINA_VP", 5, "CONTINUOUS"), ("BRZINA_VR", 8, "DASHED"),
-                     ("PREGLEDNOST_POTREBNA", 3, "CONTINUOUS"), ("PREGLEDNOST_ZAHTIJEVANA", 30, "DASHDOT"), ("PREGLEDNOST_RASPOLOZIVA", 6, "CONTINUOUS"), ("PREGLEDNOST_VERTIKALNA", 5, "DASHED"), ("PREGLEDNOST_HORIZONTALNA", 52, "DOT"), ("PREGLEDNOST_NEDOVOLJNA", 1, "CONTINUOUS")):
+    for n, c, lt in (("OKVIR", 7, "CONTINUOUS"), ("MREZA", 253, "CONTINUOUS"), ("TEKST", 7, "CONTINUOUS"), (_T('BRZINA_VP'), 5, "CONTINUOUS"), (_T('BRZINA_VR'), 8, "DASHED"),
+                     (_T('PREGLEDNOST_POTREBNA'), 3, "CONTINUOUS"), (_T('PREGLEDNOST_ZAHTIJEVANA'), 30, "DASHDOT"), (_T('PREGLEDNOST_RASPOLOZIVA'), 6, "CONTINUOUS"), (_T('PREGLEDNOST_VERTIKALNA'), 5, "DASHED"), (_T('PREGLEDNOST_HORIZONTALNA'), 52, "DOT"), (_T('PREGLEDNOST_NEDOVOLJNA'), 1, "CONTINUOUS")):
         d.layer(n, c, lt)
     H = 2.5; y0 = 0.0
     for key in out["vp"]:
@@ -77,8 +78,8 @@ def make_dxf(P, par, out, path, log=print, hs=10.0, vs=2.0, ds=5.0):
         dmax = math.ceil(dmax_src / 50) * 50
         hV = vmax / vs; hD = dmax / ds; W = X(smax)
         yD0 = y0; yV0 = y0 + hD + 18                                    # dolje preglednost, gore brzina
-        d.text("TEKST", 0, yV0 + hV + 10, 3.5, f"{P.projekat} – brzina i preglednost – {tname(key)}")
-        for (yb, hh, mx, step, st, lab) in ((yV0, hV, vmax, 20, vs, "Brzina [km/h]"), (yD0, hD, dmax, 50, ds, "Preglednost [m]")):
+        d.text("TEKST", 0, yV0 + hV + 10, 3.5, _TF('{0} – brzina i preglednost – {1}', P.projekat, tname(key)))
+        for (yb, hh, mx, step, st, lab) in ((yV0, hV, vmax, 20, vs, _T('Brzina [km/h]')), (yD0, hD, dmax, 50, ds, _T('Preglednost [m]'))):
             d.poly("OKVIR", [(0, yb), (W, yb), (W, yb + hh), (0, yb + hh)], closed=True)
             for v in np.arange(0, mx + 1e-6, step):
                 yy = yb + v / st; d.line("MREZA", 0, yy, W, yy); d.text("TEKST", -2, yy - 0.9, H * 0.8, f"{v:g}", align="r")
@@ -86,34 +87,34 @@ def make_dxf(P, par, out, path, log=print, hs=10.0, vs=2.0, ds=5.0):
         for sx in np.arange(smin, smax + 1e-6, 500):
             for yb, hh in ((yV0, hV), (yD0, hD)): d.line("MREZA", X(sx), yb, X(sx), yb + hh)
             d.text("TEKST", X(sx), yD0 - 6, H * 0.8, kmfmt(sx), rot=90, align="r" if False else "l")
-        d.poly("BRZINA_VP", [(X(a), yV0 + b / vs) for a, b in zip(s["s"], s["V"])])
-        d.line("BRZINA_VR", 0, yV0 + P.Vr / vs, W, yV0 + P.Vr / vs)
-        d.poly("PREGLEDNOST_POTREBNA", [(X(a), yD0 + min(b, dmax) / ds) for a, b in zip(s["s"], s["Lz"])])
-        if s["Lfix"]: d.line("PREGLEDNOST_ZAHTIJEVANA", 0, yD0 + s["Lfix"] / ds, W, yD0 + s["Lfix"] / ds)
+        d.poly(_T('BRZINA_VP'), [(X(a), yV0 + b / vs) for a, b in zip(s["s"], s["V"])])
+        d.line(_T('BRZINA_VR'), 0, yV0 + P.Vr / vs, W, yV0 + P.Vr / vs)
+        d.poly(_T('PREGLEDNOST_POTREBNA'), [(X(a), yD0 + min(b, dmax) / ds) for a, b in zip(s["s"], s["Lz"])])
+        if s["Lfix"]: d.line(_T('PREGLEDNOST_ZAHTIJEVANA'), 0, yD0 + s["Lfix"] / ds, W, yD0 + s["Lfix"] / ds)
         from .preglednost_crtez import _runs
-        for arr, xs_, lay in ((s["Dv"], s.get("sa"), "PREGLEDNOST_VERTIKALNA"), (s["Dh"], s.get("sa"), "PREGLEDNOST_HORIZONTALNA")):
+        for arr, xs_, lay in ((s["Dv"], s.get("sa"), _T('PREGLEDNOST_VERTIKALNA')), (s["Dh"], s.get("sa"), _T('PREGLEDNOST_HORIZONTALNA'))):
             if arr is None: continue
             xx = [X(a) if not math.isnan(b) else float("nan") for a, b in zip(xs_, arr)]; yy = [yD0 + min(b, dmax, par["Lmax"]) / ds if not math.isnan(b) else float("nan") for b in arr]
             for rn in _runs(xx, yy): d.poly(lay, rn)
         if s["D"] is not None:
             from .preglednost_crtez import _runs
             xs = [X(a) if not math.isnan(b) else float("nan") for a, b in zip(s["se"], s["D"])]; ys = [yD0 + min(b, dmax) / ds if not math.isnan(b) else float("nan") for b in s["D"]]
-            for rn in _runs(xs, ys): d.poly("PREGLEDNOST_RASPOLOZIVA", rn)
+            for rn in _runs(xs, ys): d.poly(_T('PREGLEDNOST_RASPOLOZIVA'), rn)
             run = []
             for a, b, ok in zip(s["se"], s["D"], s["ok"]):
                 if not ok: run.append((X(a), yD0 + min(b, dmax) / ds))
                 else:
-                    if len(run) > 1: d.poly("PREGLEDNOST_NEDOVOLJNA", run, width=0.6)
+                    if len(run) > 1: d.poly(_T('PREGLEDNOST_NEDOVOLJNA'), run, width=0.6)
                     run = []
-            if len(run) > 1: d.poly("PREGLEDNOST_NEDOVOLJNA", run, width=0.6)
+            if len(run) > 1: d.poly(_T('PREGLEDNOST_NEDOVOLJNA'), run, width=0.6)
         lx = W + 6; ly = yV0 + hV
-        for lay, txt in (("BRZINA_VP", "Računska brzina Vr" if par.get("_vr") else "Projektna brzina Vp (V85)"), ("BRZINA_VR", f"Računska brzina Vr = {P.Vr:g} km/h"), ("PREGLEDNOST_POTREBNA", "Potrebna preglednost Pz za Vr i nagib" if par.get("_vr") else "Potrebna preglednost Lz (Vp i nagib)"),
-                         ("PREGLEDNOST_ZAHTIJEVANA", "Zahtijevana preglednost L (zadao projektant)"), ("PREGLEDNOST_VERTIKALNA", "Vertikalna raspoloživa preglednost (niveleta)"), ("PREGLEDNOST_HORIZONTALNA", "Horizontalna raspoloživa preglednost (prepreke)"), ("PREGLEDNOST_RASPOLOZIVA", "Raspoloživa preglednost (manja od H i V)"), ("PREGLEDNOST_NEDOVOLJNA", "Dio gdje je preglednost nedovoljna")):
-            if lay == "PREGLEDNOST_ZAHTIJEVANA" and not s["Lfix"]: continue
-            if lay in ("PREGLEDNOST_RASPOLOZIVA", "PREGLEDNOST_NEDOVOLJNA") and s["D"] is None: continue
-            if lay == "PREGLEDNOST_HORIZONTALNA" and s["Dh"] is None: continue
+        for lay, txt in ((_T('BRZINA_VP'), _T('Računska brzina Vr') if par.get("_vr") else _T('Projektna brzina Vp (V85)')), (_T('BRZINA_VR'), _TF('Računska brzina Vr = {0:g} km/h', P.Vr)), (_T('PREGLEDNOST_POTREBNA'), _T('Potrebna preglednost Pz za Vr i nagib') if par.get("_vr") else _T('Potrebna preglednost Lz (Vp i nagib)')),
+                         (_T('PREGLEDNOST_ZAHTIJEVANA'), _T('Zahtijevana preglednost L (zadao projektant)')), (_T('PREGLEDNOST_VERTIKALNA'), _T('Vertikalna raspoloživa preglednost (niveleta)')), (_T('PREGLEDNOST_HORIZONTALNA'), _T('Horizontalna raspoloživa preglednost (prepreke)')), (_T('PREGLEDNOST_RASPOLOZIVA'), _T('Raspoloživa preglednost (manja od H i V)')), (_T('PREGLEDNOST_NEDOVOLJNA'), _T('Dio gdje je preglednost nedovoljna'))):
+            if lay == _T('PREGLEDNOST_ZAHTIJEVANA') and not s["Lfix"]: continue
+            if lay in (_T('PREGLEDNOST_RASPOLOZIVA'), _T('PREGLEDNOST_NEDOVOLJNA')) and s["D"] is None: continue
+            if lay == _T('PREGLEDNOST_HORIZONTALNA') and s["Dh"] is None: continue
             d.line(lay, lx, ly, lx + 12, ly); d.text("TEKST", lx + 15, ly - 0.9, H * 0.9, txt); ly -= 6
-        d.text("TEKST", 0, yD0 - 16, H * 0.9, f"Razmjera: 1 mm = {hs:g} m (stacionaža), {vs:g} km/h (brzina), {ds:g} m (preglednost). Jedinica crteža: mm.")
+        d.text("TEKST", 0, yD0 - 16, H * 0.9, _TF('Razmjera: 1 mm = {0:g} m (stacionaža), {1:g} km/h (brzina), {2:g} m (preglednost). Jedinica crteža: mm.', hs, vs, ds))
         y0 = yV0 + hV + 40
     d.save(path); log(f"DXF dijagram: {path}")
     return path
@@ -135,7 +136,7 @@ def make_vr(P, par, out, outdir, name, log=print):
         R2 = dict(R); R2["rows"] = [dict(fix(dict(r, Dh=r.get("Dh", 0), Dv=r.get("Dv", 0), D=r.get("Dv", 0))), ) for r in R["rows"]]
         R2["avail"] = dict(rows=av); o2["vp"][key] = R2
         o2["ocek"][key] = dict(rows=av, A=R["A"])
-    base = os.path.join(outdir, f"Preglednost_dijagram_Vr_{name}")
+    base = os.path.join(outdir, _TF('Preglednost_dijagram_Vr_{0}', name))
     files = make_png(P, par2, o2, base, log)
     files.append(make_dxf(P, par2, o2, base + ".dxf", log))
     return files
@@ -143,7 +144,7 @@ def make_vr(P, par, out, outdir, name, log=print):
 
 def make(P, par, out, outdir, name, log=print):
     import os
-    base = os.path.join(outdir, f"Preglednost_dijagram_{name}")
+    base = os.path.join(outdir, _TF('Preglednost_dijagram_{0}', name))
     files = make_png(P, par, out, base, log)
     files.append(make_dxf(P, par, out, base + ".dxf", log))
     return files
@@ -176,9 +177,9 @@ def make_profil_dxf(P, par, sets, path, log=print, vexag=10.0):
               nbad += (not ok)
           x1 = float(q[-1]); H = 6.0
           d.text("TEKST", 0, base + (zmax + 12) * vexag, H * 1.6, f"{title} – {tname(key)}")
-          for li, tx in enumerate((f"Vertikalna preglednost u uzdužnom profilu: oko vozača {par['h_oka']:.2f} m, predmet " + (('h2 = %.2f–%.2f m po Tabeli 29 (zavisi od Vp)' % (hp.min(), hp.max())) if h_pr is None else format(h_pr, '.2f') + ' m') + " iznad nivelete. Razmjera R 1:1000/100.",
-                                   "Linija oka (siva) i linija predmeta (plava) prate nivelete; zraka ide od linije oka do linije predmeta i prikazuje NAJVEĆU moguću vertikalnu preglednost (do Lmax)",
-                                   f"u presjeku, na istim stacionažama kao zrake u situaciji. Zelena = ≥ potrebna Pzp(Vp), crvena = manja od potrebne ({nbad} zraka).")):
+          for li, tx in enumerate((_TF('Vertikalna preglednost u uzdužnom profilu: oko vozača {0:.2f} m, predmet ', par['h_oka']) + ((_T('h2 = %.2f–%.2f m po Tabeli 29 (zavisi od Vp)') % (hp.min(), hp.max())) if h_pr is None else format(h_pr, '.2f') + ' m') + " iznad nivelete. Razmjera R 1:1000/100.",
+                                   _T('Linija oka (siva) i linija predmeta (plava) prate nivelete; zraka ide od linije oka do linije predmeta i prikazuje NAJVEĆU moguću vertikalnu preglednost (do Lmax)'),
+                                   _TF('u presjeku, na istim stacionažama kao zrake u situaciji. Zelena = ≥ potrebna Pzp(Vp), crvena = manja od potrebne ({0} zraka).', nbad))):
               d.text("TEKST", 0, base + (zmax + 12) * vexag - 14 - li * 9, H, tx)
           for sx in np.arange(0, x1 + 1e-6, 500):
               d.line("MREZA", float(sx), base + (zmin - 5) * vexag, float(sx), base + (zmax + 5) * vexag)
@@ -187,5 +188,5 @@ def make_profil_dxf(P, par, sets, path, log=print, vexag=10.0):
           for zz in np.arange(np.floor(zmin / 10) * 10, zmax + 10, 10):
               d.line("MREZA", 0, float(base + zz * vexag), x1, float(base + zz * vexag)); d.text("TEKST", -4, float(base + zz * vexag) - 2, H, f"{zz:.0f}", align="r")
           y0 = base + (zmax + 40) * vexag
-    d.save(path); log(f"DXF vertikalna preglednost (profil): {path}")
+    d.save(path); log(_TF('DXF vertikalna preglednost (profil): {0}', path))
     return path

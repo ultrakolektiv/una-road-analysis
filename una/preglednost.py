@@ -9,6 +9,7 @@ Zraka = tetiva od oka vozača (osovina vozne trake) do tačke ispred, mjereno du
 Ofset osovine trake zadaje se u smjeru vožnje: ofset_desno (traka desno od osovine) i ofset_lijevo (traka lijevo od osovine).
 Trake/ivice se zadaju u smjeru rastuće stacionaže: trake_desno / trake_lijevo = širine traka od osovine prema van.
 """
+from .i18n import _T, _TF, TrDict, tr_obj, cell as _cell
 import math
 import numpy as np
 
@@ -51,8 +52,8 @@ def lzn(V, g, par):
 DEFAULTS = dict(norma="BiH", ofset=1.75, h_oka=None, h_prepreke="auto", h2_varijanta="nize", korak_proracun=5.0, korak_crtez=20.0, mjerilo=1000, scenarij=1,
                 L_zahtijevano=None, dodatak_L=0.0, Lmax=500.0, ivice=True, ivica_debljina=0.3)
 SIDES = {"desno": "D", "lijevo": "L", "D": "D", "L": "L"}
-SIDE_NAME = {"D": "desna traka (desno od osovine kolovoza)", "L": "lijeva traka (lijevo od osovine kolovoza)"}
-TIP_ZNAK = {"PRAVAC": "pravac", "KRUZNI_LUK": "kružni luk", "PRIJELAZNICA": "prijelaznica"}
+SIDE_NAME = TrDict({"D": "desna traka (desno od osovine kolovoza)", "L": "lijeva traka (lijevo od osovine kolovoza)"})
+TIP_ZNAK = TrDict({"PRAVAC": "pravac", "KRUZNI_LUK": "kružni luk", "PRIJELAZNICA": "prijelaznica"})
 
 
 # ------------------------------------------------------------------ geometrija osovine (gušća integracija)
@@ -121,7 +122,7 @@ def element_rows(c):
 
 def _match(en, c, e=None):
     if en.get("sekcija") not in (None, "", c.sec["no"]): return False
-    if en.get("osovina") not in (None, "", c.role): return False
+    if en.get('osovina') not in (None, "", c.role): return False
     return True
 
 
@@ -147,7 +148,7 @@ def obstacle_offsets(c, par, s):
     for e in els:
         m = (s >= e["s0"] - 1e-9) & (s <= e["s1"] + 1e-9)
         if not m.any(): continue
-        key = {"PRAVAC": "pravac", "KRUZNI_LUK": "kruzni", "PRIJELAZNICA": "prijelaznica"}[e["typ"]]
+        key = {"PRAVAC": "pravac", "KRUZNI_LUK": "kruzni", "PRIJELAZNICA": 'prijelaznica'}[e["typ"]]
         if dflt.get(key) not in (None, ""): put(m, float(dflt[key]), "unutra", e["k"])
         if ztip and e["typ"] != "PRAVAC" and tipovi.get(ztip) not in (None, ""): put(m, float(tipovi[ztip]), "unutra", e["k"])
         for en in pre:
@@ -304,8 +305,8 @@ def expected(A, par, Lfun=L_vp):
                 cl = np.where(fin, cl, 1e18); j = int(np.argmin(cl))
                 if cl[j] < best: best = float(cl[j]); kc = int(ks[j])
             if best > 1.5: kc = None                        # prepreka daleko od tetive – nije dodirna tačka
-        lim = "prepreka" if (blocked is not None and Dh <= Dv + 1e-9) else ("niveleta" if Dv < Dh - 1e-9 else ("kraj trase" if end else "Lmax"))
-        short_end = (lim == "kraj trase") and D < Lr - 1e-6
+        lim = "prepreka" if (blocked is not None and Dh <= Dv + 1e-9) else ("niveleta" if Dv < Dh - 1e-9 else (_T('kraj trase') if end else "Lmax"))
+        short_end = (lim == _T('kraj trase')) and D < Lr - 1e-6
         okH = (Dh >= Lr - 1e-6) or (end and blocked is None); okV = (Dv >= Lr - 1e-6) or (end and Dv >= float(q[bmax] - q[a]) - 1e-6)
         rows.append(dict(i=a, s=float(A["s"][a]), q=float(q[a]), V=float(A["v"][a]), g=float(A["g"][a]), Lz=Lr, Dh=Dh, Dv=float(Dv), D=float(D), b=b, lim=lim,
                          trunc=short_end, ok=(D >= Lr - 1e-6) or short_end, kc=kc, okH=bool(okH), okV=bool(okV)))
@@ -368,20 +369,20 @@ def run(P, cases, fw, bw, cfg, log=print):
                 R["A"] = A; R["chain"] = ch; R["tag"] = tag; R["side"] = sd; R["key"] = key; return R
             R = meta(analyse(A, par, L_vp)); R["deficits"] = intervals(R["rows"], bad=True); out["vp"][key] = R
             R["avail"] = expected(A, par, L_vp); R["defH"] = intervals(R["avail"]["rows"], key="okH", bad=True, dkey="Dh"); R["defV"] = intervals(R["avail"]["rows"], key="okV", bad=True, dkey="Dv")
-            nm = f"smjer {'stacionaže' if tag == 'F' else 'suprotno stacionaži'}, traka {SIDE_NAME[sd]}"
-            log(f"Preglednost Vp, {nm}: Lz {min(r['Lz'] for r in R['rows']):.0f}–{max(r['Lz'] for r in R['rows']):.0f} m, slobodan prostor desno {R['mR'].max():.2f} m / lijevo {R['mL'].max():.2f} m, vertikalno nedovoljno na {len(R['defV'])}, horizontalno (prepreke) na {len(R['defH']) if A['has_ob'] else '-'} mjesta")
+            nm = _TF('smjer {0}, traka {1}', _T('stacionaže') if tag == 'F' else _T('suprotno stacionaži'), SIDE_NAME[sd])
+            log(_TF('Preglednost Vp, {0}: Lz {1:.0f}–{2:.0f} m, slobodan prostor desno {3:.2f} m / lijevo {4:.2f} m, vertikalno nedovoljno na {5}, horizontalno (prepreke) na {6} mjesta', nm, min(r['Lz'] for r in R['rows']), max(r['Lz'] for r in R['rows']), R['mR'].max(), R['mL'].max(), len(R['defV']), len(R['defH']) if A['has_ob'] else '-'))
             Rv = meta(analyse(A, par, L_vr)); Rv["deficits"] = intervals(Rv["rows"], bad=True); out["vr"][key] = Rv
             Rv["avail"] = expected(A, par, L_vr); Rv["defH"] = intervals(Rv["avail"]["rows"], key="okH", bad=True, dkey="Dh"); Rv["defV"] = intervals(Rv["avail"]["rows"], key="okV", bad=True, dkey="Dv")
-            log(f"Preglednost za Vr = {P.Vr:g} km/h, {nm}: Pz {min(r['Lz'] for r in Rv['rows']):.0f}–{max(r['Lz'] for r in Rv['rows']):.0f} m, vertikalno nedovoljno na {len(Rv['defV'])}, horizontalno (prepreke) na {len(Rv['defH']) if A['has_ob'] else '-'} mjesta")
+            log(_TF('Preglednost za Vr = {0:g} km/h, {1}: Pz {2:.0f}–{3:.0f} m, vertikalno nedovoljno na {4}, horizontalno (prepreke) na {5} mjesta', P.Vr, nm, min(r['Lz'] for r in Rv['rows']), max(r['Lz'] for r in Rv['rows']), len(Rv['defV']), len(Rv['defH']) if A['has_ob'] else '-'))
             if out["zaht"] is not None:
                 Z = meta(analyse(A, par, L_zaht)); Z["deficits"] = intervals(Z["rows"], bad=True); out["zaht"][key] = Z
                 Z["avail"] = expected(A, par, L_zaht); Z["defH"] = intervals(Z["avail"]["rows"], key="okH", bad=True, dkey="Dh"); Z["defV"] = intervals(Z["avail"]["rows"], key="okV", bad=True, dkey="Dv")
-                log(f"Zahtijevana preglednost {('L=%.0f m' % par['L_zahtijevano']) if par['L_zahtijevano'] else 'Pzp=f(Vp, nagib)'}, {nm}: slobodan prostor desno {Z['mR'].max():.2f} m / lijevo {Z['mL'].max():.2f} m, vertikalno nedovoljno na {len(Z['defV'])}, horizontalno (prepreke) na {len(Z['defH']) if A['has_ob'] else '-'} mjesta")
+                log(_TF('Zahtijevana preglednost {0}, {1}: slobodan prostor desno {2:.2f} m / lijevo {3:.2f} m, vertikalno nedovoljno na {4}, horizontalno (prepreke) na {5} mjesta', ('L=%.0f m' % par['L_zahtijevano']) if par['L_zahtijevano'] else 'Pzp=f(Vp, nagib)', nm, Z['mR'].max(), Z['mL'].max(), len(Z['defV']), len(Z['defH']) if A['has_ob'] else '-'))
             if out["ocek"] is not None:
                 Lf = L_zaht
                 E = meta(expected(A, par, Lf)); E["deficits"] = intervals(E["rows"], bad=True, dkey="D"); out["ocek"][key] = E
                 E["defH"] = intervals(E["rows"], key="okH", bad=True, dkey="Dh"); E["defV"] = intervals(E["rows"], key="okV", bad=True, dkey="Dv")
-                rr = E["rows"]; log(f"Očekivana preglednost, {nm}: raspoloživo {dminmax(rr)}, nedovoljno na {len(E['deficits'])} mjesta")
+                rr = E["rows"]; log(_TF('Očekivana preglednost, {0}: raspoloživo {1}, nedovoljno na {2} mjesta', nm, dminmax(rr), len(E['deficits'])))
     return par, out
 
 
@@ -408,27 +409,27 @@ def write_xlsx(path, P, par, out, cases=None):
     """Tabele rezultata (vrijednosti, ne formule)."""
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill, Alignment
-    wb = Workbook(); ws = wb.active; ws.title = "Sažetak"
+    wb = Workbook(); ws = wb.active; ws.title = _T('Sažetak')
     B = Font(name="Arial", bold=True); F = Font(name="Arial"); fill = PatternFill("solid", fgColor="D9E2F3")
     def w(ws, r, c, v, f=F, fmt=None):
-        x = ws.cell(r, c, v); x.font = f
+        x = ws.cell(r, c, _cell(v)); x.font = f
         if fmt: x.number_format = fmt
         return x
-    nm = lambda R: f"{'smjer rastuće stacionaže' if R['tag'] == 'F' else 'suprotno smjeru stacionaže'}, traka {SIDE_NAME[R['side']]}"
-    w(ws, 1, 1, f"PREGLEDNOST – {P.projekat}", B)
-    w(ws, 2, 1, "Napomena: IZRAČUNATE VRIJEDNOSTI (nisu formule). Lz iz dijagrama 'Skraćena zaustavna preglednost (fT50 %)', očitanog iz slike (odstupanje ≈ 0,1 m).")
+    nm = lambda R: _TF('{0}, traka {1}', _T('smjer rastuće stacionaže') if R['tag'] == 'F' else _T('suprotno smjeru stacionaže'), SIDE_NAME[R['side']])
+    w(ws, 1, 1, _TF('PREGLEDNOST – {0}', P.projekat), B)
+    w(ws, 2, 1, _T("Napomena: IZRAČUNATE VRIJEDNOSTI (nisu formule). Lz iz dijagrama 'Skraćena zaustavna preglednost (fT50 %)', očitanog iz slike (odstupanje ≈ 0,1 m)."))
     r = 4; w(ws, r, 1, "Parametri", B); r += 1
-    for k, v in (("Oko vozača iznad nivelete [m]", par["h_oka"]), ("Predmet iznad nivelete [m]", "po Tabeli 29 (h2 = f(Vp))" if par["h_auto"] else par["h_prepreke"]), ("Podrazumijevana širina trake/2 – ofset [m]", par["ofset"]),
-                 ("Korak proračuna zraka [m]", par["korak_proracun"]), ("Dodatak na zaustavnu dužinu Lz [m] (unosi korisnik)", par["dodatak_L"]), ("Zahtijevana dužina zrake L [m] (unosi korisnik)", par["L_zahtijevano"] or "nije zadana"), ("Najveća tražena dužina zrake (očekivana) [m]", par["Lmax"]),
-                 ("Strane osovine", ", ".join(SIDE_NAME[s] for s in par["strane"])),
-                 ("Zadani tip prepreke (sve krivine)", par["zadani_tip"] or "-")) + tuple((f"Tip prepreke '{k}': ofset od ivice kolovoza [m]", v) for k, v in par["tipovi_prepreka"].items()):
+    for k, v in ((_T('Oko vozača iznad nivelete [m]'), par["h_oka"]), ("Predmet iznad nivelete [m]", _T('po Tabeli 29 (h2 = f(Vp))') if par["h_auto"] else par["h_prepreke"]), (_T('Podrazumijevana širina trake/2 – ofset [m]'), par["ofset"]),
+                 (_T('Korak proračuna zraka [m]'), par["korak_proracun"]), (_T('Dodatak na zaustavnu dužinu Lz [m] (unosi korisnik)'), par["dodatak_L"]), (_T('Zahtijevana dužina zrake L [m] (unosi korisnik)'), par["L_zahtijevano"] or "nije zadana"), (_T('Najveća tražena dužina zrake (očekivana) [m]'), par["Lmax"]),
+                 (_T('Strane osovine'), ", ".join(SIDE_NAME[s] for s in par["strane"])),
+                 (_T('Zadani tip prepreke (sve krivine)'), par["zadani_tip"] or "-")) + tuple((_TF("Tip prepreke '{0}': ofset od ivice kolovoza [m]", k), v) for k, v in par["tipovi_prepreka"].items()):
         w(ws, r, 1, k); w(ws, r, 2, v); r += 1
     r += 1
     if cases:
-        w(ws, r, 1, "Poprečni profil i ofsete po slučaju (ofset u smjeru vožnje; ivice u smjeru stacionaže)", B); r += 1
+        w(ws, r, 1, _T('Poprečni profil i ofsete po slučaju (ofset u smjeru vožnje; ivice u smjeru stacionaže)'), B); r += 1
         for c in cases:
             pr = case_prof(c, par)
-            w(ws, r, 1, f"{c.key}  {c.short}:  trake desno {pr['tR']} (ivica {pr['eR']:.2f} m), lijevo {pr['tL']} (ivica {pr['eL']:.2f} m);  osovina kolovoza {pr['hC']:.2f} m od osovine puta; ofset oka desno {pr['dDR']:.2f} m, lijevo {pr['dDL']:.2f} m" + (f"; razdjelni pojas: pola {pr['gR']:.2f} / {pr['gL']:.2f} m" if pr['gR'] or pr['gL'] else "")); r += 1
+            w(ws, r, 1, _TF('{0}  {1}:  trake desno {2} (ivica {3:.2f} m), lijevo {4} (ivica {5:.2f} m);  osovina kolovoza {6:.2f} m od osovine puta; ofset oka desno {7:.2f} m, lijevo {8:.2f} m', c.key, c.short, pr['tR'], pr['eR'], pr['tL'], pr['eL'], pr['hC'], pr['dDR'], pr['dDL']) + (f"; razdjelni pojas: pola {pr['gR']:.2f} / {pr['gL']:.2f} m" if pr['gR'] or pr['gL'] else "")); r += 1
         r += 1
     def block(title, dd, expd=False):
         nonlocal r
@@ -436,21 +437,21 @@ def write_xlsx(path, P, par, out, cases=None):
         for R in dd.values():
             rows = R["rows"]; w(ws, r, 1, nm(R), B); r += 1
             if expd:
-                items = (("Potrebna dužina min / max [m]", f"{min(x['Lz'] for x in rows):.0f} / {max(x['Lz'] for x in rows):.0f}"), ("Raspoloživa preglednost min / max [m] (bez zraka koje izlaze van trase)", dminmax(rows).replace("–", " / ").replace(" m", "")),
-                         ("Mjesta sa nedovoljnom preglednošću", len(R["deficits"])))
+                items = ((_T('Potrebna dužina min / max [m]'), f"{min(x['Lz'] for x in rows):.0f} / {max(x['Lz'] for x in rows):.0f}"), (_T('Raspoloživa preglednost min / max [m] (bez zraka koje izlaze van trase)'), dminmax(rows).replace("–", " / ").replace(" m", "")),
+                         (_T('Mjesta sa nedovoljnom preglednošću'), len(R["deficits"])))
             else:
-                items = (("Lz min / max [m]", f"{min(x['Lz'] for x in rows):.0f} / {max(x['Lz'] for x in rows):.0f}"), ("Najveći potreban slobodni prostor desno od osovine trake [m]", round(float(R['mR'].max()), 2)),
-                         ("Najveći potreban slobodni prostor lijevo od osovine trake [m]", round(float(R['mL'].max()), 2)), ("Mjesta sa nedovoljnom vertikalnom preglednošću", len(R["deficits"])))
+                items = (("Lz min / max [m]", f"{min(x['Lz'] for x in rows):.0f} / {max(x['Lz'] for x in rows):.0f}"), (_T('Najveći potreban slobodni prostor desno od osovine trake [m]'), round(float(R['mR'].max()), 2)),
+                         (_T('Najveći potreban slobodni prostor lijevo od osovine trake [m]'), round(float(R['mL'].max()), 2)), (_T('Mjesta sa nedovoljnom vertikalnom preglednošću'), len(R["deficits"])))
             for k, v in items: w(ws, r, 1, k); w(ws, r, 2, v); r += 1
             hasob = R["A"]["has_ob"]
-            for lab, key in (("HORIZONTALNA preglednost (prepreke)", "defH"), ("VERTIKALNA preglednost (niveleta)", "defV")):
-                if key == "defH" and not hasob: w(ws, r, 1, "Horizontalna preglednost (prepreke): prepreke nisu zadane"); r += 1; continue
-                w(ws, r, 1, f"{lab}: nedovoljno na {len(R[key])} mjesta" + (" – zadovoljava na cijeloj dužini" if not R[key] else ""), B); r += 1
+            for lab, key in ((_T('HORIZONTALNA preglednost (prepreke)'), "defH"), (_T('VERTIKALNA preglednost (niveleta)'), "defV")):
+                if key == "defH" and not hasob: w(ws, r, 1, _T('Horizontalna preglednost (prepreke): prepreke nisu zadane')); r += 1; continue
+                w(ws, r, 1, _TF('{0}: nedovoljno na {1} mjesta', lab, len(R[key])) + (_T(' – zadovoljava na cijeloj dužini') if not R[key] else ""), B); r += 1
                 for b in R[key]:
-                    w(ws, r, 1, f"   st. {b['s0']:.0f} – {b['s1']:.0f}: raspoloživo min {b['dmin']:.0f} m < potrebno {b['need']:.0f} m (Vp {b['V']:.0f} km/h)"); r += 1
+                    w(ws, r, 1, _TF('   st. {0:.0f} – {1:.0f}: raspoloživo min {2:.0f} m < potrebno {3:.0f} m (Vp {4:.0f} km/h)', b['s0'], b['s1'], b['dmin'], b['need'], b['V'])); r += 1
             if not expd:
                 w(ws, r, 1, "Lokalni maksimumi potrebnog slobodnog prostora (≥ 1,0 m, razmak ≥ 150 m)", B); r += 1
-                for c, h in enumerate(["Stacionaža [m]", "Strana", "m od osovine trake [m]"], 1): w(ws, r, c, h, B).fill = fill
+                for c, h in enumerate([_T('Stacionaža [m]'), "Strana", _T('m od osovine trake [m]')], 1): w(ws, r, c, h, B).fill = fill
                 r += 1; A = R["A"]
                 for side, mm in (("desno", R["mR"]), ("lijevo", R["mL"])):
                     taken = []
@@ -459,17 +460,17 @@ def write_xlsx(path, P, par, out, cases=None):
                         if all(abs(A["q"][k] - A["q"][t]) > 150 for t in taken):
                             taken.append(k); w(ws, r, 1, round(float(A["s"][k]), 1)); w(ws, r, 2, side); w(ws, r, 3, round(float(mm[k]), 2)); r += 1
             r += 1
-    block("1. PREGLEDNOST NA OSNOVU Vp (V85)", out["vp"])
-    if out.get("zaht"): block(f"2. ZAHTIJEVANA PREGLEDNOST, " + (f"L = {par['L_zahtijevano']:.0f} m" if par["L_zahtijevano"] else "Pzp = f(Vp, nagib)"), out["zaht"])
-    if out.get("ocek"): block("3. OČEKIVANA (RASPOLOŽIVA) PREGLEDNOST – prepreke prema unesenim ofsetima od ivice kolovoza", out["ocek"], True)
+    block(_T('1. PREGLEDNOST NA OSNOVU Vp (V85)'), out["vp"])
+    if out.get("zaht"): block(_T('2. ZAHTIJEVANA PREGLEDNOST, ') + (f"L = {par['L_zahtijevano']:.0f} m" if par["L_zahtijevano"] else _T('Pzp = f(Vp, nagib)')), out["zaht"])
+    if out.get("ocek"): block(_T('3. OČEKIVANA (RASPOLOŽIVA) PREGLEDNOST – prepreke prema unesenim ofsetima od ivice kolovoza'), out["ocek"], True)
     ws.column_dimensions["A"].width = 100; ws.column_dimensions["B"].width = 18; ws.column_dimensions["C"].width = 24
     def sheet(name, R, kind):
         t = wb.create_sheet(name[:31]); A = R["A"]
         if kind == "e":
-            hd = ["Stacionaža [m]", "Put trake q [m]", "Vp [km/h]", "Nagib [%]", "Potrebno [m]", "Raspoloživo – horizontalno [m]", "Raspoloživo – vertikalno [m]", "Raspoloživa preglednost [m]", "Ograničava", "Zadovoljava", "Horizontalno zadovoljava", "Vertikalno zadovoljava"]
+            hd = [_T('Stacionaža [m]'), "Put trake q [m]", "Vp [km/h]", _T('Nagib [%]'), "Potrebno [m]", _T('Raspoloživo – horizontalno [m]'), _T('Raspoloživo – vertikalno [m]'), _T('Raspoloživa preglednost [m]'), _T('Ograničava'), "Zadovoljava", "Horizontalno zadovoljava", "Vertikalno zadovoljava"]
         else:
-            hd = ["Stacionaža [m]", "Put trake q [m]", "Vp [km/h]", "Nagib u smjeru vožnje [%]", "Potrebno L [m]", "Dužina zrake [m]", "Vertikalna raspoloživa [m]", "Vertikalno", "Slobodni prostor desno [m]", "Slobodni prostor lijevo [m]", "Zraka završava van trase",
-                  "Horizontalno raspoloživo – prepreke [m]", "Vertikalno raspoloživo – niveleta [m]", "Raspoloživo ukupno [m]", "Ograničava", "Horizontalno zadovoljava", "Vertikalno zadovoljava"]
+            hd = [_T('Stacionaža [m]'), "Put trake q [m]", "Vp [km/h]", _T('Nagib u smjeru vožnje [%]'), "Potrebno L [m]", _T('Dužina zrake [m]'), _T('Vertikalna raspoloživa [m]'), "Vertikalno", "Slobodni prostor desno [m]", "Slobodni prostor lijevo [m]", _T('Zraka završava van trase'),
+                  _T('Horizontalno raspoloživo – prepreke [m]'), _T('Vertikalno raspoloživo – niveleta [m]'), _T('Raspoloživo ukupno [m]'), _T('Ograničava'), "Horizontalno zadovoljava", "Vertikalno zadovoljava"]
         for c, h in enumerate(hd, 1):
             x = w(t, 1, c, h, B); x.fill = fill; x.alignment = Alignment(wrap_text=True, horizontal="center")
         t.row_dimensions[1].height = 45
@@ -487,10 +488,10 @@ def write_xlsx(path, P, par, out, cases=None):
     for key, R in (out.get("ocek") or {}).items(): sheet(f"Ocekivana_{key}", R, "e")
     if cases and par["ima_prepreke"]:
         t = wb.create_sheet("Elementi_prepreke")
-        for c, h in enumerate(["Sekcija", "Osovina", "Element br.", "Vrsta", "Od [m]", "Do [m]", "R [m]", "Ofset prepreke od ivice – desno [m]", "Ofset prepreke od ivice – lijevo [m]"], 1):
+        for c, h in enumerate(["Sekcija", _T('Osovina'), "Element br.", "Vrsta", _T('Od [m]'), _T('Do [m]'), "R [m]", _T('Ofset prepreke od ivice – desno [m]'), _T('Ofset prepreke od ivice – lijevo [m]')], 1):
             x = w(t, 1, c, h, B); x.fill = fill; x.alignment = Alignment(wrap_text=True, horizontal="center")
         t.row_dimensions[1].height = 45
         for i, e in enumerate(element_table(cases, par), 2):
-            for c, v in enumerate([e["sek"], e["osovina"], e["no"], e["typ"], e["s0"], e["s1"], None if math.isinf(e["R"]) else e["R"], None if math.isnan(e["oR"]) else e["oR"], None if math.isnan(e["oL"]) else e["oL"]], 1): w(t, i, c, v)
+            for c, v in enumerate([e["sek"], e['osovina'], e["no"], e["typ"], e["s0"], e["s1"], None if math.isinf(e["R"]) else e["R"], None if math.isnan(e["oR"]) else e["oR"], None if math.isnan(e["oL"]) else e["oL"]], 1): w(t, i, c, v)
         for c in range(1, 10): t.column_dimensions[chr(64 + c)].width = 16
     wb.save(path)
