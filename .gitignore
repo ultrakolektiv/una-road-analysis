@@ -1,0 +1,9 @@
+.venv/
+dist/
+build/vendor/pandoc/*
+!build/vendor/pandoc/OVDJE_STAVITE_pandoc.exe.txt
+__pycache__/
+*.pyc
+*.lic
+private.key
+izlaz/

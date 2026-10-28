@@ -1,0 +1,17 @@
+AUTOMATSKO PRAVLJENJE UNA_Setup.exe NA GITHUB-U (bez Windowsa i bez instalacije alata kod Vas)
+=====================================================================================
+1. Na github.com napravite PRIVATNI repozitorij (npr. "una-road-analysis").
+2. Prije slanja koda: u folderu Izdavac_licenci pokrenite  python izdavac.py init  – to upisuje VAŠ javni ključ u
+   UNA_aplikacija\una\_pubkey.py. private.key NIKAD ne šaljite na GitHub (već je u .gitignore).
+3. U build\installer.iss, build\build_ci.ps1 i build\EULA.txt zamijenite "VAŠA FIRMA".
+4. Sadržaj foldera UNA_aplikacija (ne sam folder; mora se vidjeti .github, una, build, tests …) pošaljite u repozitorij:
+   - preko web-a: "Add file → Upload files" (prevucite sve fajlove i foldere), ili
+   - git:  git init && git add . && git commit -m "UNA" && git remote add origin <URL> && git push -u origin main
+5. GitHub → Actions → "Build UNA_Setup.exe (Windows)" → Run workflow. Traje oko 20–40 min.
+   Prvo se izvrše testovi (Linux), zatim se na Windows serveru napravi UNA_Setup.exe.
+6. Kad završi, otvorite izvršavanje → Artifacts → UNA_Setup → skinite. To je instalater za račuvare korisnika.
+   (Za "pravi" release: dodajte tag, npr. v1.1.0 – tada se Setup.exe objavi i u Releases.)
+Napomene
+ - Verzija je u fajlu VERSION (npr. 1.1.0).
+ - Ako build pukne (Nuitka često traži dodatni --include-… za neki paket), pošaljite mi ispis greške iz Actions-a i ispravit ćemo.
+ - Preporučeno: potpisivanje Setup.exe kodnim certifikatom (Authenticode), inače Windows SmartScreen upozorava.

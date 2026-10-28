@@ -1,0 +1,192 @@
+ELABORAT 3 – GENERATOR VOZNO-DINAMIČKIH ANALIZA (uputstvo)
+==========================================================
+
+ČEMU SLUŽI
+Iz ispisa geometrije (horizontalna osovina, uzdužni profil, poprečni nagibi) program
+pravi dva fajla:
+  1) Elaborat_3_...docx  – kompletan Word elaborat (poglavlja, tabele, jednačine, slike, prilozi A/B/C)
+  2) Proracun_...xlsx    – Excel radna knjiga sa FORMULAMA i dijagramima (svi koraci proračuna)
+Preglednost (Elaborat 4) nije obuhvaćena.
+
+
+JEDNOKRATNA PRIPREMA (samo prvi put)
+1. Instalirajte Python 3.10 ili noviji sa https://www.python.org/downloads/
+   - na prvom ekranu instalera UKLJUČITE "Add python.exe to PATH"
+   - ostavite uključeno "tcl/tk and IDLE" (potrebno za prozor)
+2. Dvaput kliknite  pokreni.bat . Pri prvom pokretanju sam skida potrebne pakete
+   (internet, 1–3 min). Poslije toga se prozor otvara odmah.
+   (Ako Word generisanje javi da nedostaje Pandoc: instalirajte Pandoc sa https://pandoc.org/installing.html)
+
+Probni proračun na priloženom primjeru (Markovići – Lastva Grbaljska):
+  dvaput klik na  izracunaj_primjer.bat  → rezultat u  primjer\izlaz_primjer
+
+
+RAD U PROZORU
+1. Projekat: upišite naziv dionice, računsku brzinu Vr i izaberite izlazni folder.
+2. Sekcije trase: "Dodaj sekciju…" za svaki dio trase. Sekcija ima vrstu:
+     • Dvije odvojene osovine (desni + lijevi kolovoz)  – za svaku osovinu 3 datoteke
+         desna  osovina = vožnja u smjeru rastuće stacionaže
+         lijeva osovina = vožnja suprotno smjeru stacionaže
+     • Centralna osovina – jedan ispis, računa se u OBA smjera (→ i ←)
+     • Jedna osovina – samo smjer rastuće stacionaže
+     • Jedna osovina – samo smjer opadajuće stacionaže
+   Za svaku osovinu treba tri datoteke (isti CAD izvoz kao dosad):
+     horizontalna osovina (elementi PRAVAC / KRUZNI_LUK / PRIJELAZNICA),
+     uzdužni profil (tablica prelomnih tačaka), poprečni nagibi (TRAK_ kolone).
+   Dugme "Odaberi sva 3 fajla odjednom" samo prepoznaje koji je koji.
+   Dugme "Postavi OD/DO prema ispisima" predlaže raspon; OD/DO podesite na stvarne granice sekcije
+   (npr. kraj zadnje prijelaznice – bez dijela poslije kojeg vozač usporava prema naplati).
+   Broj sekcija nije ograničen. Sekcije mogu imati različite vrste (npr. 0–3000 razdvojene,
+   3000–5000 centralna, 5000–8000 razdvojene, …). Sekcije ne smiju da se preklapaju.
+   Isti ispis može se koristiti u više sekcija (npr. razdvojene 0–2000 i 2000–6640).
+   Brzine se lančano prenose preko granica sekcija u istom smjeru vožnje.
+   Opciono: "Ograničenja brzine u scenariju" (OD; DO; km/h) – program tada dodaje poglavlje
+   Scenarij (npr. zahtjev Investitora 80 km/h) i u Excelu prekidač.
+3. "Napredni parametri…": korak, ubrzanje/usporenje, tablice Vp–R i Vp–iN, teška vozila
+   (broj i parametri vozila možete mijenjati), max nagib.
+   "Tekst za elaborat…": datum, dodatni opis, obrazloženje scenarija, dodatne napomene.
+4. "NAPRAVI ELABORAT". Tok se vidi u dnu prozora. Excel traje 10–60 s zavisno od dužine trase.
+5. Projekat > Spremi projekat (JSON) – sljedeći put ga samo učitate.
+
+
+LICENCA (od ove verzije)
+   Program radi samo sa važećom licencom (.lic). Pri prvom pokretanju otvara se prozor "Aktivacija licence"
+   sa ID-em računara; ID pošaljite dobavljaču, a dobijenu .lic datoteku učitajte tim prozorom.
+   Iz komandne linije:  python -m una --id      i      python -m una --licenca moja.lic
+   Za razvoj/testiranje na svom računaru sami izdajte licencu alatom Izdavac_licenci (vidi build\README_BUILD.txt).
+
+
+PREGLEDNOST (zrake, zahtijevana i očekivana preglednost)
+   Uključite "Preglednost (DXF)" (dugme "Preglednost…" za parametre) ili u komandnoj liniji dodajte --preglednost.
+   Program pravi do tri DXF crteža (svaki sa legendom) i jedan Excel:
+     Preglednost_Vp_*.dxf          – potrebna Lz iz Vp (V85) i nagiba (dijagram "Skraćena zaustavna preglednost, fT50 %"), zrake + omotač
+     Preglednost_zahtijevana_*.dxf – zrake zadane dužine L koju unosite Vi (polje "ZAHTIJEVANA dužina zrake L"), zrake + omotač
+     Preglednost_ocekivana_*.dxf   – raspoloživa preglednost prema preprekama koje Vi zadate (vidi dolje); crta prepreke i zrake
+                                     (crvene = raspoloživo manje od potrebnog); potrebna dužina = L (ako je zadana) ili Lz iz Vp
+     Preglednost_rezultati_*.xlsx  – sažetak, tabele po stanicama (po smjeru i strani osovine), tabela elemenata sa ofsetima prepreka
+
+   1) Kolovoz, ivice i osovina oka vozača (u prozoru sekcije, za svaku osovinu posebno)
+      CENTRALNA osovina (u razdjelnom pojasu): upišite POLA širine razdjelnog pojasa i širine traka desnog kolovoza (desno) i lijevog
+      kolovoza (lijevo), npr. pojas 2.5; desno 3.5, 3.5; lijevo 3.5, 3.5. Na crtežu se za svaki kolovoz dobiju: unutrašnja ivica, osovina
+      kolovoza (sredina između traka) i vanjska ivica; ivice su crvene, debljine 0,3 mm na papiru (kvačica "Crtaj ivice kolovoza").
+      Od OSOVINE KOLOVOZA unosi se ofset na desnu i lijevu stranu (u smjeru vožnje) – to su osovine oka vozača iz kojih se crtaju zrake
+      (podrazumijevano pola prve trake, npr. 1.75). Isto važi za lijevi kolovoz (suprotan smjer).
+      ODVOJENE osovine (desna / lijeva): sama osovina je osovina kolovoza; upišite širine traka desno i lijevo od nje (npr. 3.5 i 3.5)
+      i ofset oka desno/lijevo (podrazumijevano pola prve trake).
+   2) Strane: kvačice "desna traka / lijeva traka" biraju iz kojih se osovina oka crtaju zrake (podrazumijevano obje).
+   3) Zahtijevana preglednost: upišite L [m] (npr. 150). Crta se poseban crtež sa zrakama te dužine i omotačem.
+   4) Očekivana preglednost – prepreke po TIPU:
+      - Najprije definišite tipove prepreke i ofset svakog od KRAJNJE IVICE kolovoza (prema van), npr.:
+            otvorena trasa; 3.0      most; 1.17      tunel; 0.5        (vrijednosti su Vaše – program ih ne pretpostavlja)
+      - Zatim izaberite tip koji važi za sve krivine (radijuse i prijelaznice), npr. "otvorena trasa".
+      - Po ELEMENTU: u prozoru "Preglednost…" je tabela svih elemenata trase (sekcija, osovina, br., vrsta, od–do, R). Dvaput kliknite red
+        i izaberite tip prepreke ili upišite ofset [m] za taj element; prazno = važi tip za sve krivine. (Tabela se puni iz odabranih ispisa.)
+      - Po STACIONAŽI (npr. most, tunel) – red u polju izuzetaka:   sekcija; osovina; od-do; tip; strana
+            2; centralna; 7700-7800; most          (krivina na mostu od 7700 do 7800)
+        "unutra"/"vani" se određuju prema smjeru krivine; "desno"/"lijevo" su strane u smjeru rastuće stacionaže.
+        Prioritet: tip za sve < po elementu < po rasponu stacionaža. Primjenjeni ofseti vide se i u listu Elementi_prepreke u Excelu.
+      - Linija prepreke ide paralelno ivici na tom ofsetu; program traži najdužu zraku koju linija (i niveleta) dopušta.
+      - U JSON-u:  "preglednost": {"L_zahtijevano": 150, "strane": ["desno"], "tipovi_prepreka": {"otvorena trasa": 3.0, "most": 1.17, "tunel": 0.5},
+                    "zadani_tip": "otvorena trasa", "prepreke": [{"sekcija": 2, "osovina": "centralna", "od": 7700, "do": 7800, "tip": "most"}]}
+        a u osovini: "razdjelni_pola": 2.5, "trake_desno": [3.5, 3.5], "trake_lijevo": [3.5, 3.5], (opciono "ofset_desno", "ofset_lijevo")
+   5) Prepreke se crtaju (smeđe linije) u sva tri crteža kad su zadane; na crtežu očekivane preglednosti zraka ide najdalje do dodira sa linijom
+      prepreke (mala kružnica = dodirna tačka), a crvene zrake su one kod kojih je raspoloživo manje od potrebnog. NAPOMENA: ako tipovima
+      prepreke ne upišete ofset (ostavite prazno), prepreka ne postoji i crtež očekivane preglednosti se ne pravi.
+   5b) HORIZONTALNA i VERTIKALNA preglednost računaju se u svim slučajevima (Vp, zahtijevana, očekivana): vertikalna iz nivelete
+      (oko 1,0 m / predmet 0,10 m, zaklon na prevojima), horizontalna iz prepreka (ako su zadane; bez prepreka crta se samo omotač).
+      Zrake su obojene: tamnocrvena = horizontalno nedovoljno (prepreka), crvena = vertikalno nedovoljno (niveleta). U Excelu su za svaku
+      stanicu kolone: horizontalno raspoloživo, vertikalno raspoloživo, ukupno, šta ograničava i da li H / V zadovoljavaju; u sažetku
+      su odvojeno nabrojana mjesta gdje H odnosno V nisu zadovoljene.
+   6) Dijagrami: Preglednost_dijagram_*_F_D.png/.pdf (po smjeru/strani) i Preglednost_dijagram_*.dxf – gore brzina Vp (V85) i Vr,
+      dolje potrebna Lz, zahtijevana L i raspoloživa preglednost na istoj stacionaži; nedovoljna preglednost označena crveno.
+   - Zraka = tetiva od oka vozača (1,0 m) do predmeta (0,10 m) ispred, mjereno duž osovine vozne trake; vertikalna provjera uključena.
+     Zraka koja izlazi van trase na kraju lanca ne računa se kao nedostatak. Najveća tražena dužina: polje "Lmax" (podrazumijevano 500 m).
+   - Lz je očitan iz slike dijagrama (odstupanje ≈ 0,1 m). DXF otvorite u AutoCAD-u (ili BricsCAD/DraftSight/LibreCAD) i snimite kao DWG.
+     Koordinate su Y (istok), X (sjever).
+
+KOMANDNA LINIJA (bez prozora)
+   .venv\Scripts\python -m una moj_projekat.json -o izlaz
+   (putanje datoteka u JSON-u mogu biti relativne u odnosu na JSON; vidi primjer\primjer_projekat.json)
+
+
+WORD TEMPLATE (dodatni izlaz)
+Dugme "Word template…" u prozoru (ili polje "template" u JSON-u): odaberite svoj .docx template
+(npr. IPSA obrazac sa naslovnom stranom). Program tada pored izvornog elaborata pravi i drugi fajl
+"..._po_templateu.docx":
+  • naslovna strana, sadržaj dokumentacije, zaglavlja/podnožja i stilovi ostaju iz templata;
+    žuto označena polja (folder, datum, vodeći/odgovorni projektant, saradnici) popunjavaju se iz
+    polja u dijalogu (prazna ostaju žuta);
+  • tekst elaborata (poglavlja, tabele, slike, jednačine) ide u dio "Tekstualna dokumentacija",
+    Prilog A (numerički proračun) u "Numeričku dokumentaciju", Prilog B (grafički prilozi) u "Grafičku";
+  • naslovi tabela i slika prave se kao Word nazivi (Tabela/Table n., Slika / Figure n.), pa ih
+    popis tabela/slika u templatu povlači;
+  • poglavlja zadržavaju moju numeraciju (1–7) kao tekst, da unutrašnje upute "poglavlje 4.3" ostanu tačne.
+Template mora imati stilove NASLOV, PODNASLOV 1, PODNASLOV 2, GLAVNI TEKST, Caption i naslove
+"TEKSTUALNA / NUMERIČKA / GRAFIČKA DOKUMENTACIJA" (kao IPSA obrazac). Tekst elaborata je samo na
+srpskom (nema engleskog prevoda); naslovi dijelova su SR / ENG iz templata.
+Nakon otvaranja u Wordu prihvatite ažuriranje polja (sadržaj i popisi tabela/slika), pa pregledajte.
+
+NAPOMENE O EXCELU
+• Excel prilikom otvaranja sam preračunava sve formule (to može potrajati nekoliko sekundi).
+• Plava polja su ulazni podaci (listovi Ulaz_n, Parametri). Kad zalijepite nove ispise i/ili
+  promijenite parametre, rezultati i dijagrami se ažuriraju.
+• Scenarij sa ograničenjem: list Parametri, ćelija B14 (1 = geometrija, 2 = sa ograničenjem).
+
+ŠTA TREBA PROVJERITI PRIJE PREDAJE (pretpostavke aplikacije – iste kao u dosadašnjem elaboratu)
+• Zakonitost Vp–R: aproksimirana interpolacijom tablice Rmin(Vr) iz Priloga 2 pravilnika.
+• Zakonitost Vp–iN: tablica sastavljena na osnovu dijagrama iz Priloga 2 pravilnika (slika 3-08); preporučuje se kontrola očitanih vrijednosti.
+  Obje tablice možete zamijeniti u "Napredni parametri" očitanim vrijednostima sa grafika.
+• Parametri teških vozila (masa, snaga, CdA…) su pretpostavljeni.
+• Kriterij ΔV 10/20 km/h (Lamm), referentni najveći nagib 5 % – potvrditi.
+• Naziv i izdanje pravilnika provjeriti. Jednačine su u Wordu pisane kao Word-jednačine
+  (u LibreOffice-u se ne prikazuju) – pregledajte ih u Wordu.
+• Sadržaj (TOC) u Wordu: pri otvaranju prihvatite "ažuriranje polja" (ili desni klik > Update field).
+
+POZNATA OGRANIČENJA
+• Poprečni nagib: po osovini se uzima kolona lijeve vanjske trake. Podrazumijevano za ispise
+  sa 2/4/6 traka (kao dosad); za drugačiji ispis u prozoru upišite redni broj kolone.
+• Poprečni nagib se koristi samo u provjerama na lukovima, ne u brzini/vremenu/gorivu.
+• Naplatna rampa/izlaz iz nje nisu modelirani – izbacite taj dio iz raspona sekcije.
+• Stacionaže osovina u susjednim sekcijama smatraju se nominalno jednakim.
+
+PROBLEMI
+• "Pandoc nije pronađen": instalirajte Pandoc (pandoc.org) ili ponovite pip install -r requirements.txt.
+• Greška "datoteka ne postoji / raspon izlazi iz osovine": provjerite OD/DO – sekcija mora ležati
+  unutar raspona stacionaža ispisa (prikazano u logu pri učitavanju).
+• Ako se prozor ne otvara ("No module named tkinter"): ponovo instalirajte Python sa uključenim tcl/tk.
+
+
+=== UNA - ROAD ENGINEERING ANALYSIS: ELABORAT OPTIČKIH ANALIZA (Elaborat 4) ===
+Uključite "Elaborat optičkih analiza (Word)" (ili u JSON-u "optika": {"ukljuci": true}). Program tada (uz Preglednost) pravi:
+ - Elaborat_4_Opticke_analize_<projekat>.docx: 1 Uvod, 2 Zahtijevana preglednost Pzp=f(Vp), 3 Raspoloživa i preticajna preglednost
+   (tabele i dijagram za oba smjera, %Pp prema minimumu), 4 Model trase, 5 Vizuelizacija, 6 Sadržaj i Sadržaj grafičkih priloga;
+ - Optika_dijagram_*.png/pdf (brzina Vp, Pzp, Pr, Pp po stacionaži) i Optika_preticanje_<projekat>.xlsx.
+Preticanje (BiH Smjernice 4.2.5.3, Tabela 30): Pp = 330/380/450/520/600/680 m za 50…100 km/h (promjena: "Pp_tablica"); zrake se crtaju iz LIJEVE (preticajne) trake
+za razdvojene osovine i centralnu osovinu (Preglednost_preticanje_*.dxf); minimum: grupa A 25 %, B/C 15 % ("grupa", "min_proc").
+
+Visina predmeta (prepreke) za vertikalnu preglednost: podrazumijevano AUTOMATSKI po Tabeli 29 (BiH Smjernice): h2 = 0 / 0,05 / 0,10 / 0,15 m
+zavisno od brzine Vp u presjeku (40–140 km/h). Za 50 i 100 km/h tabela ima dvije vrijednosti – podrazumijeva se manja ("h2_varijanta": "nize"; "vise" = veća).
+Ako upišete visinu (npr. 0.10, 0.15, 0.20), koristi se ta konstantna vrijednost; za preticanje posebno: optika.h_predmeta_preticanje.
+
+Tip puta za preticanje ("optika": {"tip_puta": "auto" | "dvosmjerni" | "razdvojeni"}): podrazumijevano "auto" – ako su sve sekcije sa razdvojenim kolovozima (desna/lijeva/centralna osovina),
+preticajna preglednost se NE računa (vozna + preticajna traka; Tabela 30 vrijedi za dvosmjerne puteve sa jednim kolovozom) i elaborat to obrazlaže;
+za dvosmjerni put sa jednim kolovozom (sekcija "osovina") računa se Pp (Tabela 30), %Pp i poredi sa minimumom (25 % grupa A, 15 % B/C).
+
+Elaborat 4 po templateu: ako je zadan Word template (isti kao za Elaborat 3, dugme "Word template…"), uz standardni Word pravi se i
+Elaborat_4_Opticke_analize_<projekat>_po_templateu.docx (tekstualni dio, numerička i grafička dokumentacija u templateu). Na naslovnoj strani
+možete zadati drugi folder za Elaborat 4: "template": {"folder_sr_optika": "...", "folder_en_optika": "..."}.
+
+NOVO – postavke, više elemenata odjednom, izuzeci
+- Meni Projekat: „Spremi projekat (Ctrl+S)“ sprema ispise i SVE postavke (uključujući kvačice Word/Excel/Preglednost/Optika). Program pri pokretanju nudi učitavanje posljednjeg projekta.
+- „Spremi postavke (bez ispisa)…“ i „Učitaj postavke…“: postavke (parametri, preglednost, preticanje, template, tekstovi) prenose se u novi projekat; sekcije i ispise dodajete ručno.
+- Preglednost… → tabela elemenata: označite više redova (Ctrl/Shift) pa „Uredi odabrane…“ da im odjednom zadate tip prepreke (npr. most).
+- Preglednost… → „Izuzeci po stacionaži“: „Dodaj izuzetak…“ otvara prozor s OD, DO, tipom/ofsetom prepreke, stranom (npr. most koji zahvata samo dio prijelaznice).
+- Automatsko prepoznavanje ispisa: uzdužni profil se sada ispravno prepoznaje i kad sadrži tabelu poprečnih nagiba.
+
+NOVO – usklađivanje s Prilogom 2 Pravilnika (Elaborat 3 i 4)
+- Vp–R: Rmin(Vr) se računa obrascem sa slike 3-07 (Vri² / (127·(fR + ipk,max)), ipk,max = 7 %); Vp–iN je očitano sa slike 3-08 (tačnost ≈ ±5 km/h). Ako je projekat ranije spremljen s vlastitim tablicama, u „Naprednim parametrima" kliknite „Vrati podrazumijevano".
+- maxVr: novo polje „max Vr prema tabeli 3-04"; max Vr = manja od vrijednosti Vr + dodatak i unesene vrijednosti (prazno = samo Vr + dodatak).
+- Put ubrzanja/usporenja po obrascu sa slike 3-09 (L = 0,1·Vsr·ΔV ⇒ a = d = 0,7716 m/s²); isključuje se poljem „obrazac_puta" = 0.
+- Upozorenje o uslovu Vri ≤ Vp u poglavlju 4 Elaborata 3 (Vp se ne podiže na Vr, nego se element označava).
+- Poglavlje 5: „Tegljač (Pravilnik)" koristi krivu sile vuče izvedenu iz dijagrama 3-10 (ravnotežne brzine 68…15 km/h pri 2…7 %); „Tegljač (savremeni)", autovoz i putničko vozilo računaju se konstantnom snagom (pretpostavke). Potrošnja i prazan hod su po vozilu.
+- Elaborat 4: provjera Pr (Pzp) ≥ Xd (Xd = 0,1·Vsr·ΔV) na zonama usporenja profila Vp.

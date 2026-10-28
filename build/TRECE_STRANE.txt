@@ -1,0 +1,6 @@
+Obavještenja o komponentama trećih strana (dopuniti tačnim verzijama pri izdavanju)
+- Python (PSF License) – python.org
+- NumPy, Matplotlib (BSD/PSF-stil), openpyxl (MIT), python-docx (MIT), cryptography (Apache-2.0/BSD), Nuitka (Apache-2.0; izlaz se smije distribuirati)
+- Pandoc (GPL v2+) – pandoc.org. Pokreće se kao zasebni program (pandoc\pandoc.exe). Izvorni kod: https://github.com/jgm/pandoc
+  Uz distribuciju priložiti tekst GPL licence (pandoc\COPYING.txt iz Pandoc paketa) i ostaviti ga u folderu pandoc.
+- Tcl/Tk (BSD-stil) – za prozor aplikacije

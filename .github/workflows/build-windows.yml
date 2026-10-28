@@ -1,0 +1,39 @@
+name: Build UNA_Setup.exe (Windows)
+
+on:
+  workflow_dispatch:          # ručno: Actions → Build UNA_Setup.exe → Run workflow
+  push:
+    tags: ["v*"]              # ili tag npr. v1.1.0
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: sudo apt-get update && sudo apt-get install -y pandoc
+      - run: pip install -r requirements.txt pytest
+      - run: pytest -q
+
+  windows-installer:
+    needs: tests
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Inno Setup
+        run: choco install innosetup --no-progress -y
+      - name: Build
+        shell: powershell
+        run: build\build_ci.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: UNA_Setup
+          path: dist/UNA_Setup.exe
+          if-no-files-found: error
+      - name: Release (samo za tag)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with: { files: dist/UNA_Setup.exe }

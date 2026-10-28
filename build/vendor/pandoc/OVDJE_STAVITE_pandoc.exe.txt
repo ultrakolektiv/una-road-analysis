@@ -1,0 +1,1 @@
+Ovdje stavite pandoc.exe (vidi README_BUILD.txt)

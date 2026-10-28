@@ -1,0 +1,101 @@
+{
+ "projekat": "Markovići – Lastva Grbaljska (primjer)",
+ "Vr": 100,
+ "izlaz": "izlaz_primjer",
+ "sekcije": [
+  {
+   "tip": "razdvojene",
+   "od": 0,
+   "do": 6640,
+   "desna": {
+    "h": "DESNA.TXT",
+    "v": "DESNAUZDUZNI.TXT",
+    "x": "DESNAPOPRECNINAGIBI.TXT",
+    "trake_desno": [
+     3.5
+    ],
+    "trake_lijevo": [
+     3.5
+    ]
+   },
+   "lijeva": {
+    "h": "LIJEVA.TXT",
+    "v": "LIJEVAUZDUZNI.TXT",
+    "x": "POPRECNI.TXT",
+    "trake_desno": [
+     3.5
+    ],
+    "trake_lijevo": [
+     3.5
+    ]
+   }
+  },
+  {
+   "tip": "centralna",
+   "od": 6640,
+   "do": 7973.924,
+   "centralna": {
+    "h": "CENTRALNA.TXT",
+    "v": "CENTRALNAUZDUZNI.TXT",
+    "x": "CENTRALNAPOPNAGIBI.TXT",
+    "trake_desno": [
+     3.5,
+     3.5
+    ],
+    "trake_lijevo": [
+     3.5,
+     3.5
+    ],
+    "razdjelni_pola": 2.5
+   },
+   "ogranicenja": [
+    {
+     "od": 7624.326,
+     "do": 7973.924,
+     "v": 80
+    }
+   ],
+   "ogranicenja_opis": "Investitor je zahtijevao da se zadnja krivina projektuje za brzinu 80 km/h (navesti dokument i datum)."
+  }
+ ],
+ "napomene": [
+  "Zadnji pravac (st. 7973,924 – 8192,048) nije u proračunu jer vozač poslije zadnje krivine usporava prema naplatnoj rampi."
+ ],
+ "preglednost": {
+  "ukljuci": true,
+  "h_oka": 1.0,
+  "korak_crtez": 20,
+  "korak_proracun": 5,
+  "mjerilo": 1000,
+  "strane": [
+   "desno",
+   "lijevo"
+  ],
+  "L_zahtijevano": 150,
+  "prepreke": [
+   {
+    "sekcija": 2,
+    "osovina": "centralna",
+    "od": 7700,
+    "do": 7800,
+    "tip": "most"
+   }
+  ],
+  "ivice": true,
+  "ivica_debljina": 0.3,
+  "Lmax": 500,
+  "tipovi_prepreka": {
+   "otvorena trasa": 3.0,
+   "most": 1.17,
+   "tunel": 0.5
+  },
+  "zadani_tip": "otvorena trasa",
+  "dodatak_L": 7
+ },
+ "optika": {
+  "ukljuci": true,
+  "grupa": "A",
+  "Pp_po": "Vr",
+  "korak_tabela": 50
+ }
+}

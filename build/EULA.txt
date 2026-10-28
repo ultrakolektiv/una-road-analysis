@@ -1,0 +1,16 @@
+LICENCNI UGOVOR ZA KRAJNJEG KORISNIKA (EULA) – Elaborat 3
+*** NACRT – obavezno ga pregleda pravnik i prilagodi propisima Vaše države prije distribucije ***
+
+1. Autorska prava. Softver "Elaborat 3" je vlasništvo [VAŠA FIRMA / autor]. Prodajom se ne prenosi vlasništvo, već pravo korištenja.
+2. Licenca. Dobijate neekskluzivno, neprenosivo pravo korištenja softvera na broju računara i u roku navedenom u licenci.
+   Licenca je vezana za ID računara i/ili rok važenja.
+3. Zabrane. Nije dozvoljeno: kopiranje i distribucija softvera ili licence; dekompilacija, rastavljanje ili zaobilaženje zaštite
+   (osim u mjeri u kojoj to zakon izričito dozvoljava); mijenjanje, brisanje ili krivotvorenje licence; iznajmljivanje ili ustupanje trećima.
+4. Izlazni dokumenti. Dokumenti (Word/Excel) koje pomoću softvera napravite pripadaju Vama. U njihova svojstva upisuje se ID licence.
+5. Stručna odgovornost korisnika. Softver je pomoćni alat za proračun. Rezultate MORA provjeriti ovlašteni inženjer prije upotrebe u
+   projektnoj dokumentaciji. Metodologija (Pravilnik/Priručnik, tablice Vp–R i Vp–iN, parametri vozila) može se razlikovati od zahtjeva
+   konkretnog Investitora ili revidenta; korisnik je odgovoran za izbor i provjeru ulaznih podataka i parametara.
+6. Odricanje i ograničenje odgovornosti. Softver se daje "kakav jeste", bez garancija u mjeri koju zakon dozvoljava.
+   Odgovornost autora ograničena je na iznos plaćene licence; autor ne odgovara za posrednu štetu ni izgubljenu dobit.
+7. Prestanak. Licenca prestaje istekom roka ili kršenjem ugovora; korisnik je dužan prestati sa korištenjem i obrisati softver.
+8. Primjenjivo pravo i nadležnost: [navesti državu / sud].

@@ -1,0 +1,6 @@
+numpy
+matplotlib
+openpyxl
+python-docx
+cryptography
+pypandoc_binary
