@@ -34,19 +34,20 @@ button{cursor:pointer}button:hover{background:#26304a}
 <div class="pn" id="bot"><canvas id="mm" width="300" height="220"></canvas><canvas id="ch" width="1600" height="220"></canvas></div>
 <script>
 const DATA=/*__DATA__*/null;
-const L={bs:{title:"Vožnja kroz koridor (Civil 3D) – oko vozača",st:"Stacionaža",sp:"Brzina Vp",rad:"Radijus",str:"pravac",cs:"Poprečni nagib",gr:"Uzdužni nagib",el:"Element",e0:"pravac",e1:"prijelaznica",e2:"kružni luk",sd:"Raspoloživa preglednost",rq:"Zahtijevana preglednost",okt:"PREGLEDNOST ZADOVOLJAVA",bh:"NEDOVOLJNO – horizontalna (prepreka)",bv:"NEDOVOLJNO – vertikalna (niveleta)",eye:"Oko [m]",left:"lijevo",right:"desno",t:{otvorena:"Otvorena trasa",most:"Most / vijadukt",tunel:"Tunel"},ln:"Raspoloživa",lr:"Zahtijevana",spd:"Brzina",pr:"Profil",rail:"Čelična ograda",rl:"na"},
-en:{title:"Corridor drive-through (Civil 3D) – driver's eye",st:"Chainage",sp:"Speed Vp",rad:"Radius",str:"tangent",cs:"Cross slope",gr:"Grade",el:"Element",e0:"tangent",e1:"transition",e2:"circular arc",sd:"Available sight distance",rq:"Required sight distance",okt:"SIGHT DISTANCE OK",bh:"INSUFFICIENT – horizontal (obstacle)",bv:"INSUFFICIENT – vertical (grade line)",eye:"Eye [m]",left:"left",right:"right",t:{otvorena:"Open road",most:"Bridge / viaduct",tunel:"Tunnel"},ln:"Available",lr:"Required",spd:"Speed",pr:"Section",rail:"Steel barrier",rl:"at"}};
+const L={bs:{title:"Vožnja kroz koridor (Civil 3D) – oko vozača",st:"Stacionaža",sp:"Brzina Vp",rad:"Radijus",str:"pravac",cs:"Poprečni nagib",gr:"Uzdužni nagib",el:"Element",e0:"pravac",e1:"prijelaznica",e2:"kružni luk",sd:"Raspoloživa preglednost",rq:"Zahtijevana preglednost",oko:"Oko od ose kolovoza",pre:"Prepreka od ivice kolovoza",ob:"Prepreka (zraka)",nop:"nema",okt:"PREGLEDNOST ZADOVOLJAVA",bh:"NEDOVOLJNO – horizontalna (prepreka)",bv:"NEDOVOLJNO – vertikalna (niveleta)",eye:"Oko [m]",left:"lijevo",right:"desno",t:{otvorena:"Otvorena trasa",most:"Most / vijadukt",tunel:"Tunel"},ln:"Raspoloživa",lr:"Zahtijevana",spd:"Brzina",pr:"Profil",rail:"Čelična ograda",rl:"na"},
+en:{title:"Corridor drive-through (Civil 3D) – driver's eye",st:"Chainage",sp:"Speed Vp",rad:"Radius",str:"tangent",cs:"Cross slope",gr:"Grade",el:"Element",e0:"tangent",e1:"transition",e2:"circular arc",sd:"Available sight distance",rq:"Required sight distance",oko:"Eye from carriageway axis",pre:"Obstacle from carriageway edge",ob:"Obstacle (ray)",nop:"none",okt:"SIGHT DISTANCE OK",bh:"INSUFFICIENT – horizontal (obstacle)",bv:"INSUFFICIENT – vertical (grade line)",eye:"Eye [m]",left:"left",right:"right",t:{otvorena:"Open road",most:"Bridge / viaduct",tunel:"Tunnel"},ln:"Available",lr:"Required",spd:"Speed",pr:"Section",rail:"Steel barrier",rl:"at"}};
 let lang=DATA.lang==="en"?"en":"bs";const T=()=>L[lang];
 const cv=document.getElementById('cv'),cx=cv.getContext('2d'),mm=document.getElementById('mm'),mx=mm.getContext('2d'),ch=document.getElementById('ch'),chx=ch.getContext('2d');
 const rtSel=document.getElementById('rt');Object.keys(DATA.routes).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=DATA.routes[k].naziv;rtSel.appendChild(o)});
 let R=null,key=null,q=0,playing=true,speedF=1,eyeH=DATA.h,last=0,yawS=null,pitS=0,SEC=[];
 const bs=(arr,v)=>{let lo=0,hi=arr.length-1;while(hi-lo>1){const m=(lo+hi)>>1;if(arr[m]<=v)lo=m;else hi=m}return lo};
 function zp(F,o){const n=F.length;if(!n)return 0;if(o<=F[0][0])return F[0][1];if(o>=F[n-1][0])return F[n-1][1];let lo=0,hi=n-1;while(hi-lo>1){const m=(lo+hi)>>1;if(F[m][0]<=o)lo=m;else hi=m}const f=(o-F[lo][0])/((F[hi][0]-F[lo][0])||1);return F[lo][1]+(F[hi][1]-F[lo][1])*f}
-function setRoute(k){key=k;rtSel.value=k;R=DATA.routes[k];SEC=[];const n=R.q.length;
+function setRoute(k){key=k;rtSel.value=k;SEC=[];const n=R_len(k);R=DATA.routes[k];
  for(let i=0;i<n;i++){const a=Math.max(0,i-1),b=Math.min(n-1,i+1);let tx=R.x[b]-R.x[a],ty=R.y[b]-R.y[a];const l=Math.hypot(tx,ty)||1;tx/=l;ty/=l;const e=R.e[i],F=R.F[i];
-  SEC.push({i,q:R.q[i],s:R.s[i],x:R.x[i],y:R.y[i],z:R.z[i],tx,ty,nx:ty,ny:-tx,F,E:e,kind:R.kind[i],gr:R.gr[i],rails:R.rails[i],box:R.box[i],ring:R.ring[i],v:R.v[i],g:R.g[i],k:R.k[i],el:R.el[i],D:R.D[i],Lz:R.Lz[i],ok:R.ok[i],ec:0,zl:0,ln:R.ln[i]})}
- for(let i=0;i<n;i++){let a=0,c=0;for(let j=Math.max(0,i-18);j<=Math.min(n-1,i+18);j++){a+=SEC[j].ln;c++}const w=a/c;SEC[i].ec=w*SEC[i].E.e/2;SEC[i].zl=SEC[i].z+zp(SEC[i].F,SEC[i].ec)}
+  SEC.push({i,q:R.q[i],s:R.s[i],x:R.x[i],y:R.y[i],z:R.z[i],tx,ty,nx:ty,ny:-tx,F,E:e,kind:R.kind[i],gr:R.gr[i],ob:R.ob[i],box:R.box[i],ring:R.ring[i],v:R.v[i],g:R.g[i],k:R.k[i],el:R.el[i],D:R.D[i],Lz:R.Lz[i],ok:R.ok[i],ray:R.ray[i],lim:R.lim[i],hp:R.hp[i],ln:R.ln[i],ec:0,zl:0,lat:0})}
+ for(let i=0;i<n;i++){let a=0,c=0;for(let j=Math.max(0,i-18);j<=Math.min(n-1,i+18);j++){a+=SEC[j].ln;c++}const w=(a/c+1)/2;SEC[i].ec=R.latL[i]+(R.latD[i]-R.latL[i])*w;SEC[i].zl=R.zeL[i]+(R.zeD[i]-R.zeL[i])*w}
  q=R.q[0];const sl=document.getElementById('sl');sl.max=R.q[n-1]-R.q[0];yawS=null;buildMini()}
+function R_len(k){return DATA.routes[k].q.length}
 function smp(v){const n=SEC.length;v=Math.min(Math.max(v,SEC[0].q),SEC[n-1].q-1e-6);const i=bs(R.q,v),a=SEC[i],b=SEC[i+1],f=(v-a.q)/((b.q-a.q)||1);const lp=(u,w)=>u+(w-u)*f;
  let tx=lp(a.tx,b.tx),ty=lp(a.ty,b.ty);const l=Math.hypot(tx,ty)||1;tx/=l;ty/=l;const ec=lp(a.ec,b.ec);
  return {i,q:v,x:lp(a.x,b.x)+ty*ec,y:lp(a.y,b.y)-tx*ec,z:lp(a.zl,b.zl),tx,ty,s:lp(a.s,b.s),v:lp(a.v,b.v),g:lp(a.g,b.g),k:lp(a.k,b.k),D:lp(a.D,b.D),Lz:lp(a.Lz,b.Lz),ok:a.ok,el:a.el,sec:a,sb:b,f}}
@@ -84,19 +85,23 @@ function strip(a,b,fa){
   poly([W(a,inn,za),W(a,inn,ta),W(b,inb,tb),W(b,inb,zb)],fog(col));poly([W(a,inn,ta),W(a,ouA,ta),W(b,ouB,tb),W(b,inb,tb)],fog([col[0]*.88,col[1]*.88,col[2]*.88]))}
  if(tun&&a.ring.length&&a.ring.length===b.ring.length){const A=a.ring,B=b.ring;for(let j=0;j<A.length-1;j++){const sh=(j<4||j>A.length-5)?C.tun:C.tunC;poly([W(a,A[j][0],A[j][1]),W(a,A[j+1][0],A[j+1][1]),W(b,B[j+1][0],B[j+1][1]),W(b,B[j][0],B[j][1])],fog(sh))}
   const kq=Math.ceil(a.q/12)*12;if(kq<b.q){const pm=smp(kq),mid=A[(A.length>>1)];const s1=proj([pm.x+pm.ty*0,pm.y,pm.z+mid[1]+(a.z-pm.z)]);if(s1){const gl=mix([255,244,200],C.dark,Math.min(1,fa/280));cx.fillStyle=gl;const w=Math.max(2,foc*2.2/s1[2]);cx.fillRect(s1[0]-w/2,s1[1]-w*.1,w,w*.2)}}}
- if(a.rails.length&&b.rails.length===a.rails.length){const fogr=fog(C.rail);for(let i=0;i<a.rails.length;i++){const oa=a.rails[i],ob=b.rails[i],za=zp(a.F,oa),zb=zp(b.F,ob);
+ for(let i=0;i<2;i++){const oa=a.ob[i],ob=b.ob[i];if(oa==null||ob==null)continue;const za=zp(a.F,oa),zb=zp(b.F,ob);
+  if(a.kind==="otvorena"){const fogr=fog(C.rail);
    poly([W(a,oa,za+.46),W(a,oa,za+.78),W(b,ob,zb+.78),W(b,ob,zb+.46)],fogr);poly([W(a,oa,za+.50),W(a,oa,za+.55),W(b,ob,zb+.55),W(b,ob,zb+.50)],fog([150,154,158]));
-   const kq=Math.ceil(a.q/4)*4;if(kq<b.q){const f=(kq-a.q)/((b.q-a.q)||1),o=oa+(ob-oa)*f,z=za+(zb-za)*f,p=smp(kq);const px=a.x+(b.x-a.x)*f+(a.nx+(b.nx-a.nx)*f)*o,py=a.y+(b.y-a.y)*f+(a.ny+(b.ny-a.ny)*f)*o,pz=a.z+(b.z-a.z)*f+z;const s1=proj([px,py,pz]),s2=proj([px,py,pz+.78]);if(s1&&s2){cx.strokeStyle=fogr;cx.lineWidth=Math.max(1,foc*0.1/s1[2]);cx.beginPath();cx.moveTo(s1[0],s1[1]);cx.lineTo(s2[0],s2[1]);cx.stroke()}}}}
+   const kq=Math.ceil(a.q/4)*4;if(kq<b.q){const f=(kq-a.q)/((b.q-a.q)||1),o=oa+(ob-oa)*f,z=za+(zb-za)*f;const px=a.x+(b.x-a.x)*f+(a.nx+(b.nx-a.nx)*f)*o,py=a.y+(b.y-a.y)*f+(a.ny+(b.ny-a.ny)*f)*o,pz=a.z+(b.z-a.z)*f+z;const s1=proj([px,py,pz]),s2=proj([px,py,pz+.78]);if(s1&&s2){cx.strokeStyle=fogr;cx.lineWidth=Math.max(1,foc*0.1/s1[2]);cx.beginPath();cx.moveTo(s1[0],s1[1]);cx.lineTo(s2[0],s2[1]);cx.stroke()}}}
+  else{poly([W(a,oa,za),W(a,oa,za+.7),W(b,ob,zb+.7),W(b,ob,zb)],fog([255,120,60]),.35)}}
 }
-function ray(d,colL,colT,txt,hh,wpx,below){ // zraka od oka do krajnje tačke raspoložive/zahtijevane preglednosti (tetiva kroz krivinu)
- const t=smp(q+d),e=CAM.e,eye=[CAM.ex,CAM.ey,CAM.ez],end=[t.x,t.y,t.z+hh];const N=40,pts=[];
- for(let k=1;k<=N;k++){const f=k/N,P=[eye[0]+(end[0]-eye[0])*f,eye[1]+(end[1]-eye[1])*f,eye[2]+(end[2]-eye[2])*f-0.35*(1-f)];const s=proj(P);if(s)pts.push(s)}
- if(pts.length>1){cx.lineCap="round";cx.lineJoin="round";cx.strokeStyle="rgba(0,0,0,.55)";cx.lineWidth=wpx+4;cx.beginPath();pts.forEach((s,i)=>i?cx.lineTo(s[0],s[1]):cx.moveTo(s[0],s[1]));cx.stroke();
-  cx.strokeStyle=colL;cx.lineWidth=wpx;cx.beginPath();pts.forEach((s,i)=>i?cx.lineTo(s[0],s[1]):cx.moveTo(s[0],s[1]));cx.stroke()}
- const s0=proj(end),s1=proj([t.x,t.y,t.z]);if(s0){if(s1){cx.strokeStyle=colL;cx.lineWidth=wpx;cx.beginPath();cx.moveTo(s1[0],s1[1]);cx.lineTo(s0[0],s0[1]);cx.stroke()}
-  cx.beginPath();cx.fillStyle=colL;cx.arc(s0[0],s0[1],wpx*1.3,0,7);cx.fill();cx.strokeStyle="#000";cx.lineWidth=2;cx.stroke();
-  const fs=Math.max(15,Math.min(26,3800/s0[2]+14));cx.font=`700 ${fs}px system-ui`;cx.textAlign="center";let w=cx.measureText(txt).width+16,yy=s0[1]-wpx*2-fs*.6; if(below)yy=s0[1]+wpx*2+fs*1.9;
-  cx.fillStyle="rgba(8,10,14,.82)";cx.fillRect(s0[0]-w/2,yy-fs,w,fs*1.35);cx.strokeStyle=colL;cx.lineWidth=2;cx.strokeRect(s0[0]-w/2,yy-fs,w,fs*1.35);cx.fillStyle=colT;cx.fillText(txt,s0[0],yy-fs*.05)}}
+function lineRay(P0,P1,colL,wpx){const N=60,pts=[];for(let k=0;k<=N;k++){const f=k/N,P=[P0[0]+(P1[0]-P0[0])*f,P0[1]+(P1[1]-P0[1])*f,P0[2]+(P1[2]-P0[2])*f];const s=proj(P);if(s)pts.push(s)}
+ if(pts.length>1){cx.lineCap="round";cx.lineJoin="round";for(const [c,w] of [["rgba(0,0,0,.55)",wpx+4],[colL,wpx]]){cx.strokeStyle=c;cx.lineWidth=w;cx.beginPath();pts.forEach((s,i)=>i?cx.lineTo(s[0],s[1]):cx.moveTo(s[0],s[1]));cx.stroke()}}}
+function tag(P,colL,colT,txt,wpx,below){const s0=proj(P);if(!s0)return;cx.beginPath();cx.fillStyle=colL;cx.arc(s0[0],s0[1],wpx*1.3,0,7);cx.fill();cx.strokeStyle="#000";cx.lineWidth=2;cx.stroke();
+ const fs=Math.max(15,Math.min(26,3800/s0[2]+14));cx.font=`700 ${fs}px system-ui`;cx.textAlign="center";const w=cx.measureText(txt).width+16;let yy=s0[1]-wpx*2-fs*.6;if(below)yy=s0[1]+wpx*2+fs*1.9*(below===2?2.1:1);
+ cx.fillStyle="rgba(8,10,14,.82)";cx.fillRect(s0[0]-w/2,yy-fs,w,fs*1.35);cx.strokeStyle=colL;cx.lineWidth=2;cx.strokeRect(s0[0]-w/2,yy-fs,w,fs*1.35);cx.fillStyle=colT;cx.fillText(txt,s0[0],yy-fs*.05)}
+function rays(sec,bad){const r=sec.ray;if(!r)return;const t=T(),P0=[r[0],r[1],r[2]];
+ const req=[r[6],r[7],r[8]],av=[r[3],r[4],r[5]];
+ lineRay(P0,req,"#ffb020",5);lineRay(P0,av,bad?"#ff5a4f":"#38bdf8",7);
+ tag(req,"#ffb020","#ffd27a",t.lr+" "+sec.Lz.toFixed(0)+" m",5,true);
+ tag(av,bad?"#ff5a4f":"#38bdf8",bad?"#ffb4ae":"#bfeaff",t.ln+" "+Math.min(sec.D,900).toFixed(0)+" m",7,false);
+ if(r[9])tag(r[9],"#ff5a4f","#ffb4ae",t.ob,6,2)}
 function frame(){
  const dpr=Math.min(2,window.devicePixelRatio||1);if(cv.width!==(cv.clientWidth*dpr|0)||cv.height!==(cv.clientHeight*dpr|0)){cv.width=cv.clientWidth*dpr;cv.height=cv.clientHeight*dpr}
  Wd=cv.width;Hd=cv.height;foc=Wd/(2*Math.tan(35*Math.PI/180));hx=Wd/2;hy=Hd*0.47;
@@ -107,18 +112,18 @@ function frame(){
  while(j<n-1){const d=SEC[j].q-q;const st=d<40?1:d<120?2:d<300?4:8;j=Math.min(n-1,j+st);idx.push(j);if(SEC[j].q-q>maxd)break}
  for(let k=idx.length-2;k>=0;k--)strip(SEC[idx[k]],SEC[idx[k+1]],SEC[idx[k]].q-q);
  const Lz=e.Lz,Dv=Math.min(e.D,900),bad=e.ok!==0&&Dv<Lz;
- if(Lz>3&&q+Lz<qend)ray(Lz,"#ffb020","#ffd27a",T().lr+" "+Lz.toFixed(0)+" m",0.0,5,true);
- if(Dv>3&&q+Dv<qend&&Dv<900)ray(Dv,bad?"#ff5a4f":"#38bdf8",bad?"#ffb4ae":"#bfeaff",T().ln+" "+Dv.toFixed(0)+" m",0.0,7);
- const hg=cx.createLinearGradient(0,Hd*.92,0,Hd);hg.addColorStop(0,"rgba(0,0,0,0)");hg.addColorStop(1,"rgba(0,0,0,.85)");cx.fillStyle=hg;cx.fillRect(0,Hd*.9,Wd,Hd*.1);
+ rays(e.sec,bad);
+  const hg=cx.createLinearGradient(0,Hd*.92,0,Hd);hg.addColorStop(0,"rgba(0,0,0,0)");hg.addColorStop(1,"rgba(0,0,0,.85)");cx.fillStyle=hg;cx.fillRect(0,Hd*.9,Wd,Hd*.1);
  hud(e,bad,Lz,Dv);chart();mini(e)}
 function fmtSta(s){const k=Math.floor(s/1000),m=s-k*1000;return 'km '+k+'+'+m.toFixed(2).padStart(6,'0')}
+function obTxt(a,t){const v=a.ob.filter(x=>x!=null);if(!v.length)return t.nop;return v.map(x=>(Math.abs(x)-a.E.e).toFixed(2)+' m').join(' / ')}
 function hud(e,bad,Lz,Dv){const t=T(),id=x=>document.getElementById(x),a=e.sec;id('t_proj').textContent=(DATA.projekat||'')+' · '+t.title;id('v').textContent=e.v.toFixed(0);
  const k=Math.abs(e.k),Rr=k>1/9000?1/k:0,dir=e.k>0?t.right:t.left;
  const csl=(zp(a.F,a.E.e)-zp(a.F,0))/(a.E.e||1)*100;
- const rows=[[t.st,fmtSta(e.s)],[t.el,t['e'+e.el]],[t.rad,Rr?`R=${Rr.toFixed(0)} m (${dir})`:t.str],[t.cs,csl.toFixed(1)+' %'],[t.gr,(e.g>=0?'+':'')+e.g.toFixed(2)+' %'],[t.pr,t.t[a.kind]||a.kind],[t.sd,Dv>=900?'>900 m':Dv.toFixed(0)+' m'],[t.rq,Lz.toFixed(0)+' m']];
+ const rows=[[t.st,fmtSta(e.s)],[t.el,t['e'+e.el]],[t.rad,Rr?`R=${Rr.toFixed(0)} m (${dir})`:t.str],[t.cs,csl.toFixed(1)+' %'],[t.gr,(e.g>=0?'+':'')+e.g.toFixed(2)+' %'],[t.pr,t.t[a.kind]||a.kind],[t.sd,Dv>=900?'>900 m':Dv.toFixed(0)+' m'],[t.rq,Lz.toFixed(0)+' m'],[t.oko,Math.abs(e.sec.ec).toFixed(2)+' m ('+(e.sec.ec>=0?t.right:t.left)+')'],[t.pre,obTxt(a,t)]];
  id('tb').innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('');
  const st=id('st');const lim=e.ok===1?t.bh:e.ok===2?t.bv:'';st.className=bad?'bad':'ok';st.textContent=bad?lim:t.okt;
- id('pfn').textContent=t.t[a.kind]||a.kind;id('pfo').textContent=a.rails.length?t.rail+' '+t.rl+' '+DATA.rail_off.toFixed(2)+' m':'';
+ id('pfn').textContent=t.t[a.kind]||a.kind;id('pfo').textContent='';
  id('sl').value=q-R.q[0]}
 let mmPts=null;
 function buildMini(){const xs=R.x,ys=R.y;let x0=1e18,x1=-1e18,y0=1e18,y1=-1e18;for(let i=0;i<xs.length;i++){x0=Math.min(x0,xs[i]);x1=Math.max(x1,xs[i]);y0=Math.min(y0,ys[i]);y1=Math.max(y1,ys[i])}

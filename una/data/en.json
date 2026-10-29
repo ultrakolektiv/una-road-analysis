@@ -890,5 +890,11 @@
 "Vožnja kroz koridor (HTML): {0}": "Corridor drive-through (HTML): {0}",
 "Koridor: datoteka ne postoji: {0}": "Corridor: file does not exist: {0}",
 "Vožnja kroz koridor (Civil 3D LandXML) …": "Corridor drive-through (Civil 3D LandXML) …",
-"Koridor_vizura_{0}.html": "Corridor_drive_{0}.html"
+"Koridor_vizura_{0}.html": "Corridor_drive_{0}.html",
+"Koridor: nema proračuna preglednosti za ovu osovinu (uključite preglednost).": "Corridor: no sight-distance calculation for this alignment (enable sight distance).",
+"Koridor: osovina '{0}' na st. {1:.1f} je {2:.0f} m od osovine u UNA projektu – koordinate ili stacionaže se ne poklapaju.": "Corridor: alignment '{0}' at ch. {1:.1f} is {2:.0f} m from the alignment in the UNA project – coordinates or chainages do not match.",
+"Koridor → proračun: sekcija {0} ({1}): širina trake {2} → {3:.2f} m.": "Corridor → calculation: segment {0} ({1}): lane width {2} → {3:.2f} m.",
+"Koridor → proračun: prepreka na otvorenoj trasi {0:.2f} m od ivice kolovoza.": "Corridor → calculation: obstacle on open road {0:.2f} m from carriageway edge.",
+"Koridor → proračun: dionice mosta/tunela preuzete iz koridora ({0}).": "Corridor → calculation: bridge/tunnel sections taken from the corridor ({0}).",
+"Koridor: NPP je uključen – prepreke u proračunu ostaju prema NPP-u (slika prati proračun).": "Corridor: typical sections (NPP) are on – obstacles in the calculation follow the NPP (the picture follows the calculation)."
 }
