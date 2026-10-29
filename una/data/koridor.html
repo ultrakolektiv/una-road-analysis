@@ -101,7 +101,7 @@ function rays(sec,bad){const r=sec.ray;if(!r)return;const t=T();
  const req=smooth('r',[r[6],r[7],r[8]]),av=smooth('a',[r[3],r[4],r[5]]);
  tag(req,"#ffb020","#ffd27a",t.lr+" "+sec.Lz.toFixed(0)+" m",6,true);
  tag(av,bad?"#ff5a4f":"#38bdf8",bad?"#ffb4ae":"#bfeaff",t.ln+" "+Math.min(sec.D,900).toFixed(0)+" m",8,false);
- if(r[9])tag(smooth('c',r[9]),"#ff5a4f","#ffb4ae",t.ob,6,2)}
+}
 function frame(){
  const dpr=Math.min(2,window.devicePixelRatio||1);if(cv.width!==(cv.clientWidth*dpr|0)||cv.height!==(cv.clientHeight*dpr|0)){cv.width=cv.clientWidth*dpr;cv.height=cv.clientHeight*dpr}
  Wd=cv.width;Hd=cv.height;foc=Wd/(2*Math.tan(35*Math.PI/180));hx=Wd/2;hy=Hd*0.47;
