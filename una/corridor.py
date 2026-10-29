@@ -482,6 +482,26 @@ def kinds_by_axis(R, s_from, s_to):
     return res
 
 
+def tunnel_wall_offset(R, s_from, s_to, e, z0=1.0):
+    """Ofset unutrašnje ivice obloge tunela (kalota) od ivice kolovoza, na visini zrake (≈1 m iznad kolovoza) – medijana po presjecima i stranama. None ako nema tunela."""
+    vals = []
+    for nm, lst in R["sect"].items():
+        for sta, ss in lst[::4]:
+            if not (s_from <= sta <= s_to): continue
+            if not any(n == "Sekundarna_obloga" for n, _, _ in ss): continue
+            for sd in (-1, 1):
+                xs = []
+                for n, _, pp in ss:
+                    if n != "Sekundarna_obloga": continue
+                    for p1, p2 in zip(pp, pp[1:]):
+                        if (p1[1] - z0) * (p2[1] - z0) <= 0 and p1[1] != p2[1]:
+                            x = p1[0] + (p2[0] - p1[0]) * (z0 - p1[1]) / (p2[1] - p1[1])
+                            if x * sd > 0: xs.append(abs(x))
+                if xs: vals.append(min(xs) - e)
+    if not vals: return None
+    vals.sort(); return round(max(0.0, vals[len(vals) // 2]), 2)
+
+
 def harmonize(cfg, R, log=print):
     """Proračun preglednosti prati koridor: širina trake iz koridora, prepreka na otvorenoj trasi na zadanom ofsetu od ivice kolovoza (zadano 0,78 m),
     vrsta prepreke (most / tunel) po stacionaži iz koridora. Mijenja cfg (poziva se prije proračuna)."""
@@ -509,12 +529,18 @@ def harmonize(cfg, R, log=print):
         tip["otvorena trasa"] = off; pc["zadani_tip"] = "otvorena trasa"
         log(_TF("Koridor → proračun: prepreka na otvorenoj trasi {0:.2f} m od ivice kolovoza.", off))
         tip.setdefault("most", 1.17); tip.setdefault("tunel", 0.5)
+        tw = tunnel_wall_offset(R, s_from, s_to, e)
+        if tw is not None:
+            tip["tunel"] = tw
+            log(_TF("Koridor → proračun: u tunelu je prepreka unutrašnja ivica obloge (kalota) na {0:.2f} m od ivice kolovoza (ne ivičnjak).", tw))
         pc["tipovi_prepreka"] = tip
         pre = [en for en in (pc.get("prepreke") or []) if not (isinstance(en, dict) and en.get("_kor"))]
         for nm, runs in kinds_by_axis(R, s_from, s_to).items():
             role = "desna" if nm.upper().startswith("D") else "lijeva"
             for a, b, k in runs:
-                if k != "otvorena": pre.append({"osovina": role, "od": round(a, 2), "do": round(b, 2), "tip": k, "_kor": True})
+                if k != "otvorena":
+                    for st_ in ("desno", "lijevo"):          # zid tunela / parapet mosta su s obje strane (i na pravcu)
+                        pre.append({"osovina": role, "od": round(a, 2), "do": round(b, 2), "tip": k, "strana": st_, "_kor": True})
         pc["prepreke"] = pre
         log(_TF("Koridor → proračun: dionice mosta/tunela preuzete iz koridora ({0}).", len([e_ for e_ in pre if e_.get("_kor")])))
     else:
