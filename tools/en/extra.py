@@ -110,3 +110,4 @@ X.update({
 "Koridor → proračun: dionice mosta/tunela preuzete iz koridora ({0}).": "Corridor → calculation: bridge/tunnel sections taken from the corridor ({0}).",
 "Koridor: NPP je uključen – prepreke u proračunu ostaju prema NPP-u (slika prati proračun).": "Corridor: typical sections (NPP) are on – obstacles in the calculation follow the NPP (the picture follows the calculation).",
 })
+X.update({"Koridor: niveleta u UNA proračunu se razlikuje od Civil 3D niveleta za {0:.3f} m (osovina {1}); slika prati UNA.": "Corridor: the grade line in the UNA calculation differs from the Civil 3D grade line by {0:.3f} m (alignment {1}); the picture follows UNA."})

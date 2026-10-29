@@ -418,6 +418,8 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
             o_["ln"].append(-1 if sdsel == "L" else 1); o_["latD"].append(round(lat["D"], 3)); o_["latL"].append(round(lat["L"], 3)); o_["zeD"].append(round(ze["D"], 3)); o_["zeL"].append(round(ze["L"], 3))
             o_["ob"].append(ob); o_["ray"].append(ray); o_["lim"].append(str(r.get("lim", ""))); o_["hp"].append(round(hpr, 2))
             o_["v"].append(round(v_, 1)); o_["g"].append(round(g_, 2)); o_["D"].append(round(D, 1)); o_["Lz"].append(round(Lz, 1)); o_["ok"].append(okc)
+        zs = np.array(o_["z"]) - np.array([float(S["z0"][k]) for k in order])
+        if len(zs) and abs(zs).max() > 0.01: log(_TF("Koridor: niveleta u UNA proračunu se razlikuje od Civil 3D niveleta za {0:.3f} m (osovina {1}); slika prati UNA.", float(np.median(zs)), nm))
         scene["routes"][tag] = o_
     log(_TF("Koridor: scena izrađena ({0} presjeka po smjeru).", len(order)))
     return scene
