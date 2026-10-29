@@ -327,7 +327,7 @@ def build_scene(R, s_from, s_to, sight, cfg, h_eye=1.0, log=print):
     scene = dict(routes={}, h=h_eye, range=[s_from, s_to], rail_off=rail_off, projekat=cfg.get("projekat", ""))
     for tag, nm, other, sg in plan:
         S = secs_by[nm]; n = len(S["sta"]); order = np.arange(n) if sg > 0 else np.arange(n)[::-1]
-        sr = sight.get(tag)
+        srs = sight.get(tag) or {}; sr = srs.get("D") or srs.get("L")
         q = 0.0; prev = None; out = dict(naziv=_TF("{0} – {1}", nm, _T("smjer stacionaže") if sg > 0 else _T("suprotno stacionaži")), q=[], s=[], x=[], y=[], z=[], tx=[], ty=[], k=[], el=[], v=[], g=[], D=[], Lz=[], ok=[],
                                          kind=[], e=[], gr=[], F=[], rails=[], box=[], ring=[], cs=[])
         for ii in order:
@@ -384,6 +384,9 @@ def build_scene(R, s_from, s_to, sight, cfg, h_eye=1.0, log=print):
             out["box"].append(bx); out["ring"].append([[round(sg * a, 3), round(b, 3)] for a, b in G["ring"]])
             # uzdužni nagib iz nivelete
             out["g"].append(0.0)
+            kd = sg * float(S["k"][ii]); lane = -1 if kd < -1 / 9000 else 1         # unutrašnja strana krivine (lijevi zavoj → lijeva traka)
+            out.setdefault("ln", []).append(lane)
+            sr = srs.get("L" if lane < 0 else "D") or srs.get("D") or srs.get("L")
             if sr:
                 ss = np.array(sr["s"]); o = np.argsort(ss)
                 f = lambda arr: float(np.interp(sta, ss[o], np.array(arr)[o]))
@@ -392,7 +395,7 @@ def build_scene(R, s_from, s_to, sight, cfg, h_eye=1.0, log=print):
                 out["v"].append(0); out["D"].append(0); out["Lz"].append(0); out["ok"].append(0)
         # nagib iz nivelete (ako nema iz UNA)
         z = np.array(out["z"]); qq = np.array(out["q"])
-        if not sr and len(qq) > 2: out["g"] = [round(float(v) * 100, 2) for v in np.gradient(z, qq + np.arange(len(qq)) * 1e-9)]
+        if not (srs.get("D") or srs.get("L")) and len(qq) > 2: out["g"] = [round(float(v) * 100, 2) for v in np.gradient(z, qq + np.arange(len(qq)) * 1e-9)]
         scene["routes"][tag] = out
     log(_TF("Koridor: scena izrađena ({0} presjeka po smjeru).", len(order)))
     return scene
@@ -404,11 +407,11 @@ def write_html(path, R_or_path, P, par, out, cfg, log=print):
     kc = cfg.get("koridor") or {}
     s_from = float(kc.get("od", 80)); s_to = float(kc.get("do", 1580))
     R = R_or_path if isinstance(R_or_path, dict) else load_landxml(R_or_path, s_from, s_to, log=log)
-    d = vizura.build_data(P, par, out, dict(cfg, vizura_opcije={"obje_trake": False}), log)
+    d = vizura.build_data(P, par, out, dict(cfg, vizura_opcije={"obje_trake": True}), log)
     sight = {}
     for key, r in d["routes"].items():
-        tag = key.split("_")[0]
-        sight[tag] = dict(s=r["s"], v=r["v"], g=r["g"], D=r["D"], Lz=r["Lz"], ok=r["ok"])
+        tag, side = key.split("_")[0], key.split("_")[1]
+        sight.setdefault(tag, {})[side] = dict(s=r["s"], v=r["v"], g=r["g"], D=r["D"], Lz=r["Lz"], ok=r["ok"])
     scene = build_scene(R, s_from, s_to, sight, cfg, h_eye=d["h"], log=log)
     scene["lang"] = d["lang"]; scene["Vr"] = d["Vr"]
     tpl = open(os.path.join(os.path.dirname(__file__), "data", "koridor.html"), encoding="utf-8").read()

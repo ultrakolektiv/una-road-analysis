@@ -105,7 +105,14 @@ function strip(a,b,fa,fb,pf){ // a,b = uzorci, fa fb = udaljenost
   if(!most){const kq=Math.ceil(a.q/4)*4;if(kq<b.q){const pm=smp(kq);const lst=[];if(pf.hR<=1.3)lst.push([pm.rr+pf.ofR+.1,pf.hR]);if(pf.hL<=1.3)lst.push([pm.lr-pf.ofL-.1,pf.hL]);for(const [r_,h_] of lst){const s1=proj(W(pm,r_,0)),s2=proj(W(pm,r_,h_));if(s1&&s2){cx.strokeStyle=fog(C.rail);cx.lineWidth=Math.max(1,foc*0.09/s1[2]);cx.beginPath();cx.moveTo(s1[0],s1[1]);cx.lineTo(s2[0],s2[1]);cx.stroke()}}}}
  }
 }
-function bar(p,d,colTxt,col,txt,hh){const a=smp(q+d),b=smp(q+d+1.4),w=3.6/2;poly([W(a,-w,.02),W(a,w,.02),W(b,w,.02),W(b,-w,.02)],col,.55);const s=proj(W(a,0,hh||1.6));if(s&&s[2]<420){cx.font=`600 ${Math.max(11,Math.min(18,2200/s[2]))}px system-ui`;cx.fillStyle=colTxt;cx.textAlign="center";cx.fillText(txt,s[0],s[1])}}
+function ray(d,colL,colT,txt,wpx,below){ // zraka od oka do krajnje tačke preglednosti (tetiva)
+ const t=smp(q+d),eye=[CAM.ex,CAM.ey,CAM.ez],end=[t.x,t.y,zAt(t,0,0)];const N=40,pts=[];
+ for(let k=1;k<=N;k++){const f=k/N,P=[eye[0]+(end[0]-eye[0])*f,eye[1]+(end[1]-eye[1])*f,eye[2]+(end[2]-eye[2])*f-0.35*(1-f)];const s=proj(P);if(s)pts.push(s)}
+ if(pts.length>1){cx.lineCap="round";cx.lineJoin="round";cx.strokeStyle="rgba(0,0,0,.55)";cx.lineWidth=wpx+4;cx.beginPath();pts.forEach((s,i)=>i?cx.lineTo(s[0],s[1]):cx.moveTo(s[0],s[1]));cx.stroke();
+  cx.strokeStyle=colL;cx.lineWidth=wpx;cx.beginPath();pts.forEach((s,i)=>i?cx.lineTo(s[0],s[1]):cx.moveTo(s[0],s[1]));cx.stroke()}
+ const s0=proj(end);if(s0){cx.beginPath();cx.fillStyle=colL;cx.arc(s0[0],s0[1],wpx*1.3,0,7);cx.fill();cx.strokeStyle="#000";cx.lineWidth=2;cx.stroke();
+  const fs=Math.max(15,Math.min(26,3800/s0[2]+14));cx.font=`700 ${fs}px system-ui`;cx.textAlign="center";let w=cx.measureText(txt).width+16,yy=s0[1]-wpx*2-fs*.6; if(below)yy=s0[1]+wpx*2+fs*1.9;
+  cx.fillStyle="rgba(8,10,14,.82)";cx.fillRect(s0[0]-w/2,yy-fs,w,fs*1.35);cx.strokeStyle=colL;cx.lineWidth=2;cx.strokeRect(s0[0]-w/2,yy-fs,w,fs*1.35);cx.fillStyle=colT;cx.fillText(txt,s0[0],yy-fs*.05)}}
 function frame(){
  const dpr=Math.min(2,window.devicePixelRatio||1);if(cv.width!==(cv.clientWidth*dpr|0)||cv.height!==(cv.clientHeight*dpr|0)){cv.width=cv.clientWidth*dpr;cv.height=cv.clientHeight*dpr}
  Wd=cv.width;Hd=cv.height;foc=Wd/(2*Math.tan(35*Math.PI/180));hx=Wd/2;hy=Hd*0.47;
@@ -120,8 +127,8 @@ function frame(){
  for(let k=sm.length-2;k>=0;k--)strip(sm[k],sm[k+1],ds[k],ds[k+1],DATA.profili[sm[k].pf]);
  // preglednost
  const Lz=e.Lz,Dv=Math.min(e.D,900),bad=e.ok!==0&&Dv<Lz;
- if(Lz>3&&q+Lz<qmax)bar(e,Lz,"#ffd27a","#ffb020",T().lr+" "+Lz.toFixed(0)+" m",1.6);
- if(Dv>3&&q+Dv<qmax&&Dv<600)bar(e,Dv,bad?"#ff9a92":"#9be7ff",bad?"#ff5a4f":"#4cc3ff",T().ln+" "+Dv.toFixed(0)+" m",3.4);
+ if(Lz>3&&q+Lz<qmax)ray(Lz,"#ffb020","#ffd27a",T().lr+" "+Lz.toFixed(0)+" m",5,true);
+ if(Dv>3&&q+Dv<qmax&&Dv<900)ray(Dv,bad?"#ff5a4f":"#38bdf8",bad?"#ffb4ae":"#bfeaff",T().ln+" "+Dv.toFixed(0)+" m",7);
  // haubа
  const hg=cx.createLinearGradient(0,Hd*.92,0,Hd);hg.addColorStop(0,"rgba(0,0,0,0)");hg.addColorStop(1,"rgba(0,0,0,.85)");cx.fillStyle=hg;cx.fillRect(0,Hd*.9,Wd,Hd*.1);
  hud(e,pf0,bad,Lz,Dv);chart();mini(e)}
