@@ -219,3 +219,12 @@ NPP, VOŽNJA IZ OKA VOZAČA I LANDXML (verzija 1.4)
   označava dijelove gdje preglednost nije zadovoljena. Tipke: razmak = pauza, strelice = ±40 m; klik na dijagram = skok na stacionažu.
 - Izrada → "LandXML (Civil 3D)": osovine (pravci, kružni lukovi, klotoide) i nivelete sa vertikalnim krivinama. U Civil 3D-u: Insert → Import LandXML → Alignments + Profiles, pa corridor sa vašim assembly-jem.
 - Mjere u NPP-u koje nisu bile kotirane u crtežima (npr. visina odbojne ograde 0.80 m, visina svoda tunela) su procjene označene u datoteci una/data/npp_default.json; provjerite ih prije upotrebe.
+
+VOŽNJA KROZ CIVIL 3D KORIDOR (verzija 1.5)
+- Izrada → "Vožnja kroz Civil 3D koridor (HTML)": uključite karticu, odaberite LandXML koji ste izvezli iz Civil 3D-a (osovine, nivelete, poprečni presjeci koridora i površina terena) i zadajte raspon stacionaže (npr. 80 – 1580 m).
+  UNA čita datoteku (veliki fajlovi, stotine MB, čitaju se nekoliko minuta; rezultat se pamti pa je drugi put brzo), gradi prikaz iz stvarnih presjeka koridora i vozi iz oka vozača po desnoj voznoj traci
+  svakog kolovoza (desna osovina u smjeru stacionaže, lijeva suprotno). Teren se uzima iz TIN površine, suprotni kolovoz i središnji pojas iz drugog koridora.
+- Čelične sigurnosne ograde se ucrtavaju samo na dionicama otvorene trase, na zadanom razmaku od ivice kolovoza (zadano 0,78 m, polje "Čelična ograda od ivice kolovoza"); na mostu se vidi parapet, u tunelu svod i zid.
+- HUD prikazuje stacionažu, brzinu Vp, radijus, poprečni i uzdužni nagib, element trase, tip profila te raspoloživu i zahtijevanu preglednost iz UNA proračuna. Prva metoda (vožnja po NPP-u) ostaje kao zasebna opcija.
+- U komandnoj liniji: u projektnom JSON-u dodajte "koridor": {"datoteka": "Koridor.xml", "od": 80, "do": 1580, "ograda_ofset": 0.78}.
+- Stacionaže u koridoru moraju odgovarati stacionažama UNA projekta (isti smjer i početak); koordinate osovina se čitaju iz koridora.

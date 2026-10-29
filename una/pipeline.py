@@ -103,7 +103,8 @@ def generate(cfg, outdir, log=print, word=True, excel=True, sight=None):
         p = os.path.join(outdir, _TF("Proracun_vozno-dinamicke_analize_{0}.xlsx", name))
         xlsx.build_xlsx(p, P, sections, cases, axes, tr_obj(SYM), report.LAST_REG, has_caps, log=log, stamp=licenca.stamp(lic)); outs.append(p)
     viz_on = bool(cfg.get("vizura") or (cfg.get("gui_opcije") or {}).get("vizura"))
-    sg_on = (sight if sight is not None else bool((cfg.get("preglednost") or {}).get("ukljuci") or (cfg.get("optika") or {}).get("ukljuci"))) or viz_on
+    kor = cfg.get("koridor") or {}; kor_on = bool(kor.get("datoteka")) and kor.get("ukljuci", True)
+    sg_on = (sight if sight is not None else bool((cfg.get("preglednost") or {}).get("ukljuci") or (cfg.get("optika") or {}).get("ukljuci"))) or viz_on or kor_on
     if sg_on:
         log(_T('5/5 Preglednost: zrake, omotač i DXF crtež …'))
         from . import preglednost as pgm, preglednost_crtez as pgc
@@ -128,6 +129,11 @@ def generate(cfg, outdir, log=print, word=True, excel=True, sight=None):
             log(_T('Vizualizacija vožnje (oko vozača) …'))
             from . import vizura
             outs.append(vizura.write_html(os.path.join(outdir, _TF('Vozacka_vizura_{0}.html', name)), P, par, out_, cfg, log=log))
+        if kor_on:
+            if not os.path.isfile(kor["datoteka"]): raise ValueError(_TF("Koridor: datoteka ne postoji: {0}", kor["datoteka"]))
+            log(_T('Vožnja kroz koridor (Civil 3D LandXML) …'))
+            from . import corridor
+            outs.append(corridor.write_html(os.path.join(outdir, _TF('Koridor_vizura_{0}.html', name)), kor["datoteka"], P, par, out_, cfg, log=log))
         if (cfg.get("optika") or {}).get("ukljuci"):
             log(_T('6/6 Elaborat optičkih analiza (preticajna preglednost, sadržaj grafičkih priloga) …'))
             from . import optika
@@ -156,5 +162,7 @@ def load_cfg(path):
                     if sp.get(k) and not os.path.isabs(sp[k]): sp[k] = os.path.normpath(os.path.join(base, sp[k]))
     tp = cfg.get("template")
     if isinstance(tp, dict) and tp.get("file") and not os.path.isabs(tp["file"]): tp["file"] = os.path.normpath(os.path.join(base, tp["file"]))
+    kc = cfg.get("koridor")
+    if isinstance(kc, dict) and kc.get("datoteka") and not os.path.isabs(kc["datoteka"]): kc["datoteka"] = os.path.normpath(os.path.join(base, kc["datoteka"]))
     if cfg.get("izlaz") and not os.path.isabs(cfg["izlaz"]): cfg["izlaz"] = os.path.normpath(os.path.join(base, cfg["izlaz"]))
     return cfg

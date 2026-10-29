@@ -127,3 +127,36 @@ def test_npp_vizura_landxml():
     root = ET.parse(x[0]).getroot(); ns = {"l": "http://www.landxml.org/schema/LandXML-1.2"}
     assert len(root.findall(".//l:Alignment", ns)) == 3 and root.findall(".//l:Spiral", ns)
     N = npp.resolve(cfg); assert npp.profile_at(N, "desna", 1800)[0] == "tunel" and npp.profile_at(N, "desna", 100)[0] == "nasip"
+
+
+def _mini_landxml(path):
+    """Najmanji mogući Civil 3D koridor: dvije paralelne ravne osovine, 2 PVI, presjeci svakih 5 m i TIN."""
+    ns = 'xmlns="http://www.landxml.org/schema/LandXML-1.2"'
+    def al(name, n0, e0):
+        cs = "".join(f'<CrossSect name="{name}" sta="{s}"><DesignCrossSectSurf name="Pave1" side="both"><CrossSectPnt>-3.85 0.1</CrossSectPnt><CrossSectPnt>3.85 0.1</CrossSectPnt></DesignCrossSectSurf>'
+                     f'<DesignCrossSectSurf name="Top" side="both"><CrossSectPnt>-3.85 0.1</CrossSectPnt><CrossSectPnt>3.85 0.1</CrossSectPnt></DesignCrossSectSurf>'
+                     f'<DesignCrossSectSurf name="Bankina" side="both"><CrossSectPnt>3.85 0.1</CrossSectPnt><CrossSectPnt>5.4 0.0</CrossSectPnt></DesignCrossSectSurf></CrossSect>' for s in range(0, 101, 5))
+        return (f'<Alignment name="{name}" staStart="0" length="100"><CoordGeom><Line dir="0" length="100"><Start>{n0} {e0}</Start><End>{n0 + 100} {e0}</End></Line></CoordGeom>'
+                f'<Profile name="p"><ProfAlign name="p"><PVI>0 100</PVI><PVI>100 101</PVI></ProfAlign></Profile><CrossSects>{cs}</CrossSects></Alignment>')
+    pts = "".join(f'<P id="{i + 1}">{n} {e} 100</P>' for i, (n, e) in enumerate([(-500, -500), (-500, 500), (600, 500), (600, -500)]))
+    x = (f'<?xml version="1.0"?><LandXML {ns} version="1.2"><Surfaces><Surface name="T"><Definition surfType="TIN"><Pnts>{pts}</Pnts><Faces><F>1 2 3</F><F>1 3 4</F></Faces></Definition></Surface></Surfaces>'
+         f'<Alignments>{al("DESNA", 0, 0)}{al("LIJEVA", 0, -12)}</Alignments></LandXML>')
+    open(path, "w", encoding="utf-8").write(x)
+
+
+def test_koridor_vizura():
+    import os, json, tempfile
+    from una import pipeline, licenca, corridor
+    licenca.require = lambda *a, **k: {}; licenca.describe = lambda *a, **k: "test"; licenca.stamp = lambda *a, **k: {"id": "TEST"}
+    d = tempfile.mkdtemp(); xp = os.path.join(d, "k.xml"); _mini_landxml(xp)
+    cfg = pipeline.load_cfg(os.path.join(os.path.dirname(__file__), "..", "primjer", "primjer_projekat.json"))
+    cfg["koridor"] = {"datoteka": xp, "od": 10, "do": 90, "ograda_ofset": 0.78}; cfg["jezik"] = "en"
+    outs, _ = pipeline.generate(cfg, d, log=lambda *a: None, word=False, excel=False, sight=True)
+    h = [o for o in outs if os.path.basename(o).startswith("Corridor_drive")]
+    assert h, outs
+    t = open(h[0], encoding="utf-8").read()
+    data = json.loads(t.split("const DATA=")[1].split(";\nconst L=")[0])
+    assert set(data["routes"]) == {"F", "B"}
+    F = data["routes"]["F"]; assert len(F["q"]) >= 10 and F["kind"][0] == "otvorena" and all(r for r in F["rails"])
+    assert abs(abs(F["rails"][0][0]) - (3.85 + 0.78)) < 1e-6          # ograda 0,78 m od ivice kolovoza
+    assert data["routes"]["B"]["q"][0] == 0 and data["routes"]["B"]["s"][0] > data["routes"]["B"]["s"][-1]

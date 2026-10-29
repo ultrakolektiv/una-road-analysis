@@ -89,3 +89,16 @@ X.update({
 "zid tunela / sekundarna obloga": "tunnel wall / secondary lining",
 })
 X.update({"čelična odbojna ograda, 0.78 m od ivice kolovoza": "steel guard rail, 0.78 m from carriageway edge"})
+X.update({
+"Koridor: učitano iz privremene memorije (cache).": "Corridor: loaded from temporary cache.",
+"Koridor: čitam {0} ({1:.0f} MB) – može potrajati nekoliko minuta …": "Corridor: reading {0} ({1:.0f} MB) – this may take a few minutes …",
+"Koridor: osovina '{0}' nema geometriju (CoordGeom).": "Corridor: alignment '{0}' has no geometry (CoordGeom).",
+"Koridor: {0} osovina, {1} presjeka u rasponu, teren {2} tačaka.": "Corridor: {0} alignments, {1} cross-sections in range, terrain {2} points.",
+"{0} – {1}": "{0} – {1}",
+"suprotno stacionaži": "against chainage",
+"Koridor: scena izrađena ({0} presjeka po smjeru).": "Corridor: scene built ({0} cross-sections per direction).",
+"Vožnja kroz koridor (HTML): {0}": "Corridor drive-through (HTML): {0}",
+"Koridor: datoteka ne postoji: {0}": "Corridor: file does not exist: {0}",
+"Vožnja kroz koridor (Civil 3D LandXML) …": "Corridor drive-through (Civil 3D LandXML) …",
+"Koridor_vizura_{0}.html": "Corridor_drive_{0}.html",
+})

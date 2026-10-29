@@ -162,8 +162,9 @@ def api_run(b):
     run = S.run
     cfg = b["cfg"]; o = b.get("options", {})
     word, excel = bool(o.get("word", True)), bool(o.get("excel", True))
-    sight = bool(o.get("preglednost")) or bool(o.get("optika")) or bool(o.get("dwg")) or bool(o.get("vizura"))
+    sight = bool(o.get("preglednost")) or bool(o.get("optika")) or bool(o.get("dwg")) or bool(o.get("vizura")) or bool(o.get("koridor"))
     cfg["ifc"] = bool(o.get("ifc")); cfg["dwg"] = bool(o.get("dwg")); cfg["vizura"] = bool(o.get("vizura")); cfg["landxml"] = bool(o.get("landxml"))
+    if isinstance(cfg.get("koridor"), dict): cfg["koridor"]["ukljuci"] = bool(o.get("koridor"))
     cfg["optika"] = dict(cfg.get("optika") or {}, ukljuci=bool(o.get("optika")))
     if sight and not cfg.get("preglednost"): cfg["preglednost"] = {"ukljuci": True}
     def log(s): run["lines"].append(str(s))
