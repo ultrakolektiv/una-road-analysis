@@ -26,7 +26,7 @@ def build_data(P, par, out, cfg, log=print):
     for key, R in out["vp"].items():
         if key.split("_")[1] != "D" and not (cfg.get("vizura_opcije") or {}).get("obje_trake"): continue
         A = R["A"]; ch = R["chain"]; n = len(A["xa"])
-        E = ((out.get("ocek") or {}).get(key) or R["avail"]); rows = E["rows"]
+        rows = R["avail"]["rows"]            # zahtijevana = Vp preglednost (L_vp)
         qq = A["q"]; idx = np.arange(0, n, max(1, int(round(STEP / max(np.median(np.diff(qq)), 0.01)))))
         if idx[-1] != n - 1: idx = np.append(idx, n - 1)
         th = np.unwrap(np.arctan2(A["ty"], A["tx"])); k = np.gradient(th, qq + np.arange(n) * 1e-9); k = _smooth(k, 21)

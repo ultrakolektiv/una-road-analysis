@@ -345,7 +345,7 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
         for sd in ("D", "L"):
             Rr = out["vp"].get(f"{tag}_{sd}")
             if Rr is None: continue
-            A = Rr["A"]; E = ((out.get("ocek") or {}).get(Rr["key"]) or Rr["avail"]); rows = E["rows"]
+            A = Rr["A"]; rows = Rr["avail"]["rows"]            # zahtijevana preglednost = Pzp iz Vp i nagiba (L_vp), ne fiksna vrijednost
             prep[sd] = dict(A=A, rows=rows, rs=np.array([r["s"] for r in rows]), o=np.argsort(A["s"], kind="stable"))
         if not prep: raise ValueError(_T("Koridor: nema proračuna preglednosti za ovu osovinu (uključite preglednost)."))
         PD = prep.get("D") or prep["L"]
