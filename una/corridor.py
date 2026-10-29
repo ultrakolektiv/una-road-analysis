@@ -8,6 +8,20 @@ visine presjeka su relativne u odnosu na niveletu osovine."""
 import math, os, pickle, hashlib, tempfile
 import xml.etree.ElementTree as ET
 import numpy as np
+
+
+class _NN:
+    """Najbliža tačka (brute force, bez scipy)."""
+    def __init__(self, xy): self.xy = np.asarray(xy, float)
+
+    def query(self, q):
+        q = np.asarray(q, float)
+        if q.ndim == 1:
+            d = np.hypot(self.xy[:, 0] - q[0], self.xy[:, 1] - q[1]); j = int(np.argmin(d)); return float(d[j]), j
+        dm = np.empty(len(q)); jm = np.empty(len(q), int)
+        for a in range(0, len(q), 4000):
+            c = q[a:a + 4000]; d = np.hypot(c[:, None, 0] - self.xy[None, :, 0], c[:, None, 1] - self.xy[None, :, 1]); jm[a:a + 4000] = d.argmin(1); dm[a:a + 4000] = d.min(1)
+        return dm, jm
 from .i18n import _T, _TF
 
 NS = "{http://www.landxml.org/schema/LandXML-1.2}"
@@ -171,8 +185,7 @@ def load_landxml(path, s_from, s_to, log=print, margin=60.0):
         # TIN pokriva i mnogo veće područje; filtriraj po koridoru (guste tačke osovine)
         ss = np.linspace(s_from, s_to, 200); cx = np.concatenate([A[k].pos(ss)[0] for k in A]); cy = np.concatenate([A[k].pos(ss)[1] for k in A])
         keep = np.zeros(len(tin), bool)
-        from scipy.spatial import cKDTree
-        d, _ = cKDTree(np.c_[cx, cy]).query(tin[:, :2]); keep = d < 320.0
+        d, _ = _NN(np.c_[cx, cy]).query(tin[:, :2]); keep = d < 320.0
         remap = -np.ones(len(tin), int); remap[keep] = np.arange(keep.sum())
         fm = keep[fc].all(axis=1) if len(fc) else np.zeros(0, bool)
         tin = tin[keep]; fc = remap[fc[fm]] if len(fc) else fc
@@ -314,7 +327,6 @@ def _interp_s(A, arr, sta, order=None):
 def build_scene(R, s_from, s_to, out, par, cfg, log=print):
     """Scena vožnje. SVE što se tiče preglednosti (oko, ofset trake, prepreke, zrake, D, Lz, v, g) uzima se direktno iz UNA proračuna (out['vp'] / out['ocek']);
     iz koridora dolaze samo oblik presjeka, teren, most i tunel. 'F' = osovina D* u smjeru stacionaže, 'B' = druga osovina suprotno stacionaži."""
-    from scipy.spatial import cKDTree
     dtm = _dtm_interp(R); A_ = R["aligns"]; names = [n for n in A_ if n in R["sect"]]
     nF = next((n for n in names if n.upper().startswith("D")), names[0]); nB = next((n for n in names if n != nF), None)
     plan = [("F", nF, nB, +1)] + ([("B", nB, nF, -1)] if nB else [])
@@ -325,7 +337,7 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
             if s_from - 1 <= sta <= s_to + 1 and sta - last >= 1.2: keep.append((sta, ss)); last = sta
         sta = np.array([r[0] for r in keep]); N, E = A_[nm].pos(sta); nu = A_[nm].heading(sta)
         secs_by[nm] = dict(sta=sta, N=N, E=E, nu=nu, z0=A_[nm].z(sta), G=[section_geom(ss, 0.78, False) for _, ss in keep], k=A_[nm].curvature(sta))
-    trees = {nm: cKDTree(np.c_[v["E"], v["N"]]) for nm, v in secs_by.items()}
+    trees = {nm: _NN(np.c_[v["E"], v["N"]]) for nm, v in secs_by.items()}
     h_oka = float(par["h_oka"]); scene = dict(routes={}, h=h_oka, range=[s_from, s_to], projekat=cfg.get("projekat", ""), h_pr=float(par["h_prepreke"]), h_auto=bool(par.get("h_auto")))
     for tag, nm, other, sg in plan:
         S = secs_by[nm]; n = len(S["sta"]); order = np.arange(n) if sg > 0 else np.arange(n)[::-1]
