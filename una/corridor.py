@@ -405,19 +405,27 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
                 if not np.isfinite(PD["A"][kx][j]): ob.append(None)
                 else: ob.append(round((PD["A"][kx][j] - x) * nxd + (PD["A"][ky][j] - y) * nyd, 3))
             # --- zraka iz UNA (red najbliži stacionaži; čvorovi lanca)
-            pp = prep[sdsel]; A = pp["A"]; ri = int(np.argmin(np.abs(pp["rs"] - sta))); r = pp["rows"][ri]; a = int(r["i"])
-            sxs = A["xa"] - A["x"]; sys_ = A["ya"] - A["y"]
-            hpr = pg_hpr(A, par, a); Lz = float(r["Lz"]); D = float(r["D"]); nA = len(A["q"])
-            bD = int(min(r.get("b", a), nA - 1)); bL = int(min(nA - 1, np.searchsorted(A["q"], A["q"][a] + Lz)))
-            ray = [round(float(A["x"][a]), 2), round(float(A["y"][a]), 2), round(float(A["z"][a] + h_oka), 3),
-                   round(float(A["xa"][bD] - sxs[bD]), 2), round(float(A["ya"][bD] - sys_[bD]), 2), round(float(A["z"][bD] + hpr), 3),
-                   round(float(A["xa"][bL] - sxs[bL]), 2), round(float(A["ya"][bL] - sys_[bL]), 2), round(float(A["z"][bL] + hpr), 3), None]
+            pp = prep[sdsel]; A = pp["A"]; sxs = A["xa"] - A["x"]; sys_ = A["ya"] - A["y"]; nA = len(A["q"])
+            order_r = np.argsort(pp["rs"], kind="stable"); rsS = pp["rs"][order_r]
+            jj = int(np.clip(np.searchsorted(rsS, sta), 1, len(rsS) - 1)) if len(rsS) > 1 else 0
+            cand = [order_r[jj - 1], order_r[jj]] if len(rsS) > 1 else [order_r[0]]
+            def _ray(r):
+                a = int(r["i"]); hpr = pg_hpr(A, par, a); Lz_ = float(r["Lz"]); bD = int(min(r.get("b", a), nA - 1)); bL = int(min(nA - 1, np.searchsorted(A["q"], A["q"][a] + Lz_)))
+                return a, hpr, [float(A["x"][a]), float(A["y"][a]), float(A["z"][a] + h_oka), float(A["xa"][bD] - sxs[bD]), float(A["ya"][bD] - sys_[bD]), float(A["z"][bD] + hpr),
+                                float(A["xa"][bL] - sxs[bL]), float(A["ya"][bL] - sys_[bL]), float(A["z"][bL] + hpr)], float(r["D"]), Lz_
+            rr = [pp["rows"][c] for c in cand]; Rs = [_ray(r) for r in rr]
+            if len(rr) == 2 and rr[1]["s"] != rr[0]["s"]: f_ = float(np.clip((sta - rr[0]["s"]) / (rr[1]["s"] - rr[0]["s"]), 0, 1))
+            else: f_ = 0.0
+            lerp = lambda u, v: u + (v - u) * f_
+            ray = [round(lerp(u, v), 2) for u, v in zip(Rs[0][2], Rs[-1][2])] + [None]
+            D = lerp(Rs[0][3], Rs[-1][3]); Lz = lerp(Rs[0][4], Rs[-1][4]); hpr = Rs[0][1]
+            r = rr[0] if f_ < 0.5 else rr[-1]; a = Rs[0][0] if f_ < 0.5 else Rs[-1][0]
             kc = r.get("kc")
             if kc is not None:
-                kc = int(kc); cand = []
+                kc = int(kc); cand2 = []
                 for kx, ky in (("obrx", "obry"), ("oblx", "obly")):
-                    if np.isfinite(A[kx][kc]): cand.append((math.hypot(A[kx][kc] - A["x"][kc], A[ky][kc] - A["y"][kc]), float(A[kx][kc]), float(A[ky][kc])))
-                if cand: c0 = min(cand); ray[9] = [round(c0[1], 2), round(c0[2], 2), round(float(A["z"][kc] + hpr), 3)]
+                    if np.isfinite(A[kx][kc]): cand2.append((math.hypot(A[kx][kc] - A["x"][kc], A[ky][kc] - A["y"][kc]), float(A[kx][kc]), float(A[ky][kc])))
+                if cand2: c0 = min(cand2); ray[9] = [round(c0[1], 2), round(c0[2], 2), round(float(A["z"][kc] + hpr), 3)]
             okc = 0 if (r.get("okH", True) and r.get("okV", True)) else (1 if not r.get("okH", True) else 2)
             v_ = float(_interp_s(A, A["v"], sta, pp["o"])); g_ = float(_interp_s(A, A["g"], sta, pp["o"]))
             o_["q"].append(round(q, 2)); o_["s"].append(round(sta, 2)); o_["x"].append(round(x, 3)); o_["y"].append(round(y, 3)); o_["z"].append(round(z0, 3))
