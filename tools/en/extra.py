@@ -88,3 +88,4 @@ X.update({
 "zid tunela (ivičnjak 1.00 + zaštitni pojas 1.20)": "tunnel wall (kerb 1.00 + safety strip 1.20)", "srednji zid 0.75 m": "central wall 0.75 m",
 "zid tunela / sekundarna obloga": "tunnel wall / secondary lining",
 })
+X.update({"čelična odbojna ograda, 0.78 m od ivice kolovoza": "steel guard rail, 0.78 m from carriageway edge"})

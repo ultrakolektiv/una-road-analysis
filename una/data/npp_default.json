@@ -11,14 +11,14 @@
    "bankina": 1.5,
    "razdjelni_pojas": 3.0,
    "vani": {
-    "ofset": 1.25,
+    "ofset": 1.28,
     "visina": 0.8,
-    "opis": "odbojna ograda"
+    "opis": "čelična odbojna ograda, 0.78 m od ivice kolovoza"
    },
    "razdjelni": {
-    "ofset": 1.25,
+    "ofset": 1.28,
     "visina": 0.8,
-    "opis": "odbojna ograda u razdjelnom pojasu"
+    "opis": "čelična odbojna ograda, 0.78 m od ivice kolovoza"
    },
    "teren": "nasip 1:1.5"
   },
@@ -35,9 +35,9 @@
     "opis": "kosina usjeka (rigol + pokos 1:3)"
    },
    "razdjelni": {
-    "ofset": 1.25,
+    "ofset": 1.28,
     "visina": 0.8,
-    "opis": "odbojna ograda u razdjelnom pojasu"
+    "opis": "čelična odbojna ograda, 0.78 m od ivice kolovoza"
    },
    "teren": "usjek"
   },
