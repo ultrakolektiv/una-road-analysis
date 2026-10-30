@@ -2,7 +2,7 @@
 from .i18n import _T, _TF, TrDict, tr_obj
 import math, copy
 import numpy as np
-from .parse import Axis
+from .parse import Axis, make_axis
 
 def ft_diag(m, CdA, rho=1.225, g=9.81, frl0=0.01, frl_v=44.73):
     """Kriva sile vuče Ft(v) merodavnog teretnog vozila iz slike 3-10 Priloga 2: u ravnoteži je Ft jednaka zbiru otpora,
@@ -85,7 +85,7 @@ def build_cases(cfg, P, log=print):
     def axis(spec, name):
         key = (spec["h"], spec["v"], spec["x"])
         if key not in axes:
-            axes[key] = Axis(name, *key, cs_col=spec.get("cs_col")); log(axes[key].info())
+            axes[key] = make_axis(name, *key, cs_col=spec.get("cs_col")); log(axes[key].info())
         return axes[key]
     cases = []
     for si, sec in enumerate(sorted(cfg["sekcije"], key=lambda s: s["od"]), 1):

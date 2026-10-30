@@ -1,10 +1,11 @@
 """Lokalni HTTP poslužitelj + prozor aplikacije (Edge/Chrome u 'app' režimu). Samo 127.0.0.1, sa jednokratnim tokenom."""
+import math
 import json, os, sys, threading, time, traceback, secrets, subprocess, shutil, mimetypes, copy, webbrowser, queue
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
 from .. import pipeline, engine
-from ..parse import Axis, detect_kind
+from ..parse import Axis, detect_kind, file_ok, make_axis
 from . import dialogs
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -112,6 +113,26 @@ def api_ls(b):
     return {"path": path, "parent": parent if parent != path else "", "entries": ents[:5000], "roots": roots, "error": err}
 
 
+def api_lx_import(b):
+    """Osovine iz LandXML-a → prijedlog sekcija trase (bez ispisa projektanta)."""
+    from .. import lx_axis
+    try:
+        p = b["path"]; info = lx_axis.alignments_info(p)
+        if not info: return {"error": "LandXML: nema osovina."}
+        def lane(n): return {"h": f"{p}#{n}", "v": f"{p}#{n}", "x": f"{p}#{n}", "trake_desno": [3.5], "trake_lijevo": [3.5]}
+        names = [a["name"] for a in info]
+        hi = min(min(a["hi"], a["cs_hi"]) for a in info)
+        lo = float(math.ceil(max(0.0, max(max(a["lo"], a["cs_lo"]) for a in info)))); hi = float(math.floor(hi))
+        if len(info) >= 2:
+            d = next((n for n in names if n.upper().startswith("D") or "DESN" in n.upper()), names[0]); l = next(n for n in names if n != d)
+            sec = {"tip": "razdvojene", "od": lo, "do": hi, "desna": lane(d), "lijeva": lane(l)}
+        else:
+            sec = {"tip": "jedna_naprijed", "od": lo, "do": hi, "osovina": lane(names[0])}
+        return {"alignments": info, "sekcije": [sec]}
+    except Exception as e:
+        return {"error": str(e)}
+
+
 def api_detect(b):
     out, errs = {}, {}
     for p in b.get("paths", []):
@@ -121,14 +142,14 @@ def api_detect(b):
 
 
 def _axis(sp):
-    return Axis("tmp", sp["h"], sp["v"], sp["x"], cs_col=sp.get("cs_col"))
+    return make_axis("tmp", sp["h"], sp["v"], sp["x"], cs_col=sp.get("cs_col"))
 
 
 def api_axisrange(b):
     lo = hi = None
     try:
         for sp in b.get("specs", []):
-            if not all(os.path.isfile(sp.get(k, "")) for k in ("h", "v", "x")): raise ValueError("files")
+            if not all(file_ok(sp.get(k, "")) for k in ("h", "v", "x")): raise ValueError("files")
             ax = _axis(sp)
             a, c = max(ax.s_min, float(ax.cs_s.min())), min(ax.s_max, float(ax.cs_s.max()))
             lo = a if lo is None else max(lo, a); hi = c if hi is None else min(hi, c)
@@ -143,7 +164,7 @@ def api_elements(b):
         for si, sec in enumerate(sorted(b["cfg"].get("sekcije", []), key=lambda s: s["od"]), 1):
             for role in ROLES[sec["tip"]]:
                 sp = sec.get(role) or {}
-                if not all(os.path.isfile(sp.get(k, "")) for k in ("h", "v", "x")): continue
+                if not all(file_ok(sp.get(k, "")) for k in ("h", "v", "x")): continue
                 ax = _axis(sp)
                 for e in ax.elems:
                     if e["s0"] + e["L"] < float(sec["od"]) or e["s0"] > float(sec["do"]) or e["L"] < 0.5: continue
@@ -253,7 +274,7 @@ def api_npp(_):
     return npp.defaults()
 
 
-API = {"npp": api_npp, "state": api_state, "ui": api_ui, "pick": api_pick, "ls": api_ls, "detect": api_detect, "axisrange": api_axisrange, "elements": api_elements, "load": api_load, "save": api_save,
+API = {"npp": api_npp, "state": api_state, "ui": api_ui, "pick": api_pick, "ls": api_ls, "lx_import": api_lx_import, "detect": api_detect, "axisrange": api_axisrange, "elements": api_elements, "load": api_load, "save": api_save,
        "readjson": api_readjson, "validate": api_validate, "run": api_run, "log": api_log, "open": api_open, "license": api_license, "ping": api_ping, "quit": api_quit}
 
 

@@ -39,7 +39,7 @@ sr: {
  d_or:"Osovina oka vozača DESNO od osovine kolovoza [m]", d_ol:"Osovina oka vozača LIJEVO od osovine kolovoza [m]", d_range:"Zajednički raspon ispisa: {0} – {1} m. Prilagodite OD/DO prema stvarnoj sekciji.",
  ok:"U redu", cancel:"Otkaži", close:"Zatvori", yes:"Da", no:"Ne",
  e_range:"Stacionaže OD / DO nisu ispravne (DO mora biti veće od OD).", e_file:"Datoteka ne postoji: {0}", e_cap:"Ograničenje: neispravan red '{0}' (OD; DO; brzina).", e_num:"Neispravan broj: {0}",
- e_unrec:"Nisu prepoznate sve tri vrste datoteka – dopunite ručno.", dlg_pick_one:"Odaberite datoteku.", dlg_opening:"Otvaram dijalog za odabir datoteke …", e_nodlg:"Prozor za odabir datoteka nije dostupan – upišite putanju ručno.",
+ e_unrec:"Nisu prepoznate sve tri vrste datoteka – dopunite ručno.", dlg_pick_one:"Odaberite datoteku.", s_lx:"Uvezi osovine iz LandXML-a", s_lx_wait:"Čitam LandXML (velike datoteke traju nekoliko minuta)…", s_lx_replace:"Zamijeniti postojeće sekcije osovinama iz LandXML-a?", s_lx_ok:"Uvezene osovine:", dlg_opening:"Otvaram dijalog za odabir datoteke …", e_nodlg:"Prozor za odabir datoteka nije dostupan – upišite putanju ručno.",
  pa_title:"Napredni parametri", pa_sub:"Model vožnje, tablice iz Priloga 2 pravilnika i vozila za dinamički proračun (poglavlje 5).", pa_reset:"Vrati podrazumijevano",
  pa_model:"Model vožnje", pa_tables:"Tablice", pa_tables_h:"Vrijednosti odvojene zarezom ili razmakom. Vp–R koristi Vr i Rmin tablicu.", pa_veh:"Vozila", pa_veh_h:"vlim prazno = max Vr; b i prazan hod prazno = opšte vrijednosti; P prazno = kriva sile vuče iz Pravilnika.",
  pa_addveh:"Dodaj vozilo", pa_delveh:"Ukloni zadnje", pa_tpl:"Word template", pa_tpl_h:"Ako je odabran, pored izvornog elaborata pravi se i elaborat u templatu. Prazna polja ostaju kakva su u templatu.", pa_tpl_file:"Template (.docx)", pa_tpl_clear:"Ukloni template",
@@ -91,7 +91,7 @@ en: {
  d_or:"Driver's eye axis RIGHT of the carriageway axis [m]", d_ol:"Driver's eye axis LEFT of the carriageway axis [m]", d_range:"Common range of the printouts: {0} – {1} m. Adjust FROM/TO to the actual segment.",
  ok:"OK", cancel:"Cancel", close:"Close", yes:"Yes", no:"No",
  e_range:"Chainages FROM / TO are not valid (TO must be greater than FROM).", e_file:"File does not exist: {0}", e_cap:"Limit: invalid row '{0}' (FROM; TO; speed).", e_num:"Invalid number: {0}",
- e_unrec:"Not all three file kinds were recognised – complete them manually.", dlg_pick_one:"Select a file.", dlg_opening:"Opening the file dialog …", e_nodlg:"The file dialog is not available – type the path manually.",
+ e_unrec:"Not all three file kinds were recognised – complete them manually.", dlg_pick_one:"Select a file.", s_lx:"Import alignments from LandXML", s_lx_wait:"Reading LandXML (large files take a few minutes)…", s_lx_replace:"Replace the existing segments with the alignments from LandXML?", s_lx_ok:"Imported alignments:", dlg_opening:"Opening the file dialog …", e_nodlg:"The file dialog is not available – type the path manually.",
  pa_title:"Advanced parameters", pa_sub:"Driving model, tables from Annex 2 of the Rulebook and vehicles for the dynamic calculation (chapter 5).", pa_reset:"Restore defaults",
  pa_model:"Driving model", pa_tables:"Tables", pa_tables_h:"Values separated by comma or space. Vp–R uses the Vr and Rmin tables.", pa_veh:"Vehicles", pa_veh_h:"vlim empty = max Vr; b and idle empty = general values; P empty = traction curve from the Rulebook.",
  pa_addveh:"Add vehicle", pa_delveh:"Remove last", pa_tpl:"Word template", pa_tpl_h:"If selected, a study in the template is produced in addition to the original one. Empty fields stay as in the template.", pa_tpl_file:"Template (.docx)", pa_tpl_clear:"Remove template",
@@ -308,8 +308,16 @@ function pageSections() {
       h("div", { class: "row" }, h("button", { class: "btn sm", disabled: i === 0, title: t("s_up"), onclick: () => moveSec(i, -1) }, "↑"), h("button", { class: "btn sm", disabled: i === secs.length - 1, title: t("s_down"), onclick: () => moveSec(i, 1) }, "↓"),
         h("button", { class: "btn sm", onclick: () => editSec(i) }, t("s_edit")), h("button", { class: "btn sm danger", onclick: () => delSec(i) }, t("s_del"))))))
     : h("div", { class: "empty" }, t("s_empty"));
-  return h("div", { class: "wrap" }, h("div", { class: "row" }, h("div", { class: "grow" }, h("h1", {}, t("s_title")), h("p", { class: "sub" }, t("s_sub"))), h("button", { class: "btn primary", onclick: () => editSec(-1) }, "+ " + t("s_add"))),
+  return h("div", { class: "wrap" }, h("div", { class: "row" }, h("div", { class: "grow" }, h("h1", {}, t("s_title")), h("p", { class: "sub" }, t("s_sub"))), h("button", { class: "btn", onclick: importLX, style: "margin-right:8px" }, t("s_lx")), h("button", { class: "btn primary", onclick: () => editSec(-1) }, "+ " + t("s_add"))),
     list, navButtons("project", "params"));
+}
+async function importLX() {
+  const p = (await pick("open", t("s_lx"), [["LandXML", "*.xml"], [t("flt_all"), "*.*"]], {}))[0]; if (!p) return;
+  toast(t("s_lx_wait"));
+  let r; try { r = await api("lx_import", { path: p }); } catch (e) { return toast(String(e.message || e), true); }
+  if (r.error) return toast(r.error, true);
+  if (S.cfg.sekcije.length && !(await confirmBox(t("s_lx_replace")))) return;
+  S.cfg.sekcije = r.sekcije; dirty(); render(); toast(t("s_lx_ok") + " " + r.alignments.map(a => a.name).join(", "));
 }
 function moveSec(i, d) { const L = S.cfg.sekcije; [L[i], L[i + d]] = [L[i + d], L[i]]; dirty(); render(); }
 async function delSec(i) { if (await confirmBox(t("s_confirm_del", i + 1))) { S.cfg.sekcije.splice(i, 1); dirty(); render(); } }

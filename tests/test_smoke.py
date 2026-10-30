@@ -169,3 +169,14 @@ def test_koridor_vizura():
     assert abs(abs(F["latD"][3]) - 3.85 / 2) < 0.02                    # oko u sredini trake (UNA)
     assert data["routes"]["B"]["q"][0] == 0 and data["routes"]["B"]["s"][0] > data["routes"]["B"]["s"][-1]
     assert F["ray"][3][3] != 0 and F["lim"][3] != ""
+
+
+def test_osovine_iz_landxml(tmp_path):
+    """Osovine (horizontala, niveleta, poprečni nagib) čitaju se iz LandXML-a umjesto iz ispisa projektanta."""
+    from una import parse, lx_axis
+    cfg = _cfg(tmp_path); xp = str(tmp_path / "k.xml"); _mini_landxml(xp, cfg)
+    info = lx_axis.alignments_info(xp, log=lambda *a: None)
+    assert {a["name"] for a in info} == {"DESNA", "LIJEVA"} and all(a["hi"] > 90 for a in info)
+    ax = parse.make_axis("t", xp + "#DESNA", xp + "#DESNA", xp + "#DESNA")
+    assert abs(ax.vert(50)[0] - 261.5) < 0.01 and abs(ax.cross(50)) < 0.01 and ax.elems and ax.plan.shape[1] == 3
+    assert parse.file_ok(xp + "#DESNA") and not parse.file_ok(xp + "x#DESNA")

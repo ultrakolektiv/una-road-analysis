@@ -902,5 +902,9 @@
 "unutrašnja strana krivine": "inner side of the curve",
 "Koridor → proračun: na mostu je prepreka unutrašnja strana parapeta na {0:.2f} m od ivice kolovoza (iz presjeka koridora).": "Corridor → calculation: on the bridge the obstacle is the inner face of the parapet at {0:.2f} m from the carriageway edge (from the corridor section).",
 "Koridor: prepreke preuzima koridor – NPP se ne primjenjuje na preglednost.": "Corridor: obstacles are taken from the corridor – the NPP is not applied to sight distance.",
-"Koridor → proračun: {0}: prepreka iz presjeka koridora, ofset od ivice kolovoza {1:.2f}–{2:.2f} m.": "Corridor → calculation: {0}: obstacle from the corridor section, offset from the carriageway edge {1:.2f}–{2:.2f} m."
+"Koridor → proračun: {0}: prepreka iz presjeka koridora, ofset od ivice kolovoza {1:.2f}–{2:.2f} m.": "Corridor → calculation: {0}: obstacle from the corridor section, offset from the carriageway edge {1:.2f}–{2:.2f} m.",
+"LandXML osovine: čitam {0} ({1:.0f} MB) – može potrajati nekoliko minuta …": "LandXML alignments: reading {0} ({1:.0f} MB) – this may take a few minutes …",
+"LandXML osovina '{0}': u presjecima nema površi kolovoza za poprečne nagibe.": "LandXML alignment '{0}': the cross-sections contain no carriageway surface for cross slopes.",
+"LandXML: niveleta nema prelomnih tačaka.": "LandXML: the profile has no grade-break points.",
+"LandXML: osovina '{0}' nije pronađena (postoje: {1}).": "LandXML: alignment '{0}' not found (available: {1})."
 }

@@ -1,6 +1,6 @@
 """Čitanje ispisa projektanta: horizontalna osovina, uzdužni profil, poprečni nagibi."""
 from .i18n import _T, _TF
-import re, math
+import os, re, math
 import numpy as np
 
 _DMS = re.compile(r"(\d+)d(\d+)'(\d+)\"")
@@ -160,3 +160,22 @@ def detect_kind(path):
     if re.search(r"UZD\.?\s*PAD|VIS\.?\s*T\.?|\bEKSTREM\b", txt, re.I): return "v"     # uzdužni ispis može sadržati i tabelu poprečnih (TRAK_), pa se prvo traže njegove oznake
     if "TRAK_" in txt: return "x"
     return "v"
+
+
+def file_ok(p):
+    """Postoji li datoteka ispisa (ili LandXML datoteka u referenci 'datoteka.xml#OSA')."""
+    if not p: return False
+    from .lx_axis import split_ref
+    r = split_ref(p)
+    return os.path.isfile(r[0] if r else p)
+
+
+def make_axis(name, h, v, x, cs_col=None):
+    """Osovina iz ispisa projektanta ili (za reference 'datoteka.xml#OSA') iz LandXML-a."""
+    from .lx_axis import split_ref, load_axes, AxisLX
+    r = split_ref(h)
+    if r:
+        al = load_axes(r[0])
+        if r[1] not in al: raise ValueError(_TF("LandXML: osovina '{0}' nije pronađena (postoje: {1}).", r[1], ", ".join(al)))
+        return AxisLX(r[1], r[0], al[r[1]])
+    return Axis(name, h, v, x, cs_col=cs_col)

@@ -232,3 +232,9 @@ VOŽNJA KROZ CIVIL 3D KORIDOR (verzija 1.5)
   (plava/crvena = raspoloživa, narandžasta = zahtijevana), a crveni krug je dodirna tačka s preprekom. Prepreke se crtaju na ofsetu koji proračun stvarno koristi (HUD: "Prepreka od ivice kolovoza").
   Opcija "Uskladi proračun s koridorom" (zadano uključeno) prije proračuna preuzima iz koridora širinu trake (u sekcijama koje obuhvataju zadani raspon – važi za cijelu sekciju!), prepreku na otvorenoj trasi na zadanom ofsetu od ivice kolovoza
   i dionice mosta i tunela. Ako koordinate koridora ne odgovaraju osovini projekta, izrada se prekida s porukom. Visine: slika prati niveletu iz UNA (razlika prema Civil 3D-u se vidi u dnevniku).
+
+OSOVINE IZ LANDXML-A (bez ispisa projektanta)
+Na koraku "Sekcije trase" dugme "Uvezi osovine iz LandXML-a" čita iz Civil 3D LandXML-a horizontalu (pravci, krivine, prijelaznice), nivelete
+(PVI i parabole) i poprečne nagibe (iz površi kolovoza u presjecima) i pravi sekciju trase. Dalje se sve radi kao i sa ispisima: Elaborat 3, Excel,
+preglednost (DXF), Elaborat 4, IFC... Reference u projektu su oblika "datoteka.xml#IME_OSOVINE". Poprečni nagib se računa na ±3,5 m od osovine;
+širina trake je zadano 3,5 m (mijenja se u sekciji). Stacionaže su iste kao u LandXML-u; presjeci obično pokrivaju kraći dio od osovine.

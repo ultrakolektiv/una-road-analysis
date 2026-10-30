@@ -2,6 +2,7 @@
 from .i18n import _T, _TF, tr_obj
 import os, json, time, traceback
 from . import engine, figs, report, xlsx
+from .parse import file_ok
 from .texts import SYM
 
 
@@ -19,7 +20,7 @@ def validate(cfg):
             sp = s.get(r) or {}
             for k in ("h", "v", "x"):
                 p = sp.get(k)
-                if not p or not os.path.isfile(p): errs.append(_TF("Sekcija {0} ({1}): datoteka '{2}' ne postoji: {3}", i, r, k, p))
+                if not file_ok(p): errs.append(_TF("Sekcija {0} ({1}): datoteka '{2}' ne postoji: {3}", i, r, k, p))
     pc = cfg.get("preglednost")
     if pc:
         try:
