@@ -302,13 +302,14 @@ def main(argv=None):
         except KeyboardInterrupt: return 0
     profile = os.path.join(os.environ.get("LOCALAPPDATA") or os.path.expanduser("~/.cache"), "UNA", "window")
     os.makedirs(profile, exist_ok=True)
-    proc = open_window(url, profile)
+    proc = open_window(url, profile); t_start = time.time()
     # kraj: prozor zatvoren (proces završen) ili nema otkucaja (ping) >20 s nakon prvog
     while True:
         time.sleep(1.0)
         if S.pinged and time.time() - S.last_ping > 20: break
-        if proc is not None and proc.poll() is not None and (not S.pinged or time.time() - S.last_ping > 6): break
-        if proc is None and not S.pinged and time.time() - S.last_ping > 120: break
+        # Edge/Chrome pri prvom pokretanju (novi profil) često preda prozor drugom procesu i početni proces odmah završi – zato se čeka prvi otkucaj (ping) do 3 min
+        if proc is not None and proc.poll() is not None and S.pinged and time.time() - S.last_ping > 6: break
+        if not S.pinged and time.time() - t_start > 180: break
     return 0
 
 
