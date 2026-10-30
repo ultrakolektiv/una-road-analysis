@@ -555,6 +555,41 @@ def _face_x(ss, kind, sd, e, z_ray=1.0):
     return None
 
 
+def _median_face(ss, z_ray=1.0):
+    """Poluširina betonske ograde u razdjelnom pojasu (mostovi) na visini zrake – prosjek lijeve i desne strane; None ako nema."""
+    segs = [(a, b) for n, _, pp in ss if n == "Betonska_ograda" for a, b in zip(pp, pp[1:])]
+    if not segs: return None
+    zt = max(max(a[1], b[1]) for a, b in segs); zr = min(z_ray, zt - 0.03); xs = []
+    for a, b in segs:
+        if (a[1] - zr) * (b[1] - zr) <= 0 and a[1] != b[1]: xs.append(a[0] + (b[0] - a[0]) * (zr - a[1]) / (b[1] - a[1]))
+    pos = [x for x in xs if x >= 0]; neg = [-x for x in xs if x < 0]
+    if not pos or not neg: return None
+    return (max(pos) + max(neg)) / 2
+
+
+def median_entries(R, s_from, s_to, g_of, off, step=5.0, log=print):
+    """Ograda u razdjelnom pojasu centralne osovine: na otvorenoj trasi na 'off' od unutrašnje ivice kolovoza, na mostu iz geometrije betonske ograde."""
+    out = []; vals = []
+    for nm, lst in R["sect"].items():
+        if "CENTR" not in nm.upper(): continue
+        g = g_of.get(nm, 1.5); cur = None; last = -1e9
+        for sta, ss in lst:
+            if not (s_from - 1 <= sta <= s_to + 1) or sta - last < step: continue
+            last = sta; names = {n for n, _, _ in ss}
+            if "Ploca_mosta" in names or "Vijenac" in names:
+                f = _median_face(ss); o = round(max(0.0, g - f) / 0.05) * 0.05 if f is not None else None
+            else: o = off
+            if o is None: cur = None; continue
+            if cur and abs(cur["ofset"] - o) < 0.026 and sta - cur["_l"] < step * 1.6: cur["do"] = round(sta + step * 0.5, 2); cur["_l"] = sta
+            else:
+                if cur and sta - cur["_l"] < step * 1.6: cur["do"] = round(sta, 2)
+                cur = {"osovina": "centralna", "od": round(sta, 2), "do": round(sta + step * 0.5, 2), "ofset": round(o, 2), "strana": "razdjelni", "_kor": True, "_l": sta}; out.append(cur)
+            vals.append(o)
+    for en in out: en.pop("_l")
+    if vals: log(_TF("Koridor → proračun: ograda u razdjelnom pojasu: ofset od unutrašnje ivice kolovoza {0:.2f}–{1:.2f} m.", min(vals), max(vals)))
+    return out
+
+
 def face_entries(R, s_from, s_to, e_of, step=5.0, log=print):
     """Prepreke u mostu i tunelu 'kako su nacrtane u koridoru': za svaki presjek i stranu ofset od ivice kolovoza (UNA ivica = e). Vraća unose za 'prepreke' (ofset, strana, od–do)."""
     out = []; stat = {"most": [], "tunel": []}
@@ -626,5 +661,6 @@ def harmonize(cfg, R, log=print):
     pc["tipovi_prepreka"] = tip
     pre = [en for en in (pc.get("prepreke") or []) if not (isinstance(en, dict) and en.get("_kor"))]
     pre += face_entries(R, s_from, s_to, {k: v["e"] for k, v in geo.items()}, log=log)
+    pre += median_entries(R, s_from, s_to, {k: v["g"] for k, v in geo.items()}, off, log=log)
     pc["prepreke"] = pre
     log(_TF("Koridor → proračun: dionice mosta/tunela preuzete iz koridora ({0}).", len([e_ for e_ in pre if e_.get("_kor")])))

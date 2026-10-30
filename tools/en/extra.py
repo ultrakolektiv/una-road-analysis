@@ -130,3 +130,5 @@ X.update({
 X.update({"Koridor: osovina '{0}' (centralna) nije uključena u vožnju kroz koridor.": "Corridor: alignment '{0}' (central) is not included in the corridor drive-through."})
 
 X.update({"Koridor → proračun: sekcija {0} ({1}): trake {2} → {3} × {4:.2f} m, pola razdjelnog pojasa {5:.2f} m.": "Corridor → calculation: segment {0} ({1}): lanes {2} → {3} × {4:.2f} m, half median {5:.2f} m."})
+
+X.update({"Koridor → proračun: ograda u razdjelnom pojasu: ofset od unutrašnje ivice kolovoza {0:.2f}–{1:.2f} m.": "Corridor → calculation: median barrier: offset from the inner carriageway edge {0:.2f}–{1:.2f} m."})

@@ -126,12 +126,13 @@ def _match(en, c, e=None):
     return True
 
 
-def obstacle_offsets(c, par, s):
+def obstacle_offsets(c, par, s, median=False):
     """Ofset prepreke od krajnje ivice kolovoza za stacionaže s: (oR, oL) – desna/lijeva strana u smjeru STACIONAŽE; NaN = nema prepreke.
     Redoslijed prioriteta: zadano po vrsti elementa < unos po elementu (br.) < unos po rasponu stacionaža."""
-    s = np.asarray(s, float); oR = np.full(len(s), np.nan); oL = np.full(len(s), np.nan)
+    s = np.asarray(s, float); oR = np.full(len(s), np.nan); oL = np.full(len(s), np.nan); oM = np.full(len(s), np.nan)   # oM: ograda u razdjelnom pojasu (centralna osovina), ofset od unutrašnje ivice kolovoza
+    ret = (lambda: (oR, oL, oM)) if median else (lambda: (oR, oL))
     pre = par.get("prepreke") or []; dflt = par.get("prepreke_zadano") or {}; tipovi = par.get("tipovi_prepreka") or {}; ztip = par.get("zadani_tip") or ""
-    if not pre and not dflt and not ztip: return oR, oL
+    if not pre and not dflt and not ztip: return ret()
     def val(en):
         if en.get("tip") not in (None, ""):
             v = tipovi.get(en["tip"]); return None if v in (None, "") else (v if isinstance(v, dict) else float(v))
@@ -147,6 +148,9 @@ def obstacle_offsets(c, par, s):
             r, l = sides(off)
             if r is not None: oR[mask] = float(r)
             if l is not None: oL[mask] = float(l)
+            return
+        if side == "razdjelni":
+            if not isinstance(off, dict): oM[mask] = off
             return
         if side in ("desno", "D", "desna"): oR[mask] = off
         elif side in ("lijevo", "L", "lijeva"): oL[mask] = off
@@ -170,7 +174,7 @@ def obstacle_offsets(c, par, s):
         for e in els:
             m = (s >= max(e["s0"], float(en["od"])) - 1e-9) & (s <= min(e["s1"], float(en["do"])) + 1e-9)
             if m.any(): put(m, val(en), en.get("strana", "unutra"), e["k"])
-    return oR, oL
+    return ret()
 
 
 def case_frame(c, par, s):
@@ -195,9 +199,11 @@ def build_chain(ch, P, par, scen=1, side="D"):
         xl = x0 + c.sg * d * nx; yl = y0 + c.sg * d * ny
         cols["x"] += list(yl); cols["y"] += list(xl)            # CAD: x = istok (Y), y = sjever (X)
         cols["s"] += list(s); cols["ci"] += [ci] * len(s)
-        oR, oL = obstacle_offsets(c, par, s)                    # smjer stacionaže
+        oR, oL, oM = obstacle_offsets(c, par, s, median=True)    # smjer stacionaže
         for nm, o, sign in (("R", oR, +1), ("L", oL, -1)):       # položaj prepreke u smjeru stacionaže: desno +(eR+o), lijevo -(eL+o)
             lat = sign * ((pr["eR"] if sign > 0 else pr["eL"]) + o)
+            if c.role == "centralna" and np.isfinite(oM).any() and (sign < 0) == (c.sg == 1):    # strana vozača prema razdjelnom pojasu: ograda je u razdjelnom pojasu
+                o = oM; lat = (pr["gR"] - oM) if c.sg == 1 else -(pr["gL"] - oM)
             px = np.where(np.isnan(o), np.nan, y0 + lat * ny); py = np.where(np.isnan(o), np.nan, x0 + lat * nx)
             ob[("r" if (nm == "R") == (c.sg == 1) else "l") + "x"] += list(px); ob[("r" if (nm == "R") == (c.sg == 1) else "l") + "y"] += list(py)
         zc = np.interp(s, c.S, c.Z)

@@ -31,7 +31,7 @@ def validate(cfg):
                     if e["tip"] not in par["tipovi_prepreka"]: errs.append(_TF("Preglednost, prepreka {0}: tip '{1}' nema upisan ofset (tipovi prepreka).", j, e['tip']))
                 elif e.get("ofset") in (None, "") or float(e["ofset"]) < 0: errs.append(_TF('Preglednost, prepreka {0}: zadajte tip prepreke ili ofset od ivice kolovoza (broj ≥ 0).', j))
                 if e.get("element") in (None, "") and (e.get("od") in (None, "") or e.get("do") in (None, "")): errs.append(_TF("Preglednost, prepreka {0}: zadajte 'element' ili 'od' i 'do'.", j))
-                if e.get("strana", "unutra") not in ("unutra", "vani", "izvana", "desno", "lijevo", "D", "L"): errs.append(_TF('Preglednost, prepreka {0}: strana mora biti unutra / vani / desno / lijevo.', j))
+                if e.get("strana", "unutra") not in ("unutra", "vani", "izvana", "desno", "lijevo", "D", "L", "razdjelni"): errs.append(_TF('Preglednost, prepreka {0}: strana mora biti unutra / vani / desno / lijevo.', j))
             if not par["strane"]: errs.append(_T('Preglednost: nije odabrana nijedna strana osovine.'))
         except Exception as ex: errs.append(_TF('Preglednost: neispravan unos ({0}).', ex))
         for i, s in enumerate(cfg.get("sekcije", []), 1):

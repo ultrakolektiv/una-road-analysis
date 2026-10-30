@@ -133,7 +133,7 @@ function frame(){
  const hg=cx.createLinearGradient(0,Hd*.92,0,Hd);hg.addColorStop(0,"rgba(0,0,0,0)");hg.addColorStop(1,"rgba(0,0,0,.85)");cx.fillStyle=hg;cx.fillRect(0,Hd*.9,Wd,Hd*.1);
  hud(e,bad,Lz,Dv);chart();mini(e)}
 function fmtSta(s){const k=Math.floor(s/1000),m=s-k*1000;return 'km '+k+'+'+m.toFixed(2).padStart(6,'0')}
-function obTxt(a,t){const v=a.ob.filter(x=>x!=null);if(!v.length)return t.nop;return v.map(x=>(Math.abs(x)-a.E.e).toFixed(2)+' m').join(' / ')}
+function obTxt(a,t){const v=a.ob.filter(x=>x!=null);if(!v.length)return t.nop;const PV=a.E.pv||[[-a.E.e,a.E.e]],dd=x=>Math.min(...PV.map(r=>x<r[0]?r[0]-x:(x>r[1]?x-r[1]:0)));return v.map(x=>dd(x).toFixed(2)+' m').join(' / ')}
 function hud(e,bad,Lz,Dv){const t=T(),id=x=>document.getElementById(x),a=e.sec;id('t_proj').textContent=(DATA.projekat||'')+' · '+t.title;id('v').textContent=e.v.toFixed(0);
  const k=Math.abs(e.k),Rr=k>1/9000?1/k:0,dir=e.k>0?t.right:t.left;
  let csl=(zp(a.F,a.E.e)-zp(a.F,0))/(a.E.e||1)*100;if(a.E.pv&&a.E.pv.length>1){const r=a.E.pv.reduce((u,w)=>Math.abs((u[0]+u[1])/2-a.ec)<Math.abs((w[0]+w[1])/2-a.ec)?u:w),wd=(r[1]-r[0])||1;csl=((r[0]+r[1])/2>=0?zp(a.F,r[1])-zp(a.F,r[0]):zp(a.F,r[0])-zp(a.F,r[1]))/wd*100}
