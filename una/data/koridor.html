@@ -67,7 +67,7 @@ function strip(a,b,fa){
  const ea=a.E,eb=b.E,e=ea.e;
  // profil: unija ofseta
  const os=new Set();for(const p of a.F)os.add(p[0]);for(const p of b.F)os.add(p[0]);const O=[...os].sort((u,v)=>u-v);
- const pave=(om)=>Math.abs(om)<=e+.001, oth=(om)=>ea.oe>0&&Math.abs(om-ea.ot)<=ea.oe+.001;
+ const PV=ea.pv||[[-e,e]],pave=(om)=>PV.some(r=>om>=r[0]-.001&&om<=r[1]+.001), oth=(om)=>ea.oe>0&&Math.abs(om-ea.ot)<=ea.oe+.001;
  for(let k=0;k<O.length-1;k++){const o1=O[k],o2=O[k+1],om=(o1+o2)/2;if(o2-o1<1e-4)continue;
   let col,al;const med=ea.med&&om>ea.med[0]&&om<ea.med[2];
   if(a.kind==="tunel"){col=pave(om)?C.road:C.concD}
@@ -79,10 +79,10 @@ function strip(a,b,fa){
    else{const band=Math.floor((a.z+zp(a.F,om))*1.4)&1,cr=hs(Math.floor(a.q/3)+k*5.3);col=sc(C.rock,sh*(band?.82:1.04)*(.93+.14*cr))}}
   poly([W(a,o1,zp(a.F,o1)),W(a,o2,zp(a.F,o2)),W(b,o2,zp(b.F,o2)),W(b,o1,zp(b.F,o1))],fog(col))}
  // kolotrazi (blago potamnjenje po trakama)
- if(a.kind!=="tunel"||true){const lc=e/2;for(const c0 of [-lc,lc])for(const w of [-.9,.9]){const o=c0+w;poly([W(a,o-.35,zp(a.F,o-.35)+.006),W(a,o+.35,zp(a.F,o+.35)+.006),W(b,o+.35,zp(b.F,o+.35)+.006),W(b,o-.35,zp(b.F,o-.35)+.006)],fog(C.road2),.45)}}
+ if(a.kind!=="tunel"||true){const LC=[];for(const r of PV){const nl=Math.max(1,Math.round((r[1]-r[0])/3.85));for(let j=0;j<nl;j++)LC.push(r[0]+(j+.5)*(r[1]-r[0])/nl)}for(const c0 of LC)for(const w of [-.9,.9]){const o=c0+w;poly([W(a,o-.35,zp(a.F,o-.35)+.006),W(a,o+.35,zp(a.F,o+.35)+.006),W(b,o+.35,zp(b.F,o+.35)+.006),W(b,o-.35,zp(b.F,o-.35)+.006)],fog(C.road2),.45)}}
  // oznake
  const dash=(Math.floor(a.q/9)%2===0),ln=(r,w,col,h)=>poly([W(a,r-w/2,zp(a.F,r-w/2)+.012),W(a,r+w/2,zp(a.F,r+w/2)+.012),W(b,r+w/2,zp(b.F,r+w/2)+.012),W(b,r-w/2,zp(b.F,r-w/2)+.012)],fog(col));
- ln(-(e-.15),.15,C.line);ln(e-.15,.15,C.line);if(dash)ln(0,.14,C.line);
+ for(const r of PV){ln(r[0]+.15,.15,C.line);ln(r[1]-.15,.15,C.line);const nl=Math.max(1,Math.round((r[1]-r[0])/3.85));if(dash)for(let j=1;j<nl;j++)ln(r[0]+j*(r[1]-r[0])/nl,.14,C.line)};
  if(ea.oe>0&&a.kind==="otvorena"){const c=ea.ot,w=ea.oe;ln(c-(w-.15),.15,C.line);ln(c+(w-.15),.15,C.line);if(dash)ln(c,.14,C.line)}
  // ograde, parapeti, svod
  for(let i=0;i<a.box.length;i++){const A=a.box[i],B=b.box[i];if(!B||A[0]!==B[0])continue;const inn=Math.abs(A[1])<Math.abs(A[2])?A[1]:A[2],inb=Math.abs(B[1])<Math.abs(B[2])?B[1]:B[2],ouA=inn===A[1]?A[2]:A[1],ouB=inb===B[1]?B[2]:B[1];
@@ -136,7 +136,7 @@ function fmtSta(s){const k=Math.floor(s/1000),m=s-k*1000;return 'km '+k+'+'+m.to
 function obTxt(a,t){const v=a.ob.filter(x=>x!=null);if(!v.length)return t.nop;return v.map(x=>(Math.abs(x)-a.E.e).toFixed(2)+' m').join(' / ')}
 function hud(e,bad,Lz,Dv){const t=T(),id=x=>document.getElementById(x),a=e.sec;id('t_proj').textContent=(DATA.projekat||'')+' · '+t.title;id('v').textContent=e.v.toFixed(0);
  const k=Math.abs(e.k),Rr=k>1/9000?1/k:0,dir=e.k>0?t.right:t.left;
- const csl=(zp(a.F,a.E.e)-zp(a.F,0))/(a.E.e||1)*100;
+ let csl=(zp(a.F,a.E.e)-zp(a.F,0))/(a.E.e||1)*100;if(a.E.pv&&a.E.pv.length>1){const r=a.E.pv.reduce((u,w)=>Math.abs((u[0]+u[1])/2-a.ec)<Math.abs((w[0]+w[1])/2-a.ec)?u:w),wd=(r[1]-r[0])||1;csl=((r[0]+r[1])/2>=0?zp(a.F,r[1])-zp(a.F,r[0]):zp(a.F,r[0])-zp(a.F,r[1]))/wd*100}
  const rows=[[t.st,fmtSta(e.s)],[t.el,t['e'+e.el]],[t.rad,Rr?`R=${Rr.toFixed(0)} m (${dir})`:t.str],[t.cs,csl.toFixed(1)+' %'],[t.gr,(e.g>=0?'+':'')+e.g.toFixed(2)+' %'],[t.pr,t.t[a.kind]||a.kind],[t.sd,Dv>=900?'>900 m':Dv.toFixed(0)+' m'],[t.rq,Lz.toFixed(0)+' m'],[t.oko,Math.abs(e.sec.ec).toFixed(2)+' m ('+(e.sec.ec>=0?t.right:t.left)+')'],[t.pre,obTxt(a,t)]];
  id('tb').innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('');
  const st=id('st');const lim=e.ok===1?t.bh:e.ok===2?t.bv:'';st.className=bad?'bad':'ok';st.textContent=bad?lim:t.okt;

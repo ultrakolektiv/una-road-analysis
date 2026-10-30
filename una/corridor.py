@@ -145,7 +145,7 @@ def kor_range(cfg):
 
 def load_landxml(path, s_from, s_to, log=print, margin=60.0):
     """Jedan prolaz kroz datoteku. Vraća dict: aligns{name: Align}, sect{name: [(sta, [(ime, strana, [(ofs, z, kod),…]),…]),…]}, tin (Nx3 sjever/istok/z), faces (Mx3)."""
-    key = hashlib.md5(f"{os.path.abspath(path)}|{os.path.getsize(path)}|{os.path.getmtime(path)}|{s_from}|{s_to}".encode()).hexdigest()
+    key = hashlib.md5(f"v2|{os.path.abspath(path)}|{os.path.getsize(path)}|{os.path.getmtime(path)}|{s_from}|{s_to}".encode()).hexdigest()
     cache = os.path.join(tempfile.gettempdir(), f"una_koridor_{key}.pkl")
     if os.path.isfile(cache):
         try:
@@ -185,8 +185,6 @@ def load_landxml(path, s_from, s_to, log=print, margin=60.0):
                 a = el.text.split()
                 if len(a) == 3: faces.append((a[0], a[1], a[2]))
             el.clear()
-    for k in [k for k in aligns if "CENTR" in k.upper()]:          # centralna osovina se ne prikazuje u koridoru (samo razdvojeni dio)
-        aligns.pop(k); sect.pop(k, None); log(_TF("Koridor: osovina '{0}' (centralna) nije uključena u vožnju kroz koridor.", k))
     for k, v in aligns.items():
         if not v["elems"]: raise ValueError(_TF("Koridor: osovina '{0}' nema geometriju (CoordGeom).", k))
     A = {}
@@ -275,7 +273,7 @@ def _ring(secs, cz=2.4):
     return ring[::-1]            # od desnog zida preko tjemena do lijevog zida? (kut opada: ide od lijevo prema desno -> obrnuto)
 
 
-def section_geom(secs, rail_off=0.78, add_rails=True):
+def section_geom(secs, rail_off=0.78, add_rails=True, central=False):
     """Presjek u stacionažnom okviru (ofset + = desno u smjeru stacionaže, visina relativna na niveletu osovine)."""
     names = {n or "-" for n, _, _ in secs}
     bridge = "Ploca_mosta" in names or "Vijenac" in names; tunnel = "Sekundarna_obloga" in names
@@ -283,8 +281,16 @@ def section_geom(secs, rail_off=0.78, add_rails=True):
     ref = [p[0] for n, _, pp in secs if n in ("Pave1", "Sloj1", "Sloj1_vrh") for p in pp]
     eL, eR = (min(ref), max(ref)) if ref else (-3.85, 3.85)
     e = max(2.5, min(abs(eL), eR, 3.85))
+    pv = [[-e, e]]; gap = None
+    if central and eL < -5.0 and eR > 5.0:                       # centralna osovina: dva kolovoza sa razdjelnim pojasom (na mostu betonska ograda u sredini)
+        px = [abs(p[0]) for n, _, pp in secs if n == "Pave1" for p in pp]
+        if px and min(px) > 0.3: g = min(px)
+        else:
+            bo = [abs(p[0]) for n, _, pp in secs if n == "Betonska_ograda" for p in pp]
+            g = min(bo) if bo else 0.5
+        e = min(abs(eL), eR); pv = [[eL, -g], [g, eR]]; gap = (-g, g)
     top = _envelope(_segments(secs, ENV_LAYERS))
-    G = dict(kind=kind, e=e, eL=eL, eR=eR, top=top, gr=int(("Humus_skarpa" in names) or ("Humus_dno" in names)), rails=[], box=[], ring=[])
+    G = dict(kind=kind, e=e, eL=eL, eR=eR, top=top, pv=pv, gap=gap, gr=int(("Humus_skarpa" in names) or ("Humus_dno" in names)), rails=[], box=[], ring=[])
     bk = [p[0] for n, _, pp in secs if n == "Bankina" for p in pp]
     G["shR"] = max(bk) if bk and max(bk) > 0 else e
     G["shL"] = min(bk) if bk and min(bk) < 0 else -e
@@ -343,7 +349,8 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
     """Scena vožnje. SVE što se tiče preglednosti (oko, ofset trake, prepreke, zrake, D, Lz, v, g) uzima se direktno iz UNA proračuna (out['vp'] / out['ocek']);
     iz koridora dolaze samo oblik presjeka, teren, most i tunel. 'F' = osovina D* u smjeru stacionaže, 'B' = druga osovina suprotno stacionaži."""
     dtm = _dtm_interp(R); A_ = R["aligns"]; names = [n for n in A_ if n in R["sect"]]
-    nF = next((n for n in names if n.upper().startswith("D")), names[0]); nB = next((n for n in names if n != nF), None)
+    cen = next((n for n in names if "CENTR" in n.upper()), None); dl = [n for n in names if n != cen] or names
+    nF = next((n for n in dl if n.upper().startswith("D")), dl[0]); nB = next((n for n in dl if n != nF), None)
     plan = [("F", nF, nB, +1)] + ([("B", nB, nF, -1)] if nB else [])
     secs_by = {}
     for nm in names:
@@ -351,11 +358,16 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
         for sta, ss in R["sect"][nm]:
             if s_from - 1 <= sta <= s_to + 1 and sta - last >= max(1.2, (s_to - s_from) / 2500): keep.append((sta, ss)); last = sta
         sta = np.array([r[0] for r in keep]); N, E = A_[nm].pos(sta); nu = A_[nm].heading(sta)
-        secs_by[nm] = dict(sta=sta, N=N, E=E, nu=nu, z0=A_[nm].z(sta), G=[section_geom(ss, 0.78, False) for _, ss in keep], k=A_[nm].curvature(sta))
+        secs_by[nm] = dict(sta=sta, N=N, E=E, nu=nu, z0=A_[nm].z(sta), G=[section_geom(ss, 0.78, False, "CENTR" in nm.upper()) for _, ss in keep], k=A_[nm].curvature(sta))
     trees = {nm: _NN(np.c_[v["E"], v["N"]]) for nm, v in secs_by.items()}
     h_oka = float(par["h_oka"]); scene = dict(routes={}, h=h_oka, range=[s_from, s_to], projekat=cfg.get("projekat", ""), h_pr=float(par["h_prepreke"]), h_auto=bool(par.get("h_auto")))
+    sw = float(secs_by[cen]["sta"][0]) if (cen and len(secs_by[cen]["sta"])) else None            # st. na kojoj se razdvojene osovine nastavljaju centralnom
     for tag, nm, other, sg in plan:
-        S = secs_by[nm]; n = len(S["sta"]); order = np.arange(n) if sg > 0 else np.arange(n)[::-1]
+        S = secs_by[nm]; n = len(S["sta"])
+        ia = [(nm, int(i)) for i in range(n) if sw is None or S["sta"][i] < sw - 1e-6]
+        if sw is not None: ic = [(cen, int(i)) for i in range(len(secs_by[cen]["sta"]))]
+        else: ic = []
+        order = (ia + ic) if sg > 0 else (ic[::-1] + ia[::-1])
         prep = {}
         for sd in ("D", "L"):
             Rr = out["vp"].get(f"{tag}_{sd}")
@@ -365,12 +377,14 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
         if not prep: raise ValueError(_T("Koridor: nema proračuna preglednosti za ovu osovinu (uključite preglednost)."))
         PD = prep.get("D") or prep["L"]
         q = 0.0; prev = None
-        o_ = dict(naziv=_TF("{0} – {1}", nm, _T("smjer stacionaže") if sg > 0 else _T("suprotno stacionaži")), q=[], s=[], x=[], y=[], z=[], tx=[], ty=[], k=[], el=[], v=[], g=[], D=[], Lz=[], ok=[],
+        o_ = dict(naziv=_TF("{0} – {1}", (nm + " + " + cen) if (cen and sw is not None) else nm, _T("smjer stacionaže") if sg > 0 else _T("suprotno stacionaži")), q=[], s=[], x=[], y=[], z=[], tx=[], ty=[], k=[], el=[], v=[], g=[], D=[], Lz=[], ok=[],
                   kind=[], gr=[], F=[], e=[], box=[], ring=[], ln=[], latD=[], latL=[], zeD=[], zeL=[], ob=[], ray=[], lim=[], hp=[])
-        for ii in order:
+        z0cs = []
+        for nm_s, ii in order:
+            S = secs_by[nm_s]; nm_c = nm_s; oth_a = None if nm_s == cen else other
             sta = float(S["sta"][ii]); x, y = float(S["E"][ii]), float(S["N"][ii])
             if prev is not None: q += math.hypot(x - prev[0], y - prev[1])
-            prev = (x, y); nu = float(S["nu"][ii]); G = S["G"][ii]; z0c = float(S["z0"][ii])
+            prev = (x, y); nu = float(S["nu"][ii]); G = S["G"][ii]; z0c = float(S["z0"][ii]); z0cs.append(z0c)
             shift = _interp_s(PD["A"], PD["A"]["z"], sta, PD["o"]) - z0c            # UNA niveleta vs Civil niveleta (razlika se prikazuje, slika prati UNA)
             z0 = z0c + shift
             nxs, nys = math.cos(nu), -math.sin(nu); nxd, nyd = sg * nxs, sg * nys    # desna normala (stacionaža / smjer vožnje), (E,N)
@@ -384,13 +398,13 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
             if abs(lat[sdsel]) > 25: raise ValueError(_TF("Koridor: osovina '{0}' na st. {1:.1f} je {2:.0f} m od osovine u UNA projektu – koordinate ili stacionaže se ne poklapaju.", nm, sta, abs(lat[sdsel])))
             # --- profil u stacionažnom okviru
             top = list(G["top"]); oth_top = None; oth_e = None
-            if other and G["kind"] == "otvorena":
-                d, j = trees[other].query([x, y])
+            if oth_a and G["kind"] == "otvorena":
+                d, j = trees[oth_a].query([x, y])
                 if d < 60:
-                    Go = secs_by[other]["G"][int(j)]
+                    Go = secs_by[oth_a]["G"][int(j)]
                     if Go["kind"] == "otvorena":
-                        t = (secs_by[other]["E"][j] - x) * nxs + (secs_by[other]["N"][j] - y) * nys
-                        dz = float(secs_by[other]["z0"][j]) - z0
+                        t = (secs_by[oth_a]["E"][j] - x) * nxs + (secs_by[oth_a]["N"][j] - y) * nys
+                        dz = float(secs_by[oth_a]["z0"][j]) - z0
                         oth_top = [(o + t, zz + dz) for o, zz in Go["top"]]; oth_e = (Go["e"], t)
             drv = lambda tp: sorted([(sg * o, zz) for o, zz in tp])
             P1 = drv(top); P2 = drv(oth_top) if oth_top else None; pts = list(P1); med = None
@@ -408,7 +422,10 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
                         if np.ma.is_masked(zt) or zt is None: break
                         lst.append((oo, float(zt) - z0))
             full = list(reversed(terr_L)) + pts + terr_R
-            zones = dict(e=round(G["e"], 3), shL=round(sg * (G["shL"] if sg > 0 else G["shR"]), 3), shR=round(sg * (G["shR"] if sg > 0 else G["shL"]), 3),
+            if G.get("gap"):
+                pvd = sorted([sorted((sg * a_, sg * b_)) for a_, b_ in G["pv"]]); med = (pvd[0][1], 0.0, pvd[1][0], 0.0)
+            else: pvd = [[-G["e"], G["e"]]]
+            zones = dict(pv=[[round(a_, 3), round(b_, 3)] for a_, b_ in pvd], e=round(G["e"], 3), shL=round(sg * (G["shL"] if sg > 0 else G["shR"]), 3), shR=round(sg * (G["shR"] if sg > 0 else G["shL"]), 3),
                          oe=round(oth_e[0], 3) if (oth_top and oth_e) else 0, ot=round(sg * oth_e[1], 3) if (oth_top and oth_e) else 0, med=[round(v, 3) for v in med] if med else None)
             # --- prepreke iz UNA proračuna (bočni ofset u okviru vožnje)
             ob = []
@@ -445,7 +462,7 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
             v_ = float(_interp_s(A, A["v"], sta, pp["o"])); g_ = float(_interp_s(A, A["g"], sta, pp["o"]))
             o_["q"].append(round(q, 2)); o_["s"].append(round(sta, 2)); o_["x"].append(round(x, 3)); o_["y"].append(round(y, 3)); o_["z"].append(round(z0, 3))
             o_["tx"].append(round(sg * math.sin(nu), 5)); o_["ty"].append(round(sg * math.cos(nu), 5)); o_["k"].append(round(kd, 6))
-            o_["el"].append(_elem_at(A_[nm], sta)); o_["kind"].append(G["kind"]); o_["gr"].append(G["gr"]); o_["F"].append([[round(a_, 3), round(b_, 3)] for a_, b_ in full]); o_["e"].append(zones)
+            o_["el"].append(_elem_at(A_[nm_c], sta)); o_["kind"].append(G["kind"]); o_["gr"].append(G["gr"]); o_["F"].append([[round(a_, 3), round(b_, 3)] for a_, b_ in full]); o_["e"].append(zones)
             bx = []
             for st_, a_, b_, h_ in G["box"]:
                 lo, hi = sorted((sg * a_, sg * b_)); bx.append([st_, round(lo, 3), round(hi, 3), round(h_, 3)])
@@ -453,7 +470,7 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
             o_["ln"].append(-1 if sdsel == "L" else 1); o_["latD"].append(round(lat["D"], 3)); o_["latL"].append(round(lat["L"], 3)); o_["zeD"].append(round(ze["D"], 3)); o_["zeL"].append(round(ze["L"], 3))
             o_["ob"].append(ob); o_["ray"].append(ray); o_["lim"].append(str(r.get("lim", ""))); o_["hp"].append(round(hpr, 2))
             o_["v"].append(round(v_, 1)); o_["g"].append(round(g_, 2)); o_["D"].append(round(D, 1)); o_["Lz"].append(round(Lz, 1)); o_["ok"].append(okc)
-        zs = np.array(o_["z"]) - np.array([float(S["z0"][k]) for k in order])
+        zs = np.array(o_["z"]) - np.array(z0cs)
         if len(zs) and abs(zs).max() > 0.01: log(_TF("Koridor: niveleta u UNA proračunu se razlikuje od Civil 3D niveleta za {0:.3f} m (osovina {1}); slika prati UNA.", float(np.median(zs)), nm))
         scene["routes"][tag] = o_
     log(_TF("Koridor: scena izrađena ({0} presjeka po smjeru).", len(order)))
@@ -538,11 +555,11 @@ def _face_x(ss, kind, sd, e, z_ray=1.0):
     return None
 
 
-def face_entries(R, s_from, s_to, e, step=5.0, log=print):
+def face_entries(R, s_from, s_to, e_of, step=5.0, log=print):
     """Prepreke u mostu i tunelu 'kako su nacrtane u koridoru': za svaki presjek i stranu ofset od ivice kolovoza (UNA ivica = e). Vraća unose za 'prepreke' (ofset, strana, od–do)."""
     out = []; stat = {"most": [], "tunel": []}
     for nm, lst in R["sect"].items():
-        role = "desna" if nm.upper().startswith("D") else "lijeva"
+        role = "centralna" if "CENTR" in nm.upper() else ("desna" if nm.upper().startswith("D") else "lijeva"); e = e_of.get(nm, 3.85) if isinstance(e_of, dict) else e_of
         for sd, st_ in ((1, "desno"), (-1, "lijevo")):
             cur = None; last = -1e9
             for sta, ss in lst:
@@ -571,21 +588,35 @@ def harmonize(cfg, R, log=print):
     kc = cfg.get("koridor") or {}
     if not kc.get("uskladi", True): return
     s_from, s_to = kor_range(cfg); off = float(kc.get("ograda_ofset", 0.78))
-    es = []
+    geo = {}                                                        # po osovini: ivica kolovoza e, razdjelni pojas (pola) g, širina trake w, broj traka po smjeru n
     for nm, lst in R["sect"].items():
+        es = []; gs = []
         for sta, ss in lst[::10]:
             if s_from <= sta <= s_to:
-                G = section_geom(ss, off, False)
-                if G["kind"] == "otvorena": es.append(round(G["e"], 2))
-    if not es: return
-    e = max(set(es), key=es.count)
+                G = section_geom(ss, off, False, "CENTR" in nm.upper())
+                if G["kind"] == "otvorena": es.append(round(G["e"], 2)); gs.append(G["gap"][1] if G.get("gap") else 0.0)
+        if es:
+            e_ = max(set(es), key=es.count); g_ = float(np.median(gs)); n_ = max(1, int(round((e_ - g_) / 3.85))) if g_ > 0 else 1
+            geo[nm] = dict(e=e_, g=g_, n=n_, w=(e_ - g_) / n_ if g_ > 0 else e_, central="CENTR" in nm.upper())
+    if not geo: return
     for sec in cfg.get("sekcije", []):
         if float(sec["do"]) < s_from or float(sec["od"]) > s_to: continue
         for r in ("desna", "lijeva", "centralna", "osovina"):
             sp = sec.get(r)
-            if isinstance(sp, dict):
-                old = (sp.get("trake_desno"), sp.get("trake_lijevo")); sp["trake_desno"] = [e]; sp["trake_lijevo"] = [e]
-                log(_TF("Koridor → proračun: sekcija {0} ({1}): širina trake {2} → {3:.2f} m.", sec.get("od"), r, old[0], e))
+            if not isinstance(sp, dict): continue
+            ref = sp.get("h", "")
+            from .lx_axis import split_ref
+            sr = split_ref(ref); nm = sr[1] if sr else None
+            gg = geo.get(nm) if nm in geo else (next((v for v in geo.values() if v["central"]), None) if r == "centralna" else next((v for k, v in geo.items() if not v["central"]), None))
+            if not gg: continue
+            old = (sp.get("trake_desno"), sp.get("trake_lijevo"))
+            if gg["central"]:
+                w = round(gg["w"], 3); sp["trake_desno"] = [w] * gg["n"]; sp["trake_lijevo"] = [w] * gg["n"]; sp["razdjelni_pola"] = round(gg["g"], 3)
+                log(_TF("Koridor → proračun: sekcija {0} ({1}): trake {2} → {3} × {4:.2f} m, pola razdjelnog pojasa {5:.2f} m.", sec.get("od"), r, old[0], gg["n"], w, gg["g"]))
+            else:
+                sp["trake_desno"] = [round(gg["e"], 3)]; sp["trake_lijevo"] = [round(gg["e"], 3)]
+                log(_TF("Koridor → proračun: sekcija {0} ({1}): širina trake {2} → {3:.2f} m.", sec.get("od"), r, old[0], gg["e"]))
+    e = max((v["e"] for v in geo.values() if not v["central"]), default=3.85)
     pc = cfg.setdefault("preglednost", {"ukljuci": True})
     tip = dict(pc.get("tipovi_prepreka") or {})
     if cfg.get("npp"):
@@ -594,6 +625,6 @@ def harmonize(cfg, R, log=print):
     log(_TF("Koridor → proračun: prepreka na otvorenoj trasi {0:.2f} m od ivice kolovoza.", off))
     pc["tipovi_prepreka"] = tip
     pre = [en for en in (pc.get("prepreke") or []) if not (isinstance(en, dict) and en.get("_kor"))]
-    pre += face_entries(R, s_from, s_to, e, log=log)
+    pre += face_entries(R, s_from, s_to, {k: v["e"] for k, v in geo.items()}, log=log)
     pc["prepreke"] = pre
     log(_TF("Koridor → proračun: dionice mosta/tunela preuzete iz koridora ({0}).", len([e_ for e_ in pre if e_.get("_kor")])))

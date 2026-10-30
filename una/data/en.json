@@ -907,5 +907,6 @@
 "LandXML osovina '{0}': u presjecima nema površi kolovoza za poprečne nagibe.": "LandXML alignment '{0}': the cross-sections contain no carriageway surface for cross slopes.",
 "LandXML: niveleta nema prelomnih tačaka.": "LandXML: the profile has no grade-break points.",
 "LandXML: osovina '{0}' nije pronađena (postoje: {1}).": "LandXML: alignment '{0}' not found (available: {1}).",
-"Koridor: osovina '{0}' (centralna) nije uključena u vožnju kroz koridor.": "Corridor: alignment '{0}' (central) is not included in the corridor drive-through."
+"Koridor: osovina '{0}' (centralna) nije uključena u vožnju kroz koridor.": "Corridor: alignment '{0}' (central) is not included in the corridor drive-through.",
+"Koridor → proračun: sekcija {0} ({1}): trake {2} → {3} × {4:.2f} m, pola razdjelnog pojasa {5:.2f} m.": "Corridor → calculation: segment {0} ({1}): lanes {2} → {3} × {4:.2f} m, half median {5:.2f} m."
 }
