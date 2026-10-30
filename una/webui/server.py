@@ -76,6 +76,8 @@ def api_pick(b):
         r = dialogs.pick(b.get("mode", "open"), b.get("title", ""), [tuple(x) for x in b.get("filters", [])], bool(b.get("multiple")), b.get("initial", ""), b.get("name", ""))
         return {"paths": r}
     except Exception as e:
+        try: open(os.path.join(_log_dir(), "dialog_error.log"), "a", encoding="utf-8").write(str(e) + "\n")
+        except Exception: pass
         return {"paths": [], "error": str(e)}
 
 

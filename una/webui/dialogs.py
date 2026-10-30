@@ -6,7 +6,7 @@ $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 Add-Type -AssemblyName System.Windows.Forms
 $owner = New-Object System.Windows.Forms.Form -Property @{TopMost = $true; ShowInTaskbar = $false; Opacity = 0; StartPosition = 'CenterScreen'}
-$owner.Show()
+$owner.Show(); $owner.Activate()
 $mode = $env:UNA_MODE; $title = $env:UNA_TITLE; $flt = $env:UNA_FILTER; $init = $env:UNA_INIT; $name = $env:UNA_NAME
 if ($mode -eq 'folder') {
   $d = New-Object System.Windows.Forms.FolderBrowserDialog
@@ -40,12 +40,20 @@ def pick(mode="open", title="", filters=None, multiple=False, initial="", name="
         q = json.load(open(stub)); r = q.pop(0) if q else []; json.dump(q, open(stub, "w")); return r
     initial = initial if initial and os.path.isdir(initial) else (os.path.dirname(initial) if initial and os.path.isdir(os.path.dirname(initial)) else "")
     if os.name == "nt":
-        env = dict(os.environ, UNA_MODE=mode, UNA_TITLE=title, UNA_FILTER=_flt_win(filters), UNA_INIT=initial, UNA_NAME=name, UNA_MULTI="1" if multiple else "0")
-        ps = shutil.which("powershell") or "powershell"
-        r = subprocess.run([ps, "-NoProfile", "-STA", "-ExecutionPolicy", "Bypass", "-Command", _PS], env=env, capture_output=True, text=True, encoding="utf-8",
-                           creationflags=0x08000000)
-        if r.returncode != 0: raise RuntimeError(r.stderr.strip() or "PowerShell dialog failed")
-        return [x.strip() for x in r.stdout.splitlines() if x.strip()]
+        err = ""
+        try:
+            env = dict(os.environ, UNA_MODE=mode, UNA_TITLE=title, UNA_FILTER=_flt_win(filters), UNA_INIT=initial, UNA_NAME=name, UNA_MULTI="1" if multiple else "0")
+            ps = shutil.which("powershell") or "powershell"
+            r = subprocess.run([ps, "-NoProfile", "-NonInteractive", "-STA", "-ExecutionPolicy", "Bypass", "-Command", _PS], env=env, capture_output=True, text=True, encoding="utf-8",
+                               creationflags=0x08000000, timeout=1800)
+            if r.returncode == 0: return [x.strip() for x in r.stdout.splitlines() if x.strip()]
+            err = r.stderr.strip() or "PowerShell dialog failed"
+        except Exception as e:
+            err = str(e)
+        try:                                                  # rezerva: tkinter (uključen u pakovanu aplikaciju)
+            return _tk(mode, title, filters, multiple, name)
+        except Exception as e2:
+            raise RuntimeError("PowerShell: " + err[:300] + " | tkinter: " + str(e2)[:200])
     z = shutil.which("zenity")
     if z:
         cmd = [z, "--file-selection", "--title=" + title]
@@ -56,15 +64,21 @@ def pick(mode="open", title="", filters=None, multiple=False, initial="", name="
         r = subprocess.run(cmd, capture_output=True, text=True)
         return [x for x in r.stdout.splitlines() if x]
     try:
-        import tkinter as tk
-        from tkinter import filedialog
-        root = tk.Tk(); root.withdraw(); root.attributes("-topmost", True)
-        ft = [(n, p.replace(";", " ")) for n, p in (filters or [])] or [("All", "*.*")]
-        if mode == "folder": r = filedialog.askdirectory(title=title)
-        elif mode == "save": r = filedialog.asksaveasfilename(title=title, filetypes=ft, initialfile=name)
-        elif multiple: r = list(filedialog.askopenfilenames(title=title, filetypes=ft))
-        else: r = filedialog.askopenfilename(title=title, filetypes=ft)
-        root.destroy()
-        return [r] if isinstance(r, str) and r else (r or [])
+        return _tk(mode, title, filters, multiple, name)
     except Exception as e:
         raise RuntimeError("no-native-dialog: " + str(e))
+
+
+def _tk(mode, title, filters, multiple, name):
+    import tkinter as tk
+    from tkinter import filedialog
+    root = tk.Tk(); root.withdraw(); root.attributes("-topmost", True)
+    ft = [(n, p.replace(";", " ")) for n, p in (filters or [])] or [("All", "*.*")]
+    try:
+        if mode == "folder": r = filedialog.askdirectory(title=title, parent=root)
+        elif mode == "save": r = filedialog.asksaveasfilename(title=title, filetypes=ft, initialfile=name, parent=root)
+        elif multiple: r = list(filedialog.askopenfilenames(title=title, filetypes=ft, parent=root))
+        else: r = filedialog.askopenfilename(title=title, filetypes=ft, parent=root)
+    finally:
+        root.destroy()
+    return [r] if isinstance(r, str) and r else list(r or [])

@@ -39,7 +39,7 @@ sr: {
  d_or:"Osovina oka vozača DESNO od osovine kolovoza [m]", d_ol:"Osovina oka vozača LIJEVO od osovine kolovoza [m]", d_range:"Zajednički raspon ispisa: {0} – {1} m. Prilagodite OD/DO prema stvarnoj sekciji.",
  ok:"U redu", cancel:"Otkaži", close:"Zatvori", yes:"Da", no:"Ne",
  e_range:"Stacionaže OD / DO nisu ispravne (DO mora biti veće od OD).", e_file:"Datoteka ne postoji: {0}", e_cap:"Ograničenje: neispravan red '{0}' (OD; DO; brzina).", e_num:"Neispravan broj: {0}",
- e_unrec:"Nisu prepoznate sve tri vrste datoteka – dopunite ručno.", e_nodlg:"Prozor za odabir datoteka nije dostupan – upišite putanju ručno.",
+ e_unrec:"Nisu prepoznate sve tri vrste datoteka – dopunite ručno.", dlg_opening:"Otvaram dijalog za odabir datoteke …", e_nodlg:"Prozor za odabir datoteka nije dostupan – upišite putanju ručno.",
  pa_title:"Napredni parametri", pa_sub:"Model vožnje, tablice iz Priloga 2 pravilnika i vozila za dinamički proračun (poglavlje 5).", pa_reset:"Vrati podrazumijevano",
  pa_model:"Model vožnje", pa_tables:"Tablice", pa_tables_h:"Vrijednosti odvojene zarezom ili razmakom. Vp–R koristi Vr i Rmin tablicu.", pa_veh:"Vozila", pa_veh_h:"vlim prazno = max Vr; b i prazan hod prazno = opšte vrijednosti; P prazno = kriva sile vuče iz Pravilnika.",
  pa_addveh:"Dodaj vozilo", pa_delveh:"Ukloni zadnje", pa_tpl:"Word template", pa_tpl_h:"Ako je odabran, pored izvornog elaborata pravi se i elaborat u templatu. Prazna polja ostaju kakva su u templatu.", pa_tpl_file:"Template (.docx)", pa_tpl_clear:"Ukloni template",
@@ -91,7 +91,7 @@ en: {
  d_or:"Driver's eye axis RIGHT of the carriageway axis [m]", d_ol:"Driver's eye axis LEFT of the carriageway axis [m]", d_range:"Common range of the printouts: {0} – {1} m. Adjust FROM/TO to the actual segment.",
  ok:"OK", cancel:"Cancel", close:"Close", yes:"Yes", no:"No",
  e_range:"Chainages FROM / TO are not valid (TO must be greater than FROM).", e_file:"File does not exist: {0}", e_cap:"Limit: invalid row '{0}' (FROM; TO; speed).", e_num:"Invalid number: {0}",
- e_unrec:"Not all three file kinds were recognised – complete them manually.", e_nodlg:"The file dialog is not available – type the path manually.",
+ e_unrec:"Not all three file kinds were recognised – complete them manually.", dlg_opening:"Opening the file dialog …", e_nodlg:"The file dialog is not available – type the path manually.",
  pa_title:"Advanced parameters", pa_sub:"Driving model, tables from Annex 2 of the Rulebook and vehicles for the dynamic calculation (chapter 5).", pa_reset:"Restore defaults",
  pa_model:"Driving model", pa_tables:"Tables", pa_tables_h:"Values separated by comma or space. Vp–R uses the Vr and Rmin tables.", pa_veh:"Vehicles", pa_veh_h:"vlim empty = max Vr; b and idle empty = general values; P empty = traction curve from the Rulebook.",
  pa_addveh:"Add vehicle", pa_delveh:"Remove last", pa_tpl:"Word template", pa_tpl_h:"If selected, a study in the template is produced in addition to the original one. Empty fields stay as in the template.", pa_tpl_file:"Template (.docx)", pa_tpl_clear:"Remove template",
@@ -141,8 +141,9 @@ function toast(msg, err) { const e = h("div", { class: "toast" + (err ? " err" :
 /* ---------------------------------------------------------------- native dialogs */
 const FLT = () => ({ proj: [[t("flt_proj"), "*.json"], [t("flt_all"), "*.*"]], prn: [[t("flt_prn"), "*.txt;*.dat;*.lst"], [t("flt_all"), "*.*"]], lic: [[t("flt_lic"), "*.lic"], [t("flt_all"), "*.*"]], word: [[t("flt_word"), "*.docx;*.dotx"]], set: [[t("flt_proj"), "*.json"]] });
 async function pick(mode, title, filters, extra = {}) {
+  toast(t("dlg_opening"));
   const r = await api("pick", { mode, title, filters, ...extra });
-  if (r.error) { toast(t("e_nodlg"), true); return []; }
+  if (r.error) { toast(t("e_nodlg") + " " + String(r.error).slice(0, 300), true); return []; }
   return r.paths || [];
 }
 async function pathField(input, mode, title, filters) {
