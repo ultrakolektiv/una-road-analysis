@@ -62,8 +62,9 @@ function ground(p,side,pf){ // profil terena izvan prepreke: lista [dr, dz] (dr 
  if(side<0)return[[0,0],[2,0],[60,0]];
  if(pf.key==="usjek")return[[0,-0.2],[3,-0.6],[6,-0.6],[18,5],[60,6]];
  return[[0,0],[(pf.bank||1.5),0],[(pf.bank||1.5)+6,-4],[70,-4.2]]}
+const hs=(n)=>{n=Math.sin(n*12.9898)*43758.5453;return n-Math.floor(n)};const sc=(c,f)=>[Math.min(255,c[0]*f),Math.min(255,c[1]*f),Math.min(255,c[2]*f)];
 function strip(a,b,fa,fb,pf){ // a,b = uzorci, fa fb = udaljenost
- const fogT=Math.min(1,fa/700),tun=pf.tip==="tunel";const fog=(c)=>tun?mix(c,C.dark,Math.min(1,fa/90)):mix(c,C.haze,fogT*0.85);
+ const fogT=1-Math.exp(-fa/420),tun=pf.tip==="tunel";const fog=(c)=>tun?mix(c,C.dark,Math.min(1,fa/90)):mix(c,C.haze,Math.min(.92,fogT*1.05));
  const iv=pf.iv,Rl=a.lr-iv,Rr=a.rr+iv,Rl2=b.lr-iv,Rr2=b.rr+iv,cr=pf.cr,wp=(Rr-Rl),wp2=(Rr2-Rl2);
  const q4=(r1,r2,h1,h2,col,al)=>poly([W(a,r1,h1),W(a,r2,h2),W(b,r2,h2),W(b,r1,h1)],col,al);
  const q4b=(r1a,r2a,r1b,r2b,h,col)=>poly([W(a,r1a,h),W(a,r2a,h),W(b,r2b,h),W(b,r1b,h)],col);
@@ -82,7 +83,7 @@ function strip(a,b,fa,fb,pf){ // a,b = uzorci, fa fb = udaljenost
   for(const side of[1,-1]){const g=ground(a,side,pf);if(!g)continue;const base=side>0?rb+(pf.hR?0.2:0):(lb-cr-wp-(pf.ofL-iv)*2);const baseB=side>0?rb2+(pf.hR?0.2:0):(lb2-cr-wp2-(pf.ofL-iv)*2);
    const gc=pf.tip==="most"?C.grass2:(pf.key==="usjek"&&side>0?C.rock:C.grass);
    for(let m=0;m<g.length-1;m++){const r1=base+side*g[m][0],r2=base+side*g[m+1][0],r1b=baseB+side*g[m][0],r2b=baseB+side*g[m+1][0];
-    poly([W(a,r1,g[m][1]),W(a,r2,g[m+1][1]),W(b,r2b,g[m+1][1]),W(b,r1b,g[m][1])],fog(m%2?gc:[gc[0]*.93,gc[1]*.93,gc[2]*.93]))}}
+    poly([W(a,r1,g[m][1]),W(a,r2,g[m+1][1]),W(b,r2b,g[m+1][1]),W(b,r1b,g[m][1])],fog(sc(gc,(.9+.18*hs(Math.floor(a.q/4)*3.1+m*1.7+side))*(m%2?1:.94))))}}
   if(pf.tip!=="most"){poly([W(a,Rr,-.01),W(a,rb,-.01),W(b,rb2,-.01),W(b,Rr2,-.01)],fog([120,118,112]))}
   // središnji pojas (između kolovoza) i suprotni kolovoz
   poly([W(a,Rl,-.02),W(a,Rl-cr,-.02),W(b,Rl2-cr,-.02),W(b,Rl2,-.02)],fog(pf.tip==="most"?C.concD:C.grass2));
@@ -91,44 +92,51 @@ function strip(a,b,fa,fb,pf){ // a,b = uzorci, fa fb = udaljenost
   if(pf.tip==="most"){poly([W(a,Rr,0),W(a,Rr,-pf.dp),W(b,Rr2,-pf.dp),W(b,Rr2,0)],fog(C.concD));poly([W(a,Rl,0),W(a,Rl,-pf.dp),W(b,Rl2,-pf.dp),W(b,Rl2,0)],fog(C.concD))}
   poly([W(a,Rl,0),W(a,Rr,0),W(b,Rr2,0),W(b,Rl2,0)],fog(C.road));
  }
+ // kolotrazi
+ if(!tun||true){const lc=(a.lr+a.rr)/2,hw=(a.rr-a.lr)/4;for(const c0 of [a.lr+hw,a.rr-hw])for(const w of [-.9,.9]){const o=c0+w;poly([W(a,o-.35,.006),W(a,o+.35,.006),W(b,o+.35,.006),W(b,o-.35,.006)],fog(C.road2),.45)}}
  // oznake
  const dash=(Math.floor(a.q/9)%2===0);
  const ln=(r,w,col)=>poly([W(a,r-w/2,0.01),W(a,r+w/2,0.01),W(b,r+w/2,0.01),W(b,r-w/2,0.01)],fog(col));
  ln(a.lr,.16,C.line);ln(a.rr,.16,C.line);if(dash)ln((a.lr+a.rr)/2,.14,C.line);
  if(!tun){ln(a.lr-cr-iv-wp+iv,.0,C.line)}
  if(!tun){const dash2=dash;const o1=(Rl-cr-iv),o2=(Rl-cr-wp+iv);poly([W(a,o1-.03,.01),W(a,o1+.13,.01),W(b,o1+.13,.01),W(b,o1-.03,.01)],fog(C.line));if(dash2)poly([W(a,(o1+o2)/2-.07,.01),W(a,(o1+o2)/2+.07,.01),W(b,(o1+o2)/2+.07,.01),W(b,(o1+o2)/2-.07,.01)],fog(C.line))}
- if(!tun){ // prepreke: betonska ograda (most, puna) ili odbojna ograda (šine na stupovima); kosine/zidovi (visina>1.3) nisu ograda
-  const most=pf.tip==="most",t=most?.46:.2,col=most?C.conc:C.rail,top=most?C.line:C.rail,tc=[top[0]*.9,top[1]*.9,top[2]*.9],h0=most?0:.45;
-  const fence=(ra,rb_,sgn,h)=>{if(h>1.3)return;const x1=ra,x2=rb_;
-   poly([W(a,x1,h0),W(a,x1,h),W(b,x2,h),W(b,x2,h0)],fog(col));poly([W(a,x1,h),W(a,x1+sgn*t,h),W(b,x2+sgn*t,h),W(b,x2,h)],fog(tc))};
+ if(!tun){ // prepreke: čelična valovita ograda (otvorena trasa) ili New Jersey betonska barijera (most)
+  const most=pf.tip==="most";
+  const nj=(ra,rb_,sgn,h)=>{const dr=sgn,sa=Math.max(.5,h)/.81,NJ=[[0,0],[0,.08],[.18,.33],[.26,.81],[.41,.81]],cl=[[196,195,188],[170,169,163],[208,207,200],[222,221,214]];
+   for(let m=0;m<NJ.length-1;m++){const p0=NJ[m],p1=NJ[m+1];poly([W(a,ra+dr*p0[0],p0[1]*sa),W(a,ra+dr*p1[0],p1[1]*sa),W(b,rb_+dr*p1[0],p1[1]*sa),W(b,rb_+dr*p0[0],p0[1]*sa)],fog(cl[m]))}};
+  const wb=(ra,rb_,sgn)=>{const out=sgn;poly([W(a,ra+out*.30,.02),W(a,ra+out*.55,.02),W(b,rb_+out*.55,.02),W(b,rb_+out*.30,.02)],fog([40,50,35]),.28);
+   const band=(z0,z1,c)=>poly([W(a,ra,z0),W(a,ra,z1),W(b,rb_,z1),W(b,rb_,z0)],fog(c));
+   band(.64,.77,[226,229,232]);band(.55,.64,[150,155,162]);band(.46,.55,[196,200,205]);band(.43,.46,[110,114,120]);poly([W(a,ra,.77),W(a,ra+out*.04,.77),W(b,rb_+out*.04,.77),W(b,rb_,.77)],fog([240,242,244]))};
+  const fence=(ra,rb_,sgn,h)=>{if(h>1.3)return;if(most)nj(ra,rb_,sgn,h);else wb(ra,rb_,sgn)};
   fence(rb,rb2,1,pf.hR);fence(lb,lb2,-1,pf.hL);fence(Rl-cr+(pf.ofL-iv),Rl2-cr+(pf.ofL-iv),-1,pf.hL);
-  if(!most){const kq=Math.ceil(a.q/4)*4;if(kq<b.q){const pm=smp(kq);const lst=[];if(pf.hR<=1.3)lst.push([pm.rr+pf.ofR+.1,pf.hR]);if(pf.hL<=1.3)lst.push([pm.lr-pf.ofL-.1,pf.hL]);for(const [r_,h_] of lst){const s1=proj(W(pm,r_,0)),s2=proj(W(pm,r_,h_));if(s1&&s2){cx.strokeStyle=fog(C.rail);cx.lineWidth=Math.max(1,foc*0.09/s1[2]);cx.beginPath();cx.moveTo(s1[0],s1[1]);cx.lineTo(s2[0],s2[1]);cx.stroke()}}}}
+  if(!most){const kq=Math.ceil(a.q/4)*4;if(kq<b.q){const pm=smp(kq);const lst=[];if(pf.hR<=1.3)lst.push([pm.rr+pf.ofR+.1,1]);if(pf.hL<=1.3)lst.push([pm.lr-pf.ofL-.1,-1]);for(const [r_,sg_] of lst){const s1=proj(W(pm,r_+sg_*.08,0)),s2=proj(W(pm,r_+sg_*.08,.77));if(s1&&s2){cx.strokeStyle=fog([88,92,98]);cx.lineWidth=Math.max(1.5,foc*0.16/s1[2]);cx.beginPath();cx.moveTo(s1[0],s1[1]);cx.lineTo(s2[0],s2[1]);cx.stroke()}}}}
  }
 }
-function ray(d,colL,colT,txt,wpx,below){ // zraka od oka do krajnje tačke preglednosti (tetiva)
- const t=smp(q+d),eye=[CAM.ex,CAM.ey,CAM.ez],end=[t.x,t.y,zAt(t,0,0)];const N=40,pts=[];
- for(let k=1;k<=N;k++){const f=k/N,P=[eye[0]+(end[0]-eye[0])*f,eye[1]+(end[1]-eye[1])*f,eye[2]+(end[2]-eye[2])*f-0.35*(1-f)];const s=proj(P);if(s)pts.push(s)}
- if(pts.length>1){cx.lineCap="round";cx.lineJoin="round";cx.strokeStyle="rgba(0,0,0,.55)";cx.lineWidth=wpx+4;cx.beginPath();pts.forEach((s,i)=>i?cx.lineTo(s[0],s[1]):cx.moveTo(s[0],s[1]));cx.stroke();
-  cx.strokeStyle=colL;cx.lineWidth=wpx;cx.beginPath();pts.forEach((s,i)=>i?cx.lineTo(s[0],s[1]):cx.moveTo(s[0],s[1]));cx.stroke()}
- const s0=proj(end);if(s0){cx.beginPath();cx.fillStyle=colL;cx.arc(s0[0],s0[1],wpx*1.3,0,7);cx.fill();cx.strokeStyle="#000";cx.lineWidth=2;cx.stroke();
-  const fs=Math.max(15,Math.min(26,3800/s0[2]+14));cx.font=`700 ${fs}px system-ui`;cx.textAlign="center";let w=cx.measureText(txt).width+16,yy=s0[1]-wpx*2-fs*.6; if(below)yy=s0[1]+wpx*2+fs*1.9;
-  cx.fillStyle="rgba(8,10,14,.82)";cx.fillRect(s0[0]-w/2,yy-fs,w,fs*1.35);cx.strokeStyle=colL;cx.lineWidth=2;cx.strokeRect(s0[0]-w/2,yy-fs,w,fs*1.35);cx.fillStyle=colT;cx.fillText(txt,s0[0],yy-fs*.05)}}
+function ray(d,colL,colT,txt,wpx,below){ // tačka na kraju preglednosti (raspoloživa / zahtijevana)
+ const t=smp(q+d),end=[t.x,t.y,zAt(t,0,0)],s0=proj(end);if(!s0)return;
+ cx.beginPath();cx.fillStyle=colL;cx.arc(s0[0],s0[1],wpx*1.2,0,7);cx.fill();cx.strokeStyle="#000";cx.lineWidth=2;cx.stroke();
+ const fs=Math.max(12,Math.min(17,2400/s0[2]+10));cx.font=`700 ${fs}px system-ui`;cx.textAlign="center";const w=cx.measureText(txt).width+16;let yy=s0[1]-wpx*2-fs*.6;if(below)yy=s0[1]+wpx*2+fs*1.9;
+ cx.fillStyle="rgba(8,10,14,.82)";cx.fillRect(s0[0]-w/2,yy-fs,w,fs*1.35);cx.strokeStyle=colL;cx.lineWidth=2;cx.strokeRect(s0[0]-w/2,yy-fs,w,fs*1.35);cx.fillStyle=colT;cx.fillText(txt,s0[0],yy-fs*.05)}
 function frame(){
  const dpr=Math.min(2,window.devicePixelRatio||1);if(cv.width!==(cv.clientWidth*dpr|0)||cv.height!==(cv.clientHeight*dpr|0)){cv.width=cv.clientWidth*dpr;cv.height=cv.clientHeight*dpr}
  Wd=cv.width;Hd=cv.height;foc=Wd/(2*Math.tan(35*Math.PI/180));hx=Wd/2;hy=Hd*0.47;
  setCam();const e=CAM.e,pf0=DATA.profili[e.pf],tun=pf0.tip==="tunel";
  // nebo
- const g=cx.createLinearGradient(0,0,0,hy);if(tun){g.addColorStop(0,"#0a0b0d");g.addColorStop(1,"#14161a")}else{g.addColorStop(0,`rgb(${C.sky1})`);g.addColorStop(1,`rgb(${C.sky2})`)}
- cx.fillStyle=g;cx.fillRect(0,0,Wd,Hd);cx.fillStyle=tun?"#0a0b0d":mix(C.grass,C.haze,.7);cx.fillRect(0,hy,Wd,Hd-hy);
- if(!tun){cx.fillStyle="rgba(120,140,150,.55)";cx.beginPath();cx.moveTo(0,hy);for(let i=0;i<=40;i++){cx.lineTo(i*Wd/40,hy-(Math.sin(i*.9+q*.002)*.5+.5)*Hd*.035-Hd*.012)}cx.lineTo(Wd,hy);cx.fill()}
+ const g=cx.createLinearGradient(0,0,0,hy);if(tun){g.addColorStop(0,"#0a0b0d");g.addColorStop(1,"#14161a")}else{g.addColorStop(0,"#2f6fb8");g.addColorStop(.55,"#6ea6dc");g.addColorStop(.88,"#cfe3f3");g.addColorStop(1,"#eaf2f8")}
+ cx.fillStyle=g;cx.fillRect(0,0,Wd,Hd);cx.fillStyle=tun?"#0a0b0d":mix(C.grass,C.haze,.8);cx.fillRect(0,hy,Wd,Hd-hy);
+ if(!tun){const az=x=>yawS+Math.atan((x-hx)/foc),sunAz=0.55,dd=((sunAz-yawS+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI,sx=hx+foc*Math.tan(dd);
+  if(Math.abs(dd)<1.2){const sg=cx.createRadialGradient(sx,hy*.45,4,sx,hy*.45,Wd*.35);sg.addColorStop(0,"rgba(255,246,214,.95)");sg.addColorStop(.12,"rgba(255,238,190,.5)");sg.addColorStop(1,"rgba(255,238,190,0)");cx.fillStyle=sg;cx.fillRect(0,0,Wd,hy)}
+  for(let L=0;L<3;L++){const amp=Hd*(.055+.03*L),base=hy-Hd*.004,f1=1.7+L*.9,f2=4.1+L*1.7,off=L*2.3;cx.beginPath();cx.moveTo(0,hy);for(let x=0;x<=Wd;x+=8){const A=az(x);const y=base-amp*(.55+.3*Math.sin(A*f1+off)+.15*Math.sin(A*f2+off*1.7))*(.7+.3*Math.sin(A*.6+L));cx.lineTo(x,y)}cx.lineTo(Wd,hy);cx.closePath();cx.fillStyle=mix([70,96,120],C.haze,.45+.085*(2-L));cx.globalAlpha=.9;cx.fill();cx.globalAlpha=1}
+  const hz=cx.createLinearGradient(0,hy-Hd*.09,0,hy+Hd*.03);hz.addColorStop(0,"rgba(214,230,243,0)");hz.addColorStop(.7,"rgba(214,230,243,.75)");hz.addColorStop(1,"rgba(214,230,243,.3)");cx.fillStyle=hz;cx.fillRect(0,hy-Hd*.09,Wd,Hd*.12)}
  // uzorci duž puta (blizu → daleko)
  const ds=[];let d=2.2;const maxd=tun?260:520,qmax=R.q[R.n-1]-1e-3;while(d<maxd&&q+d<qmax){ds.push(d);d+=Math.min(14,Math.max(1.3,d*.06))}
  const sm=ds.map(x=>smp(q+x));
  for(let k=sm.length-2;k>=0;k--)strip(sm[k],sm[k+1],ds[k],ds[k+1],DATA.profili[sm[k].pf]);
  // preglednost
  const Lz=e.Lz,Dv=Math.min(e.D,900),bad=e.ok!==0&&Dv<Lz;
- if(Lz>3&&q+Lz<qmax)ray(Lz,"#ffb020","#ffd27a",T().lr+" "+Lz.toFixed(0)+" m",5,true);
- if(Dv>3&&q+Dv<qmax&&Dv<900)ray(Dv,bad?"#ff5a4f":"#38bdf8",bad?"#ffb4ae":"#bfeaff",T().ln+" "+Dv.toFixed(0)+" m",7);
+ if(Lz>3&&q+Lz<qmax)ray(Lz,"#ffb020","#ffd27a",T().lr+" "+Lz.toFixed(0)+" m",4,true);
+ if(Dv>3&&q+Dv<qmax&&Dv<900)ray(Dv,bad?"#ff5a4f":"#38bdf8",bad?"#ffb4ae":"#bfeaff",T().ln+" "+Dv.toFixed(0)+" m",4);
+ {const vg=cx.createRadialGradient(Wd/2,Hd*.5,Math.min(Wd,Hd)*.45,Wd/2,Hd*.5,Math.max(Wd,Hd)*.75);vg.addColorStop(0,"rgba(0,0,0,0)");vg.addColorStop(1,tun?"rgba(0,0,0,.35)":"rgba(10,20,35,.28)");cx.fillStyle=vg;cx.fillRect(0,0,Wd,Hd)}
  // haubа
  const hg=cx.createLinearGradient(0,Hd*.92,0,Hd);hg.addColorStop(0,"rgba(0,0,0,0)");hg.addColorStop(1,"rgba(0,0,0,.85)");cx.fillStyle=hg;cx.fillRect(0,Hd*.9,Wd,Hd*.1);
  hud(e,pf0,bad,Lz,Dv);chart();mini(e)}

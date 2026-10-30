@@ -14,6 +14,37 @@ def _smooth(a, n):
     return np.convolve(np.pad(a, (pad, n - 1 - pad), mode="edge"), k, mode="valid")
 
 
+def _merge_lanes(routes):
+    """Spaja traku D i L istog smjera u jednu vožnju: vozač je na unutrašnjoj strani krivine (desna krivina → desna traka, lijeva → lijeva).
+    Položaj oka se glatko prebacuje između dvije trake; preglednost, Lz i ocjena su iz trake u kojoj se vozač nalazi."""
+    out = {}
+    for tag in ("F", "B"):
+        D = routes.get(tag + "_D"); L = routes.get(tag + "_L")
+        if D is None and L is None: continue
+        if D is None or L is None: out[tag + "_" + ("D" if D else "L")] = D or L; continue
+        sg = np.array(D["s"]); o = np.argsort(sg, kind="stable"); sL = np.array(L["s"]); oL = np.argsort(sL, kind="stable")
+        def rs(a, kind="f"):
+            a = np.asarray(L[a] if isinstance(a, str) else a, float)
+            return np.interp(sg, sL[oL], a[oL])
+        kD = np.array(D["k"]); w = np.where(kD < -1 / 9000, 0.0, 1.0)             # 1 = desna (D) traka; lijevi zavoj → lijeva traka
+        n = max(1, int(30 / max(np.median(np.abs(np.diff(D["q"]))), 0.5)))
+        w = np.convolve(np.pad(w, (n, n), mode="edge"), np.ones(2 * n + 1) / (2 * n + 1), mode="valid")
+        sel = w >= 0.5
+        x = w * np.array(D["x"]) + (1 - w) * rs("x"); y = w * np.array(D["y"]) + (1 - w) * rs("y")
+        deD = np.array(D["de"]); deL = rs("de"); de = w * deD + (1 - w) * deL
+        leftabs = np.array(D["lr"]) + deD; rightabs = np.array(D["rr"]) + deD            # ivice kolovoza u odnosu na osu puta (iz trake D)
+        M = dict(D)
+        M.update(x=[round(float(v), 2) for v in x], y=[round(float(v), 2) for v in y], de=[round(float(v), 2) for v in de], lr=[round(float(v), 2) for v in leftabs - de], rr=[round(float(v), 2) for v in rightabs - de])
+        for f in ("D", "Lz", "g", "v"):
+            M[f] = [round(float(a if s_ else b), 1 if f != "g" else 2) for a, b, s_ in zip(D[f], rs(f), sel)]
+        M["ok"] = [int(a if s_ else b) for a, b, s_ in zip(D["ok"], np.round(rs("ok")).astype(int), sel)]
+        thx = np.gradient(x); thy = np.gradient(y); th = np.unwrap(np.arctan2(thy, thx)); kk = np.gradient(th, np.array(D["q"]) + np.arange(len(x)) * 1e-9)
+        k = _smooth(kk, 21); M["k"] = [round(float(v), 6) for v in k]
+        M["naziv"] = D["naziv"].rsplit(", ", 1)[0] + ", " + _T("unutrašnja strana krivine")
+        out[tag] = M
+    return out
+
+
 def build_data(P, par, out, cfg, log=print):
     N = _npp.resolve(cfg)
     keys = list(N["profili"]); pf_list = []
@@ -24,7 +55,6 @@ def build_data(P, par, out, cfg, log=print):
                             cr=p.get("razdjelni_pojas", 0.0), hs=p.get("visina_svoda", 5.0), sl=p.get("slobodna_visina", 4.7), dp=p.get("debljina_ploce", 1.9), teren=p.get("teren", "")))
     routes = {}
     for key, R in out["vp"].items():
-        if key.split("_")[1] != "D" and not (cfg.get("vizura_opcije") or {}).get("obje_trake"): continue
         A = R["A"]; ch = R["chain"]; n = len(A["xa"])
         rows = R["avail"]["rows"]            # zahtijevana = Vp preglednost (L_vp)
         qq = A["q"]; idx = np.arange(0, n, max(1, int(round(STEP / max(np.median(np.diff(qq)), 0.01)))))
@@ -52,6 +82,7 @@ def build_data(P, par, out, cfg, log=print):
                            cl=f(cl, 2), cd=f(cd, 2), sg=[int(v) for v in sg[idx]], de=f(de, 2), lr=f(lr, 2), rr=f(rr, 2), pf=[int(v) for v in pf[idx]], el=[int(v) for v in el[idx]], R=f(Rm, 0),
                            D=[round(float(np.interp(v, rq, rD)), 1) for v in qq[idx]], Lz=[round(float(np.interp(v, rq, rL)), 1) for v in qq[idx]],
                            ok=[int(rok[min(len(rok) - 1, int(np.searchsorted(rq, v)))]) for v in qq[idx]])
+    routes = _merge_lanes(routes)
     return dict(routes=routes, profili=pf_list, h=float(par.get("h_oka", 1.0)), Vr=float(P.Vr), projekat=cfg.get("projekat", ""), lang=get_lang(), izvor=N.get("izvor", ""))
 
 
