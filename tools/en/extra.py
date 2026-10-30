@@ -114,3 +114,5 @@ X.update({"Koridor: niveleta u UNA proračunu se razlikuje od Civil 3D niveleta 
 X.update({"Koridor → proračun: u tunelu je prepreka unutrašnja ivica obloge (kalota) na {0:.2f} m od ivice kolovoza (ne ivičnjak).": "Corridor → calculation: in the tunnel the obstacle is the inner face of the lining (vault) at {0:.2f} m from the carriageway edge (not the kerb)."})
 
 X.update({"unutrašnja strana krivine": "inner side of the curve"})
+
+X.update({"Koridor → proračun: na mostu je prepreka unutrašnja strana parapeta na {0:.2f} m od ivice kolovoza (iz presjeka koridora).": "Corridor → calculation: on the bridge the obstacle is the inner face of the parapet at {0:.2f} m from the carriageway edge (from the corridor section)."})

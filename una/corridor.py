@@ -502,6 +502,19 @@ def tunnel_wall_offset(R, s_from, s_to, e, z0=1.0):
     vals.sort(); return round(max(0.0, vals[len(vals) // 2]), 2)
 
 
+def parapet_offset(R, s_from, s_to, e):
+    """Ofset unutrašnje strane parapeta mosta (vijenac) od ivice kolovoza, očitan iz presjeka koridora – medijana. None ako nema mosta."""
+    vals = []
+    for nm, lst in R["sect"].items():
+        for sta, ss in lst[::4]:
+            if not (s_from <= sta <= s_to): continue
+            for sd in (-1, 1):
+                xs = [abs(p[0]) for n, _, pp in ss if n == "Vijenac" for p in pp if p[0] * sd > e + 0.05]
+                if xs: vals.append(min(xs) - e)
+    if not vals: return None
+    vals.sort(); return round(max(0.0, vals[len(vals) // 2]), 2)
+
+
 def harmonize(cfg, R, log=print):
     """Proračun preglednosti prati koridor: širina trake iz koridora, prepreka na otvorenoj trasi na zadanom ofsetu od ivice kolovoza (zadano 0,78 m),
     vrsta prepreke (most / tunel) po stacionaži iz koridora. Mijenja cfg (poziva se prije proračuna)."""
@@ -529,6 +542,10 @@ def harmonize(cfg, R, log=print):
         tip["otvorena trasa"] = off; pc["zadani_tip"] = "otvorena trasa"
         log(_TF("Koridor → proračun: prepreka na otvorenoj trasi {0:.2f} m od ivice kolovoza.", off))
         tip.setdefault("most", 1.17); tip.setdefault("tunel", 0.5)
+        pw = parapet_offset(R, s_from, s_to, e)
+        if pw is not None:
+            tip["most"] = pw
+            log(_TF("Koridor → proračun: na mostu je prepreka unutrašnja strana parapeta na {0:.2f} m od ivice kolovoza (iz presjeka koridora).", pw))
         tw = tunnel_wall_offset(R, s_from, s_to, e)
         if tw is not None:
             tip["tunel"] = tw

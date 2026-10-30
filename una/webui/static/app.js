@@ -530,6 +530,9 @@ function korCard() {
     sw(t("k_rails"), !!k.uskladi, v => { k.uskladi = v; dirty(); }));
 }
 async function startRun() {
+  try { await startRun_(); } catch (e) { const R = S.run; R.running = false; R.errs = [String(e && e.message || e)]; toast(R.errs[0], true); render(); }
+}
+async function startRun_() {
   collectPage(); const R = S.run; R.errs = [];
   try { syncSight(); } catch (e) { R.errs = [e.message]; return render(); }
   const o = Object.assign({ word: true, excel: true, preglednost: false, optika: false }, S.cfg.gui_opcije || {});
@@ -542,7 +545,7 @@ async function startRun() {
   const r = await api("run", { cfg, options: o }); if (r.error) { R.running = false; R.errs = [r.error]; return render(); }
   render(); let since = 0;
   const tick = async () => {
-    const j = await api("log", { since }); since = j.next; if (j.lines.length) { R.lines.push(...j.lines); const lb = $("#logbox"); if (lb) { lb.textContent = R.lines.join("\n"); lb.scrollTop = lb.scrollHeight; } }
+    let j; try { j = await api("log", { since }); } catch (e) { setTimeout(tick, 1500); return; } since = j.next; if (j.lines.length) { R.lines.push(...j.lines); const lb = $("#logbox"); if (lb) { lb.textContent = R.lines.join("\n"); lb.scrollTop = lb.scrollHeight; } }
     if (j.done) { R.running = false; R.done = true; R.outs = j.outs; R.error = j.error; if (S.page === "run") render(); return; }
     setTimeout(tick, 500);
   };
