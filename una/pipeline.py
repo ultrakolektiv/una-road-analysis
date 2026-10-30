@@ -66,15 +66,15 @@ def generate(cfg, outdir, log=print, word=True, excel=True, sight=None):
     from . import licenca, i18n
     i18n.set_lang(cfg.get("jezik", "sr"))
     lic = licenca.require(); log(licenca.describe(lic))
-    if cfg.get("npp"):
-        from . import npp as _npp
-        _npp.apply_to_sight(cfg)
     kor = cfg.get("koridor") or {}; kor_on = bool(kor.get("datoteka")) and kor.get("ukljuci", True); KR = None
     if kor_on:
         if not os.path.isfile(kor["datoteka"]): raise ValueError(_TF("Koridor: datoteka ne postoji: {0}", kor["datoteka"]))
         from . import corridor
         KR = corridor.load_landxml(kor["datoteka"], float(kor.get("od", 80)), float(kor.get("do", 1580)), log=log)
         corridor.harmonize(cfg, KR, log=log)
+    if cfg.get("npp"):
+        from . import npp as _npp
+        _npp.apply_to_sight(cfg)
     errs = validate(cfg)
     if errs: raise ValueError("\n".join(errs))
     os.makedirs(outdir, exist_ok=True)

@@ -502,17 +502,52 @@ def tunnel_wall_offset(R, s_from, s_to, e, z0=1.0):
     vals.sort(); return round(max(0.0, vals[len(vals) // 2]), 2)
 
 
-def parapet_offset(R, s_from, s_to, e):
-    """Ofset unutrašnje strane parapeta mosta (vijenac) od ivice kolovoza, očitan iz presjeka koridora – medijana. None ako nema mosta."""
-    vals = []
+def _face_x(ss, kind, sd, e, z_ray=1.0):
+    """Apsolutni ofset (od osovine) prepreke na strani sd (+1 desno, -1 lijevo u smjeru stacionaže) iz presjeka koridora.
+    Most: unutrašnja strana parapeta (vijenac) na visini zrake (ili najviše što parapet seže); tunel: krajnja (vanjska) ivica revizione staze. None ako nema."""
+    if kind == "most":
+        pts = [(p[0], p[1]) for n, _, pp in ss if n == "Vijenac" for p in pp if p[0] * sd > e + 0.02 and p[1] >= 0.05]
+        if len(pts) < 3: return None
+        zt = max(z for _, z in pts); zr = min(z_ray, zt - 0.03)
+        xs = []
+        for n, _, pp in ss:
+            if n != "Vijenac": continue
+            for p1, p2 in zip(pp, pp[1:]):
+                if p1[0] * sd > e and p2[0] * sd > e and (p1[1] - zr) * (p2[1] - zr) <= 0 and p1[1] != p2[1]:
+                    xs.append(abs(p1[0] + (p2[0] - p1[0]) * (zr - p1[1]) / (p2[1] - p1[1])))
+        if not xs: xs = [abs(x) for x, _ in pts]
+        return min(xs)
+    if kind == "tunel":
+        xs = [abs(p[0]) for n, _, pp in ss if n == "Ploca_staze" for p in pp if p[0] * sd > 0]
+        return max(xs) if xs else None
+    return None
+
+
+def face_entries(R, s_from, s_to, e, step=5.0, log=print):
+    """Prepreke u mostu i tunelu 'kako su nacrtane u koridoru': za svaki presjek i stranu ofset od ivice kolovoza (UNA ivica = e). Vraća unose za 'prepreke' (ofset, strana, od–do)."""
+    out = []; stat = {"most": [], "tunel": []}
     for nm, lst in R["sect"].items():
-        for sta, ss in lst[::4]:
-            if not (s_from <= sta <= s_to): continue
-            for sd in (-1, 1):
-                xs = [abs(p[0]) for n, _, pp in ss if n == "Vijenac" for p in pp if p[0] * sd > e + 0.05]
-                if xs: vals.append(min(xs) - e)
-    if not vals: return None
-    vals.sort(); return round(max(0.0, vals[len(vals) // 2]), 2)
+        role = "desna" if nm.upper().startswith("D") else "lijeva"
+        for sd, st_ in ((1, "desno"), (-1, "lijevo")):
+            cur = None; last = -1e9
+            for sta, ss in lst:
+                if not (s_from - 1 <= sta <= s_to + 1) or sta - last < step: continue
+                names = {n for n, _, _ in ss}
+                kind = "tunel" if "Sekundarna_obloga" in names else ("most" if ("Ploca_mosta" in names or "Vijenac" in names) else "otvorena")
+                x = _face_x(ss, kind, sd, e) if kind != "otvorena" else None
+                last = sta
+                if x is None:
+                    cur = None; continue
+                off = round(max(0.0, x - e) / 0.05) * 0.05; stat[kind].append(off)
+                if cur and cur["tip"] == kind and abs(cur["ofset"] - off) < 0.026 and sta - cur["_l"] < step * 1.6:
+                    cur["do"] = round(sta + step * 0.5, 2); cur["_l"] = sta
+                else:
+                    if cur and sta - cur["_l"] < step * 1.6: cur["do"] = round(sta, 2)          # bez rupe između susjednih dionica
+                    cur = {"osovina": role, "od": round(sta, 2), "do": round(sta + step * 0.5, 2), "ofset": round(off, 2), "strana": st_, "tip": kind, "_kor": True, "_l": sta}; out.append(cur)
+    for en in out: en.pop("tip"); en.pop("_l")                                    # vrijednost je eksplicitni ofset
+    for k, v in stat.items():
+        if v: log(_TF("Koridor → proračun: {0}: prepreka iz presjeka koridora, ofset od ivice kolovoza {1:.2f}–{2:.2f} m.", k, min(v), max(v)))
+    return out
 
 
 def harmonize(cfg, R, log=print):
@@ -538,27 +573,12 @@ def harmonize(cfg, R, log=print):
                 log(_TF("Koridor → proračun: sekcija {0} ({1}): širina trake {2} → {3:.2f} m.", sec.get("od"), r, old[0], e))
     pc = cfg.setdefault("preglednost", {"ukljuci": True})
     tip = dict(pc.get("tipovi_prepreka") or {})
-    if not cfg.get("npp"):
-        tip["otvorena trasa"] = off; pc["zadani_tip"] = "otvorena trasa"
-        log(_TF("Koridor → proračun: prepreka na otvorenoj trasi {0:.2f} m od ivice kolovoza.", off))
-        tip.setdefault("most", 1.17); tip.setdefault("tunel", 0.5)
-        pw = parapet_offset(R, s_from, s_to, e)
-        if pw is not None:
-            tip["most"] = pw
-            log(_TF("Koridor → proračun: na mostu je prepreka unutrašnja strana parapeta na {0:.2f} m od ivice kolovoza (iz presjeka koridora).", pw))
-        tw = tunnel_wall_offset(R, s_from, s_to, e)
-        if tw is not None:
-            tip["tunel"] = tw
-            log(_TF("Koridor → proračun: u tunelu je prepreka unutrašnja ivica obloge (kalota) na {0:.2f} m od ivice kolovoza (ne ivičnjak).", tw))
-        pc["tipovi_prepreka"] = tip
-        pre = [en for en in (pc.get("prepreke") or []) if not (isinstance(en, dict) and en.get("_kor"))]
-        for nm, runs in kinds_by_axis(R, s_from, s_to).items():
-            role = "desna" if nm.upper().startswith("D") else "lijeva"
-            for a, b, k in runs:
-                if k != "otvorena":
-                    for st_ in ("desno", "lijevo"):          # zid tunela / parapet mosta su s obje strane (i na pravcu)
-                        pre.append({"osovina": role, "od": round(a, 2), "do": round(b, 2), "tip": k, "strana": st_, "_kor": True})
-        pc["prepreke"] = pre
-        log(_TF("Koridor → proračun: dionice mosta/tunela preuzete iz koridora ({0}).", len([e_ for e_ in pre if e_.get("_kor")])))
-    else:
-        log(_T("Koridor: NPP je uključen – prepreke u proračunu ostaju prema NPP-u (slika prati proračun)."))
+    if cfg.get("npp"):
+        cfg.pop("npp"); log(_T("Koridor: prepreke preuzima koridor – NPP se ne primjenjuje na preglednost."))
+    tip["otvorena trasa"] = off; pc["zadani_tip"] = "otvorena trasa"
+    log(_TF("Koridor → proračun: prepreka na otvorenoj trasi {0:.2f} m od ivice kolovoza.", off))
+    pc["tipovi_prepreka"] = tip
+    pre = [en for en in (pc.get("prepreke") or []) if not (isinstance(en, dict) and en.get("_kor"))]
+    pre += face_entries(R, s_from, s_to, e, log=log)
+    pc["prepreke"] = pre
+    log(_TF("Koridor → proračun: dionice mosta/tunela preuzete iz koridora ({0}).", len([e_ for e_ in pre if e_.get("_kor")])))

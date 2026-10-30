@@ -116,3 +116,6 @@ X.update({"Koridor → proračun: u tunelu je prepreka unutrašnja ivica obloge 
 X.update({"unutrašnja strana krivine": "inner side of the curve"})
 
 X.update({"Koridor → proračun: na mostu je prepreka unutrašnja strana parapeta na {0:.2f} m od ivice kolovoza (iz presjeka koridora).": "Corridor → calculation: on the bridge the obstacle is the inner face of the parapet at {0:.2f} m from the carriageway edge (from the corridor section)."})
+
+X.update({"Koridor: prepreke preuzima koridor – NPP se ne primjenjuje na preglednost.": "Corridor: obstacles are taken from the corridor – the NPP is not applied to sight distance.",
+"Koridor → proračun: {0}: prepreka iz presjeka koridora, ofset od ivice kolovoza {1:.2f}–{2:.2f} m.": "Corridor → calculation: {0}: obstacle from the corridor section, offset from the carriageway edge {1:.2f}–{2:.2f} m."})
