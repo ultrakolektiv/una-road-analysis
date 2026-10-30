@@ -25,7 +25,8 @@ def _lane_slopes(secs, w):
         top = C._envelope(segs, 0.05)
         if len(top) < 2: continue
         px = [abs(p[0]) for n, _, pp in secs if n == nm for p in pp]
-        g = min(px) if px and min(px) > 0.3 else 0.0                      # unutrašnja ivica kolovoza (centralna osovina: pola razdjelnog pojasa)
+        cross0 = any(a[0] * b[0] < 0 for n, _, pp in secs if n == nm for a, b in zip(pp, pp[1:]))
+        g = 0.0 if (cross0 or not px or min(px) <= 0.3) else min(px)                      # unutrašnja ivica kolovoza (centralna osovina: pola razdjelnog pojasa)
         if min(p[0] for p in top) > -(g + w) + 0.05 or max(p[0] for p in top) < g + w - 0.05: continue
         zl0, zd0 = (C._zi(top, -g), C._zi(top, g)) if g else (C._zi(top, 0.0),) * 2
         return 100 * (C._zi(top, -(g + w)) - zl0) / w, 100 * (C._zi(top, g + w) - zd0) / w, g, max(px)
