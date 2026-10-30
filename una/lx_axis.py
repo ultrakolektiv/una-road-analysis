@@ -24,16 +24,17 @@ def _lane_slopes(secs, w):
         if not segs: continue
         top = C._envelope(segs, 0.05)
         if len(top) < 2: continue
-        xs = [p[0] for p in top]
-        if min(xs) > -w + 0.05 or max(xs) < w - 0.05: continue
-        z0, zl, zd = C._zi(top, 0.0), C._zi(top, -w), C._zi(top, w)
-        return 100 * (zl - z0) / w, 100 * (zd - z0) / w
+        px = [abs(p[0]) for n, _, pp in secs if n == nm for p in pp]
+        g = min(px) if px and min(px) > 0.3 else 0.0                      # unutrašnja ivica kolovoza (centralna osovina: pola razdjelnog pojasa)
+        if min(p[0] for p in top) > -(g + w) + 0.05 or max(p[0] for p in top) < g + w - 0.05: continue
+        zl0, zd0 = (C._zi(top, -g), C._zi(top, g)) if g else (C._zi(top, 0.0),) * 2
+        return 100 * (C._zi(top, -(g + w)) - zl0) / w, 100 * (C._zi(top, g + w) - zd0) / w, g, max(px)
     return None
 
 
 def load_axes(path, log=print, w=3.5):
     """Čita sve osovine iz LandXML-a: {ime: dict(sta0, elems, pvi, cs_s, cs_l, cs_d)}. Rezultat se kešira."""
-    key = hashlib.md5(f"lxaxes|{os.path.abspath(path)}|{os.path.getsize(path)}|{os.path.getmtime(path)}|{w}".encode()).hexdigest()
+    key = hashlib.md5(f"lxaxes2|{os.path.abspath(path)}|{os.path.getsize(path)}|{os.path.getmtime(path)}|{w}".encode()).hexdigest()
     cache = os.path.join(tempfile.gettempdir(), f"una_lxosa_{key}.pkl")
     if os.path.isfile(cache):
         try: return pickle.load(open(cache, "rb"))
@@ -61,7 +62,7 @@ def load_axes(path, log=print, w=3.5):
                     if len(a) >= 2: pp.append((float(a[0]), float(a[1]), g.get("code")))
                 secs.append((ch.get("name"), ch.get("side"), pp))
             r = _lane_slopes(secs, w)
-            if r: al[cur]["cs"].append((C._f(el.get("sta")), r[0], r[1]))
+            if r: al[cur]["cs"].append((C._f(el.get("sta")), r[0], r[1])); al[cur].setdefault("geo", []).append((r[2], r[3]))
             el.clear()
         elif t in ("P", "F"): el.clear()
     for k, v in al.items():
@@ -77,7 +78,8 @@ def alignments_info(path, log=print):
     out = []
     for nm in al:
         ax = AxisLX(nm, path, al[nm])
-        out.append(dict(name=nm, lo=float(ax.s_min), hi=float(ax.s_max), cs_lo=float(ax.cs_s.min()), cs_hi=float(ax.cs_s.max()), n=len(ax.elems)))
+        gg = al[nm].get("geo") or [(0.0, 3.85)]; g = float(np.median([a for a, _ in gg])); em = float(np.median([b for _, b in gg]))
+        out.append(dict(name=nm, lo=float(ax.s_min), hi=float(ax.s_max), cs_lo=float(ax.cs_s.min()), cs_hi=float(ax.cs_s.max()), n=len(ax.elems), g=round(g, 2), lanes=max(1, int(round((em - g - 0.35) / 3.5)))))
     return out
 
 

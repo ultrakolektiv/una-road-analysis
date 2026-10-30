@@ -114,21 +114,32 @@ def api_ls(b):
 
 
 def api_lx_import(b):
-    """Osovine iz LandXML-a → prijedlog sekcija trase (bez ispisa projektanta)."""
+    """Osovine iz LandXML-a → prijedlog sekcija trase: razdvojeni dio (desna + lijeva), pa centralna od kraja razdvojenog dijela."""
     from .. import lx_axis
     try:
         p = b["path"]; info = lx_axis.alignments_info(p)
         if not info: return {"error": "LandXML: nema osovina."}
-        def lane(n): return {"h": f"{p}#{n}", "v": f"{p}#{n}", "x": f"{p}#{n}", "trake_desno": [3.5], "trake_lijevo": [3.5]}
-        names = [a["name"] for a in info]
-        hi = min(min(a["hi"], a["cs_hi"]) for a in info)
-        lo = float(math.ceil(max(0.0, max(max(a["lo"], a["cs_lo"]) for a in info)))); hi = float(math.floor(hi))
-        if len(info) >= 2:
-            d = next((n for n in names if n.upper().startswith("D") or "DESN" in n.upper()), names[0]); l = next(n for n in names if n != d)
-            sec = {"tip": "razdvojene", "od": lo, "do": hi, "desna": lane(d), "lijeva": lane(l)}
-        else:
-            sec = {"tip": "jedna_naprijed", "od": lo, "do": hi, "osovina": lane(names[0])}
-        return {"alignments": info, "sekcije": [sec]}
+        def sp(a):
+            n = a["name"]; w = [3.5] * a["lanes"]
+            d = {"h": f"{p}#{n}", "v": f"{p}#{n}", "x": f"{p}#{n}", "trake_desno": w, "trake_lijevo": w}
+            if a["g"] > 0.3: d["razdjelni_pola"] = a["g"]
+            return d
+        U = lambda a: a["name"].upper()
+        cen = [a for a in info if "CENTR" in U(a)]; rest = [a for a in info if a not in cen]
+        D = next((a for a in rest if U(a).startswith("D") or "DESN" in U(a)), None); Lf = next((a for a in rest if a is not D and (U(a).startswith("L") or "LIJEV" in U(a))), None)
+        if D is None and rest: D = rest[0]
+        if Lf is None: Lf = next((a for a in rest if a is not D), None)
+        sek = []; end = None
+        top = lambda a: float(math.floor(min(a["hi"], a["cs_hi"])))
+        bot = lambda a: float(math.ceil(max(0.0, a["lo"], a["cs_lo"])))
+        if D and Lf:
+            lo = max(bot(D), bot(Lf)); end = min(top(D), top(Lf))
+            sek.append({"tip": "razdvojene", "od": lo, "do": end, "desna": sp(D), "lijeva": sp(Lf)})
+        elif D: end = top(D); sek.append({"tip": "jedna_naprijed", "od": bot(D), "do": end, "osovina": sp(D)})
+        for a in cen:
+            sek.append({"tip": "centralna", "od": end if end is not None else bot(a), "do": top(a), "centralna": sp(a)}); end = top(a)
+        if not sek: return {"error": "LandXML: nije prepoznata nijedna osovina."}
+        return {"alignments": info, "sekcije": sek}
     except Exception as e:
         return {"error": str(e)}
 
