@@ -353,8 +353,7 @@ def make_par(cfg):
     if par["h_auto"]: par["h_prepreke"] = 0.10
     for k in ("dodatak_L", "ofset", "h_oka", "h_prepreke", "korak_proracun", "korak_crtez", "Lmax", "ivica_debljina"):
         par[k] = float(str(par[k]).replace(",", "."))
-    L = par.get("L_zahtijevano")
-    par["L_zahtijevano"] = None if L in (None, "", 0, "0") else float(str(L).replace(",", "."))
+    par["L_zahtijevano"] = None            # zahtijevana preglednost je uvijek Vp preglednost (iz Vp i nagiba); fiksna dužina se više ne koristi
     st = par.get("strane") or ["desno", "lijevo"]
     par["strane"] = [SIDES[s] for s in (st if isinstance(st, (list, tuple)) else [st]) if s in SIDES]
     par["prepreke"] = [e for e in (par.get("prepreke") or []) if isinstance(e, dict)]

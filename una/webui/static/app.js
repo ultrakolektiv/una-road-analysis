@@ -39,7 +39,7 @@ sr: {
  d_or:"Osovina oka vozača DESNO od osovine kolovoza [m]", d_ol:"Osovina oka vozača LIJEVO od osovine kolovoza [m]", d_range:"Zajednički raspon ispisa: {0} – {1} m. Prilagodite OD/DO prema stvarnoj sekciji.",
  ok:"U redu", cancel:"Otkaži", close:"Zatvori", yes:"Da", no:"Ne",
  e_range:"Stacionaže OD / DO nisu ispravne (DO mora biti veće od OD).", e_file:"Datoteka ne postoji: {0}", e_cap:"Ograničenje: neispravan red '{0}' (OD; DO; brzina).", e_num:"Neispravan broj: {0}",
- e_unrec:"Nisu prepoznate sve tri vrste datoteka – dopunite ručno.", dlg_opening:"Otvaram dijalog za odabir datoteke …", e_nodlg:"Prozor za odabir datoteka nije dostupan – upišite putanju ručno.",
+ e_unrec:"Nisu prepoznate sve tri vrste datoteka – dopunite ručno.", dlg_pick_one:"Odaberite datoteku.", dlg_opening:"Otvaram dijalog za odabir datoteke …", e_nodlg:"Prozor za odabir datoteka nije dostupan – upišite putanju ručno.",
  pa_title:"Napredni parametri", pa_sub:"Model vožnje, tablice iz Priloga 2 pravilnika i vozila za dinamički proračun (poglavlje 5).", pa_reset:"Vrati podrazumijevano",
  pa_model:"Model vožnje", pa_tables:"Tablice", pa_tables_h:"Vrijednosti odvojene zarezom ili razmakom. Vp–R koristi Vr i Rmin tablicu.", pa_veh:"Vozila", pa_veh_h:"vlim prazno = max Vr; b i prazan hod prazno = opšte vrijednosti; P prazno = kriva sile vuče iz Pravilnika.",
  pa_addveh:"Dodaj vozilo", pa_delveh:"Ukloni zadnje", pa_tpl:"Word template", pa_tpl_h:"Ako je odabran, pored izvornog elaborata pravi se i elaborat u templatu. Prazna polja ostaju kakva su u templatu.", pa_tpl_file:"Template (.docx)", pa_tpl_clear:"Ukloni template",
@@ -91,7 +91,7 @@ en: {
  d_or:"Driver's eye axis RIGHT of the carriageway axis [m]", d_ol:"Driver's eye axis LEFT of the carriageway axis [m]", d_range:"Common range of the printouts: {0} – {1} m. Adjust FROM/TO to the actual segment.",
  ok:"OK", cancel:"Cancel", close:"Close", yes:"Yes", no:"No",
  e_range:"Chainages FROM / TO are not valid (TO must be greater than FROM).", e_file:"File does not exist: {0}", e_cap:"Limit: invalid row '{0}' (FROM; TO; speed).", e_num:"Invalid number: {0}",
- e_unrec:"Not all three file kinds were recognised – complete them manually.", dlg_opening:"Opening the file dialog …", e_nodlg:"The file dialog is not available – type the path manually.",
+ e_unrec:"Not all three file kinds were recognised – complete them manually.", dlg_pick_one:"Select a file.", dlg_opening:"Opening the file dialog …", e_nodlg:"The file dialog is not available – type the path manually.",
  pa_title:"Advanced parameters", pa_sub:"Driving model, tables from Annex 2 of the Rulebook and vehicles for the dynamic calculation (chapter 5).", pa_reset:"Restore defaults",
  pa_model:"Driving model", pa_tables:"Tables", pa_tables_h:"Values separated by comma or space. Vp–R uses the Vr and Rmin tables.", pa_veh:"Vehicles", pa_veh_h:"vlim empty = max Vr; b and idle empty = general values; P empty = traction curve from the Rulebook.",
  pa_addveh:"Add vehicle", pa_delveh:"Remove last", pa_tpl:"Word template", pa_tpl_h:"If selected, a study in the template is produced in addition to the original one. Empty fields stay as in the template.", pa_tpl_file:"Template (.docx)", pa_tpl_clear:"Remove template",
@@ -141,10 +141,43 @@ function toast(msg, err) { const e = h("div", { class: "toast" + (err ? " err" :
 /* ---------------------------------------------------------------- native dialogs */
 const FLT = () => ({ proj: [[t("flt_proj"), "*.json"], [t("flt_all"), "*.*"]], prn: [[t("flt_prn"), "*.txt;*.dat;*.lst"], [t("flt_all"), "*.*"]], lic: [[t("flt_lic"), "*.lic"], [t("flt_all"), "*.*"]], word: [[t("flt_word"), "*.docx;*.dotx"]], set: [[t("flt_proj"), "*.json"]] });
 async function pick(mode, title, filters, extra = {}) {
-  toast(t("dlg_opening"));
-  const r = await api("pick", { mode, title, filters, ...extra });
-  if (r.error) { toast(t("e_nodlg") + " " + String(r.error).slice(0, 300), true); return []; }
-  return r.paths || [];
+  if (S.stubPick) { const r = await api("pick", { mode, title, filters, ...extra }); return r.paths || []; }   // testovi
+  return browseDialog(mode, title, filters || [], extra);
+}
+/* Ugrađeni odabir datoteka/foldera (radi bez Windows dijaloga) */
+function browseDialog(mode, title, filters, extra) {
+  const multiple = !!extra.multiple; let cur = extra.initial || ""; let sel = new Set(); let fi = 0;
+  const exts = () => { const pat = (filters[fi] && filters[fi][1]) || "*.*"; if (pat.includes("*.*")) return null; return pat.split(/[;,\s]+/).map(x => x.replace(/^\*/, "").toLowerCase()).filter(Boolean); };
+  const pathIn = txt("", { class: "mono", style: "width:100%" }); const nameIn = txt(extra.name || "", { style: "width:100%" });
+  const list = h("div", { style: "border:1px solid var(--line,#8884);border-radius:8px;height:340px;overflow:auto;padding:4px" }); const side = h("div", { style: "display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px" });
+  const fsel = filters.length > 1 ? h("select", { onchange: e => { fi = +e.target.value; go(pathIn.value); } }, filters.map((f, i) => h("option", { value: i }, f[0]))) : null;
+  const sz = n => n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : n > 1024 ? Math.round(n / 1024) + " KB" : n + " B";
+  async function go(p) {
+    const r = await api("ls", { path: p }); cur = r.path; pathIn.value = cur; sel.clear(); side.replaceChildren(...r.roots.map(x => h("button", { class: "btn sm", onclick: () => go(x.p) }, x.n)));
+    const ex = exts(); const rows = [];
+    if (r.parent) rows.push(h("div", { class: "file", style: "cursor:pointer;padding:5px 8px", onclick: () => go(r.parent) }, "📁 .."));
+    if (r.error) rows.push(h("div", { class: "hint", style: "padding:8px" }, r.error));
+    for (const e of r.entries) {
+      const full = cur.replace(/[\\/]+$/, "") + (cur.includes("\\") ? "\\" : "/") + e.n;
+      if (e.d) rows.push(h("div", { class: "file", style: "cursor:pointer;padding:5px 8px", onclick: () => go(full) }, "📁 " + e.n));
+      else if (mode !== "folder" && (!ex || ex.some(x => e.n.toLowerCase().endsWith(x)))) {
+        const row = h("div", { class: "file", style: "cursor:pointer;padding:5px 8px;display:flex;gap:8px;border-radius:6px", onclick: () => { if (!multiple) { sel.clear(); [...list.children].forEach(c => c.style.background = ""); } if (sel.has(full)) { sel.delete(full); row.style.background = ""; } else { sel.add(full); row.style.background = "rgba(56,130,246,.25)"; } if (mode === "save") nameIn.value = e.n; } }, h("span", { class: "grow" }, "📄 " + e.n), h("span", { class: "hint" }, sz(e.s)));
+        rows.push(row);
+      }
+    }
+    list.replaceChildren(...rows);
+  }
+  const body = h("div", {}, side, h("div", { class: "row", style: "margin-bottom:8px;gap:8px" }, h("div", { class: "grow" }, pathIn), h("button", { class: "btn sm", onclick: () => go(pathIn.value) }, "↵")), list,
+    mode === "save" ? h("div", { style: "margin-top:8px" }, nameIn) : null, fsel ? h("div", { style: "margin-top:8px" }, fsel) : null);
+  pathIn.addEventListener("keydown", e => { if (e.key === "Enter") go(pathIn.value); });
+  go(cur);
+  return modal({ title, body, wide: true, okText: mode === "folder" ? "OK" : null,
+    onOk: () => {
+      const sep = cur.includes("\\") ? "\\" : "/";
+      if (mode === "folder") return [cur];
+      if (mode === "save") { const n = nameIn.value.trim(); if (!n) throw new Error(t("e_nodlg")); return [cur.replace(/[\\/]+$/, "") + sep + n]; }
+      if (!sel.size) throw new Error(t("dlg_pick_one")); return [...sel];
+    } }).then(v => v || []);
 }
 async function pathField(input, mode, title, filters) {
   const p = await pick(mode, title, filters, { initial: input.value }); if (p[0]) { input.value = p[0]; input.dispatchEvent(new Event("input", { bubbles: true })); input.dispatchEvent(new Event("change", { bubbles: true })); }
@@ -216,7 +249,7 @@ async function licenseDialog() {
     h("div", { class: "row" }, h("button", { class: "btn", onclick: async () => { try { await navigator.clipboard.writeText(idIn.value); } catch (e) { idIn.select(); document.execCommand("copy"); } toast(t("copied")); } }, t("lic_copy")),
       h("button", { class: "btn primary", onclick: async () => { const p = (await pick("open", t("dlg_lic"), FLT().lic))[0]; if (!p) return; const r = await api("license", { path: p }); if (r.error) return toast(r.error, true); toast(t("lic_done")); await refreshState(); } }, t("lic_load")))) });
 }
-async function refreshState() { const st = await api("state", { lang: LANG }); S.lic = st.license; S.defaults = st.defaults; S.version = st.version; renderNav(); }
+async function refreshState() { const st = await api("state", { lang: LANG }); S.lic = st.license; S.defaults = st.defaults; S.version = st.version; S.stubPick = !!st.stub_pick; renderNav(); }
 
 /* ---------------------------------------------------------------- UI helpers */
 const field = (label, input, help) => h("div", { class: "field" }, h("label", {}, label), input, help ? h("div", { class: "help" }, help) : null);
@@ -374,7 +407,7 @@ function pageParams() {
 }
 
 /* ================================================================ PAGE 4 – SIGHT DISTANCE */
-const PFIELDS = [["ofset", 1.75, false], ["h_oka", 1.0, false], ["h_prepreke", "", true], ["dodatak_L", 0.0, false], ["L_zahtijevano", "", true], ["Lmax", 500.0, false], ["korak_crtez", 20.0, false], ["korak_proracun", 5.0, false], ["mjerilo", 1000, false], ["ivica_debljina", 0.3, false]];
+const PFIELDS = [["ofset", 1.75, false], ["h_oka", 1.0, false], ["h_prepreke", "", true], ["dodatak_L", 0.0, false], ["Lmax", 500.0, false], ["korak_crtez", 20.0, false], ["korak_proracun", 5.0, false], ["mjerilo", 1000, false], ["ivica_debljina", 0.3, false]];
 function loadSightState() {
   const p = S.cfg.preglednost || {}; S.sightTouched = false;
   S.pre = { f: {}, sd: (p.strane || ["desno", "lijevo"]).includes("desno"), sl: (p.strane || ["desno", "lijevo"]).includes("lijevo"), ivice: p.ivice !== false, png: !!p.png,

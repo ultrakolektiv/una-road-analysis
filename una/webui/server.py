@@ -63,7 +63,7 @@ def api_state(b):
         if p and os.path.isfile(p): last = p
     except Exception: pass
     D = {k: v for k, v in engine.DEFAULTS.items()}
-    return {"version": _version(), "license": lic, "last": last, "ui": S.ui, "defaults": json.loads(json.dumps(D, default=lambda o: None)),
+    return {"stub_pick": bool(os.environ.get("UNA_PICK_STUB")), "version": _version(), "license": lic, "last": last, "ui": S.ui, "defaults": json.loads(json.dumps(D, default=lambda o: None)),
             "pid": os.getpid()}
 
 
@@ -79,6 +79,37 @@ def api_pick(b):
         try: open(os.path.join(_log_dir(), "dialog_error.log"), "a", encoding="utf-8").write(str(e) + "\n")
         except Exception: pass
         return {"paths": [], "error": str(e)}
+
+
+def api_ls(b):
+    """Ugrađeni pregled foldera (ne zavisi od Windows dijaloga)."""
+    import string
+    home = os.path.expanduser("~")
+    roots = []
+    for nm in ("Desktop", "Documents", "Downloads"):
+        for base in (home, os.path.join(home, "OneDrive")):
+            q = os.path.join(base, nm)
+            if os.path.isdir(q): roots.append({"n": nm, "p": q}); break
+    roots.insert(0, {"n": "Home", "p": home})
+    if os.name == "nt":
+        roots += [{"n": d + ":\\", "p": d + ":\\"} for d in string.ascii_uppercase if os.path.exists(d + ":\\")]
+    else: roots.append({"n": "/", "p": "/"})
+    path = b.get("path") or ""
+    if path and not os.path.isdir(path): path = os.path.dirname(path)
+    if not path or not os.path.isdir(path): path = home
+    path = os.path.abspath(path); ents = []; err = None
+    try:
+        with os.scandir(path) as it:
+            for e in it:
+                try:
+                    d = e.is_dir()
+                    if e.name.startswith("."): continue
+                    ents.append({"n": e.name, "d": d, "s": (0 if d else e.stat().st_size)})
+                except OSError: pass
+    except OSError as ex: err = str(ex)
+    ents.sort(key=lambda x: (not x["d"], x["n"].lower()))
+    parent = os.path.dirname(path.rstrip("\\/")) if os.path.dirname(path.rstrip("\\/")) != path else ""
+    return {"path": path, "parent": parent if parent != path else "", "entries": ents[:5000], "roots": roots, "error": err}
 
 
 def api_detect(b):
@@ -222,7 +253,7 @@ def api_npp(_):
     return npp.defaults()
 
 
-API = {"npp": api_npp, "state": api_state, "ui": api_ui, "pick": api_pick, "detect": api_detect, "axisrange": api_axisrange, "elements": api_elements, "load": api_load, "save": api_save,
+API = {"npp": api_npp, "state": api_state, "ui": api_ui, "pick": api_pick, "ls": api_ls, "detect": api_detect, "axisrange": api_axisrange, "elements": api_elements, "load": api_load, "save": api_save,
        "readjson": api_readjson, "validate": api_validate, "run": api_run, "log": api_log, "open": api_open, "license": api_license, "ping": api_ping, "quit": api_quit}
 
 
