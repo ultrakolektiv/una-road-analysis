@@ -302,10 +302,17 @@ def section_geom(secs, rail_off=0.78, add_rails=True, central=False):
         for sd in (-1, 1):
             pts = [(p[0], p[1]) for n, _, pp in secs if n == "Vijenac" for p in pp if p[0] * sd > e + 0.05]
             if len(pts) >= 3:
-                xs = [abs(x) for x, _ in pts]; G["box"].append([ST["parapet"], sd * min(xs), sd * max(xs), max(z for _, z in pts)])
+                xs = [abs(x) for x, _ in pts]; bx0 = [ST["parapet"], sd * min(xs), sd * max(xs), max(z for _, z in pts)]
+                sg_ = [(a[0] * sd, a[1], b[0] * sd, b[1]) for n, _, pp in secs if n == "Vijenac" for a, b in zip(pp, pp[1:]) if a[0] * sd > e - 0.02 and b[0] * sd > e - 0.02 and max(a[1], b[1]) > 0.05]
+                env = _envelope(sg_, 0.03) if sg_ else []
+                if len(env) >= 3: bx0.append([(round(x - env[0][0], 3), round(z, 3)) for x, z in env])      # stvarni profil ograde (od unutrašnjeg podnožja prema van)
+                G["box"].append(bx0)
         if central and gap:                                          # betonska ograda u sredini mosta (jedna konstrukcija)
             bo = [(p[0], p[1]) for n, _, pp in secs if n == "Betonska_ograda" for p in pp]
-            if len(bo) >= 3: G["box"].append([ST["medblok"], min(x for x, _ in bo), max(x for x, _ in bo), max(z for _, z in bo)])
+            if len(bo) >= 3:
+                sgm = [(x1, z1, x2, z2) for n, _, pp in secs if n == "Betonska_ograda" for (x1, z1, *_), (x2, z2, *_) in zip(pp, pp[1:])]
+                envm = _envelope(sgm, 0.02)
+                G["box"].append([ST["medblok"], min(x for x, _ in bo), max(x for x, _ in bo), max(z for _, z in bo)] + ([[(round(x, 3), round(z, 3)) for x, z in envm]] if len(envm) >= 3 else []))
     elif kind == "tunel":
         G["ring"] = [(round(x, 3), round(z, 3)) for x, z in _ring(secs)]
         for sd in (-1, 1):
@@ -478,8 +485,8 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
             o_["tx"].append(round(sg * math.sin(nu), 5)); o_["ty"].append(round(sg * math.cos(nu), 5)); o_["k"].append(round(kd, 6))
             o_["el"].append(_elem_at(A_[nm_c], sta)); o_["kind"].append(G["kind"]); o_["jn"].append(0); o_["gr"].append(G["gr"]); o_["F"].append([[round(a_, 3), round(b_, 3)] for a_, b_ in full]); o_["e"].append(zones)
             bx = []
-            for st_, a_, b_, h_ in G["box"]:
-                lo, hi = sorted((sg * a_, sg * b_)); bx.append([st_, round(lo, 3), round(hi, 3), round(h_, 3)])
+            for st_, a_, b_, h_, *pf in G["box"]:
+                lo, hi = sorted((sg * a_, sg * b_)); bx.append([st_, round(lo, 3), round(hi, 3), round(h_, 3)] + (list(pf) if pf else []))
             o_["box"].append(bx); o_["ring"].append([[round(sg * a_, 3), round(b_, 3)] for a_, b_ in G["ring"]])
             o_["ln"].append(-1 if sdsel == "L" else 1); o_["latD"].append(round(lat["D"], 3)); o_["latL"].append(round(lat["L"], 3)); o_["zeD"].append(round(ze["D"], 3)); o_["zeL"].append(round(ze["L"], 3))
             o_["ob"].append(ob); o_["ray"].append(ray); o_["lim"].append(str(r.get("lim", ""))); o_["hp"].append(round(hpr, 2))

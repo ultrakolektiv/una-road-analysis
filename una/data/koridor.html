@@ -67,7 +67,7 @@ function strip(a,b,fa){
  const ea=a.E,eb=b.E,e=ea.e;
  // profil: unija ofseta
  const os=new Set();for(const p of a.F)os.add(p[0]);for(const p of b.F)os.add(p[0]);const O=[...os].sort((u,v)=>u-v);
- const PV=ea.pv||[[-e,e]],pave=(om)=>PV.some(r=>om>=r[0]-.001&&om<=r[1]+.001), oth=(om)=>ea.oe>0&&Math.abs(om-ea.ot)<=ea.oe+.001;
+ const PV=ea.pv||[[-e,e]],PVL=PV.map(r=>{const u=ea.ug||0;return u>0?(r[1]<0?[r[0],-u]:[u,r[1]]):r}),pave=(om)=>PV.some(r=>om>=r[0]-.001&&om<=r[1]+.001), oth=(om)=>ea.oe>0&&Math.abs(om-ea.ot)<=ea.oe+.001;
  for(let k=0;k<O.length-1;k++){const o1=O[k],o2=O[k+1],om=(o1+o2)/2;if(o2-o1<1e-4)continue;
   let col,al;const med=ea.med&&om>ea.med[0]&&om<ea.med[2];
   if(a.kind==="tunel"){col=pave(om)?C.road:C.concD}
@@ -79,15 +79,20 @@ function strip(a,b,fa){
    else{const band=Math.floor((a.z+zp(a.F,om))*1.4)&1,cr=hs(Math.floor(a.q/3)+k*5.3);col=sc(C.rock,sh*(band?.82:1.04)*(.93+.14*cr))}}
   poly([W(a,o1,zp(a.F,o1)),W(a,o2,zp(a.F,o2)),W(b,o2,zp(b.F,o2)),W(b,o1,zp(b.F,o1))],fog(col))}
  // kolotrazi (blago potamnjenje po trakama)
- if(a.kind!=="tunel"||true){const LC=[];for(const r of PV){const nl=Math.max(1,Math.round((r[1]-r[0])/3.85));for(let j=0;j<nl;j++)LC.push(r[0]+(j+.5)*(r[1]-r[0])/nl)}for(const c0 of LC)for(const w of [-.9,.9]){const o=c0+w;poly([W(a,o-.35,zp(a.F,o-.35)+.006),W(a,o+.35,zp(a.F,o+.35)+.006),W(b,o+.35,zp(b.F,o+.35)+.006),W(b,o-.35,zp(b.F,o-.35)+.006)],fog(C.road2),.45)}}
+ if(a.kind!=="tunel"||true){const LC=[];for(const r of PVL){const nl=Math.max(1,Math.round((r[1]-r[0])/3.85));for(let j=0;j<nl;j++)LC.push(r[0]+(j+.5)*(r[1]-r[0])/nl)}for(const c0 of LC)for(const w of [-.9,.9]){const o=c0+w;poly([W(a,o-.35,zp(a.F,o-.35)+.006),W(a,o+.35,zp(a.F,o+.35)+.006),W(b,o+.35,zp(b.F,o+.35)+.006),W(b,o-.35,zp(b.F,o-.35)+.006)],fog(C.road2),.45)}}
  // oznake
  const dash=(Math.floor(a.q/9)%2===0),ln=(r,w,col,h)=>poly([W(a,r-w/2,zp(a.F,r-w/2)+.012),W(a,r+w/2,zp(a.F,r+w/2)+.012),W(b,r+w/2,zp(b.F,r+w/2)+.012),W(b,r-w/2,zp(b.F,r-w/2)+.012)],fog(col));
- for(const r of PV){ln(r[0]+.15,.15,C.line);ln(r[1]-.15,.15,C.line);const nl=Math.max(1,Math.round((r[1]-r[0])/3.85));if(dash)for(let j=1;j<nl;j++)ln(r[0]+j*(r[1]-r[0])/nl,.14,C.line)};
+ for(const r of PVL){ln(r[0]+.15,.15,C.line);ln(r[1]-.15,.15,C.line);const nl=Math.max(1,Math.round((r[1]-r[0])/3.85));if(dash)for(let j=1;j<nl;j++)ln(r[0]+j*(r[1]-r[0])/nl,.14,C.line)};
  if(ea.oe>0&&a.kind==="otvorena"){const c=ea.ot,w=ea.oe;ln(c-(w-.15),.15,C.line);ln(c+(w-.15),.15,C.line);if(dash)ln(c,.14,C.line)}
  // ograde, parapeti, svod
- for(let i=0;i<a.box.length;i++){const A=a.box[i],B=b.box[i];if(!B||A[0]!==B[0])continue;if(A[0]===10){const cc=[196,195,188];for(const [xa_,xb_] of [[A[1],B[1]],[A[2],B[2]]]){const za_=zp(a.F,xa_),zb_=zp(b.F,xb_);poly([W(a,xa_,za_),W(a,xa_,A[3]),W(b,xb_,B[3]),W(b,xb_,zb_)],fog(cc))}poly([W(a,A[1],A[3]),W(a,A[2],A[3]),W(b,B[2],B[3]),W(b,B[1],B[3])],fog([222,221,214]));continue}const inn=Math.abs(A[1])<Math.abs(A[2])?A[1]:A[2],inb=Math.abs(B[1])<Math.abs(B[2])?B[1]:B[2],ouA=inn===A[1]?A[2]:A[1],ouB=inb===B[1]?B[2]:B[1];
+ for(let i=0;i<a.box.length;i++){const A=a.box[i],B=b.box[i];if(!B||A[0]!==B[0])continue;if(A[0]===10&&A[4]&&B[4]&&A[4].length===B[4].length){const PA=A[4],PB=B[4];for(let m=0;m<PA.length-1;m++){const dx=PA[m+1][0]-PA[m][0],dzz=PA[m+1][1]-PA[m][1],ang=Math.atan2(Math.abs(dzz),Math.abs(dx)+1e-6)*57.3;const sh=ang<25?[232,231,224]:(dx*dzz>0?[184,183,176]:[212,211,204]);poly([W(a,PA[m][0],PA[m][1]),W(a,PA[m+1][0],PA[m+1][1]),W(b,PB[m+1][0],PB[m+1][1]),W(b,PB[m][0],PB[m][1])],fog(sc(sh,m===0?.8:1)))}continue}
+  if(A[0]===10){const cc=[196,195,188];for(const [xa_,xb_] of [[A[1],B[1]],[A[2],B[2]]]){const za_=zp(a.F,xa_),zb_=zp(b.F,xb_);poly([W(a,xa_,za_),W(a,xa_,A[3]),W(b,xb_,B[3]),W(b,xb_,zb_)],fog(cc))}poly([W(a,A[1],A[3]),W(a,A[2],A[3]),W(b,B[2],B[3]),W(b,B[1],B[3])],fog([222,221,214]));continue}const inn=Math.abs(A[1])<Math.abs(A[2])?A[1]:A[2],inb=Math.abs(B[1])<Math.abs(B[2])?B[1]:B[2],ouA=inn===A[1]?A[2]:A[1],ouB=inb===B[1]?B[2]:B[1];
   const za=zp(a.F,inn),zb=zp(b.F,inb),ta=A[3],tb=B[3],col=A[0]===3?C.conc:[165,165,160];
-  if(A[0]===3){const dr=inn>=0?1:-1,drb=inb>=0?1:-1,hA=Math.max(.5,ta-za),hB=Math.max(.5,tb-zb),sa=hA/.81,sb=hB/.81;
+  if(A[0]===3&&A[4]&&B[4]&&A[4].length===B[4].length){const dr=inn>=0?1:-1,drb=inb>=0?1:-1,PA=A[4],PB=B[4];
+   for(let m=0;m<PA.length-1;m++){const dx=Math.abs(PA[m+1][0]-PA[m][0]),dzz=PA[m+1][1]-PA[m][1],ang=Math.atan2(Math.abs(dzz),dx+1e-6)*57.3;const sh=ang>55?[196,195,188]:(ang>20?[212,211,204]:[228,227,220]),base=m===0?.82:1;
+    const o0=inn+dr*PA[m][0],o1=inn+dr*PA[m+1][0],q0=inb+drb*PB[m][0],q1=inb+drb*PB[m+1][0];poly([W(a,o0,PA[m][1]),W(a,o1,PA[m+1][1]),W(b,q1,PB[m+1][1]),W(b,q0,PB[m][1])],fog(sc(sh,base)))}
+   const kq=Math.ceil(a.q/6)*6;if(kq<b.q){const f=(kq-a.q)/((b.q-a.q)||1),o=inn+(inb-inn)*f,z=za+(zb-za)*f,px=a.x+(b.x-a.x)*f+(a.nx+(b.nx-a.nx)*f)*o,py=a.y+(b.y-a.y)*f+(a.ny+(b.ny-a.ny)*f)*o,pz=a.z+(b.z-a.z)*f;const s1=proj([px,py,pz+PA[0][1]]),s2=proj([px,py,pz+ta]);if(s1&&s2){cx.strokeStyle=fog([120,119,114]);cx.lineWidth=Math.max(1,foc*0.05/s1[2]);cx.beginPath();cx.moveTo(s1[0],s1[1]);cx.lineTo(s2[0],s2[1]);cx.stroke()}}}
+  else if(A[0]===3){const dr=inn>=0?1:-1,drb=inb>=0?1:-1,hA=Math.max(.5,ta-za),hB=Math.max(.5,tb-zb),sa=hA/.81,sb=hB/.81;
    const NJ=[[0,0],[0,.08],[.18,.33],[.26,.81],[.41,.81]],cl=[[196,195,188],[170,169,163],[208,207,200],[222,221,214]];
    for(let m=0;m<NJ.length-1;m++){const p0=NJ[m],p1=NJ[m+1];poly([W(a,inn+dr*p0[0],za+p0[1]*sa),W(a,inn+dr*p1[0],za+p1[1]*sa),W(b,inb+drb*p1[0],zb+p1[1]*sb),W(b,inb+drb*p0[0],zb+p0[1]*sb)],fog(cl[m]))}
    const kq=Math.ceil(a.q/6)*6;if(kq<b.q){const f=(kq-a.q)/((b.q-a.q)||1),o=inn+(inb-inn)*f,z=za+(zb-za)*f,px=a.x+(b.x-a.x)*f+(a.nx+(b.nx-a.nx)*f)*o,py=a.y+(b.y-a.y)*f+(a.ny+(b.ny-a.ny)*f)*o,pz=a.z+(b.z-a.z)*f+z;const s1=proj([px,py,pz+.02]),s2=proj([px,py,pz+.8*sa]);if(s1&&s2){cx.strokeStyle=fog([120,119,114]);cx.lineWidth=Math.max(1,foc*.012/s1[2]);cx.beginPath();cx.moveTo(s1[0],s1[1]);cx.lineTo(s2[0],s2[1]);cx.stroke()}}}
@@ -104,7 +109,7 @@ function strip(a,b,fa){
    const band=(z0,z1,c)=>poly([W(a,oa,za+z0),W(a,oa,za+z1),W(b,ob,zb+z1),W(b,ob,zb+z0)],fogr(c));
    band(.64,.77,[226,229,232]);band(.55,.64,[150,155,162]);band(.46,.55,[196,200,205]);band(.43,.46,[110,114,120]);
    poly([W(a,oa,za+.77),W(a,oa+out*.04,za+.77),W(b,ob+out*.04,zb+.77),W(b,ob,zb+.77)],fogr([240,242,244]))}
-  else if(oa===rails[0][0]||true){if(Math.abs(oa)>=gh||gh===0)poly([W(a,oa,za),W(a,oa,za+.25),W(b,ob,zb+.25),W(b,ob,zb)],fog([255,120,60]),.22)}}
+  else if(oa===rails[0][0]||true){if(Math.abs(oa)>=gh||gh===0)poly([W(a,oa,za),W(a,oa,za+.25),W(b,ob,zb+.25),W(b,ob,zb)],fog([255,120,60]),.14)}}
 }
 function lineRay(P0,P1,colL,wpx){const N=60,pts=[];for(let k=0;k<=N;k++){const f=k/N,P=[P0[0]+(P1[0]-P0[0])*f,P0[1]+(P1[1]-P0[1])*f,P0[2]+(P1[2]-P0[2])*f];const s=proj(P);if(s)pts.push(s)}
  if(pts.length>1){cx.lineCap="round";cx.lineJoin="round";for(const [c,w] of [["rgba(0,0,0,.55)",wpx+4],[colL,wpx]]){cx.strokeStyle=c;cx.lineWidth=w;cx.beginPath();pts.forEach((s,i)=>i?cx.lineTo(s[0],s[1]):cx.moveTo(s[0],s[1]));cx.stroke()}}}
