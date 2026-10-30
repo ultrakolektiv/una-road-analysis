@@ -562,9 +562,9 @@ function pageRun() {
     h("div", { class: "card" }, h("h3", {}, t("r_log")), log), files, navButtons("sight", null));
 }
 function korCard() {
-  const k = S.cfg.koridor = Object.assign({ datoteka: "", od: 80, do: 1580, ograda_ofset: 0.78, uskladi: true }, S.cfg.koridor || {});
+  const k = S.cfg.koridor = Object.assign({ datoteka: "", od: "", do: "", ograda_ofset: 0.78, uskladi: true }, S.cfg.koridor || {});
   const f = txt(k.datoteka || "", { class: "mono", oninput: e => { k.datoteka = e.target.value; dirty(); } });
-  const nIn = (key, w) => txt(String(k[key]), { style: "width:" + w + "px", inputmode: "decimal", oninput: e => { const v = nz(e.target.value); if (v != null) { k[key] = v; dirty(); } } });
+  const nIn = (key, w) => txt(String(k[key]), { style: "width:" + w + "px", inputmode: "decimal", placeholder: "auto", oninput: e => { const v = nz(e.target.value); if (e.target.value.trim() === "") { k[key] = ""; dirty(); } else if (v != null) { k[key] = v; dirty(); } } });
   return h("div", { class: "card" }, h("h3", {}, t("r_kor")), h("p", { class: "hint" }, t("k_h")),
     h("div", { class: "grid g2" }, field(t("k_file"), h("div", { class: "row" }, h("div", { class: "grow" }, f), h("button", { class: "btn sm", onclick: () => pathField(f, "open", t("k_file"), [["LandXML", "*.xml"], [t("flt_all"), "*.*"]]) }, t("k_pick")))),
       field(t("k_from"), nIn("od", 120)), field(t("k_to"), nIn("do", 120)), field(t("k_off"), nIn("ograda_ofset", 120))),

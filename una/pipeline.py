@@ -71,7 +71,7 @@ def generate(cfg, outdir, log=print, word=True, excel=True, sight=None):
     if kor_on:
         if not os.path.isfile(kor["datoteka"]): raise ValueError(_TF("Koridor: datoteka ne postoji: {0}", kor["datoteka"]))
         from . import corridor
-        KR = corridor.load_landxml(kor["datoteka"], float(kor.get("od", 80)), float(kor.get("do", 1580)), log=log)
+        KR = corridor.load_landxml(kor["datoteka"], *corridor.kor_range(cfg), log=log)
         corridor.harmonize(cfg, KR, log=log)
     if cfg.get("npp"):
         from . import npp as _npp

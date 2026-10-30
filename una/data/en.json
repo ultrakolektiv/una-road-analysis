@@ -906,5 +906,6 @@
 "LandXML osovine: čitam {0} ({1:.0f} MB) – može potrajati nekoliko minuta …": "LandXML alignments: reading {0} ({1:.0f} MB) – this may take a few minutes …",
 "LandXML osovina '{0}': u presjecima nema površi kolovoza za poprečne nagibe.": "LandXML alignment '{0}': the cross-sections contain no carriageway surface for cross slopes.",
 "LandXML: niveleta nema prelomnih tačaka.": "LandXML: the profile has no grade-break points.",
-"LandXML: osovina '{0}' nije pronađena (postoje: {1}).": "LandXML: alignment '{0}' not found (available: {1})."
+"LandXML: osovina '{0}' nije pronađena (postoje: {1}).": "LandXML: alignment '{0}' not found (available: {1}).",
+"Koridor: osovina '{0}' (centralna) nije uključena u vožnju kroz koridor.": "Corridor: alignment '{0}' (central) is not included in the corridor drive-through."
 }

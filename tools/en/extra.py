@@ -126,3 +126,5 @@ X.update({
 "LandXML: niveleta nema prelomnih tačaka.": "LandXML: the profile has no grade-break points.",
 "LandXML: osovina '{0}' nije pronađena (postoje: {1}).": "LandXML: alignment '{0}' not found (available: {1}).",
 })
+
+X.update({"Koridor: osovina '{0}' (centralna) nije uključena u vožnju kroz koridor.": "Corridor: alignment '{0}' (central) is not included in the corridor drive-through."})

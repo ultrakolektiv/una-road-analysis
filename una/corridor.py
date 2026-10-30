@@ -130,6 +130,19 @@ def _parse_profile(pr):
 
 
 # ----------------------------------------------------------------------------------------------- čitanje datoteke
+def kor_range(cfg):
+    """Opseg stacionaža koridora: zadani 'od'/'do' ako su upisani, inače cijela trasa (od najmanjeg 'od' do najvećeg 'do' u sekcijama)."""
+    kc = cfg.get("koridor") or {}
+    def num(v):
+        try: return float(str(v).replace(",", "."))
+        except (TypeError, ValueError): return None
+    a, b = num(kc.get("od")), num(kc.get("do"))
+    secs = [s for s in cfg.get("sekcije", []) if s.get("od") not in (None, "") and s.get("do") not in (None, "")]
+    if a is None: a = min((float(s["od"]) for s in secs), default=0.0)
+    if b is None: b = max((float(s["do"]) for s in secs), default=a + 1500.0)
+    return a, b
+
+
 def load_landxml(path, s_from, s_to, log=print, margin=60.0):
     """Jedan prolaz kroz datoteku. Vraća dict: aligns{name: Align}, sect{name: [(sta, [(ime, strana, [(ofs, z, kod),…]),…]),…]}, tin (Nx3 sjever/istok/z), faces (Mx3)."""
     key = hashlib.md5(f"{os.path.abspath(path)}|{os.path.getsize(path)}|{os.path.getmtime(path)}|{s_from}|{s_to}".encode()).hexdigest()
@@ -172,6 +185,8 @@ def load_landxml(path, s_from, s_to, log=print, margin=60.0):
                 a = el.text.split()
                 if len(a) == 3: faces.append((a[0], a[1], a[2]))
             el.clear()
+    for k in [k for k in aligns if "CENTR" in k.upper()]:          # centralna osovina se ne prikazuje u koridoru (samo razdvojeni dio)
+        aligns.pop(k); sect.pop(k, None); log(_TF("Koridor: osovina '{0}' (centralna) nije uključena u vožnju kroz koridor.", k))
     for k, v in aligns.items():
         if not v["elems"]: raise ValueError(_TF("Koridor: osovina '{0}' nema geometriju (CoordGeom).", k))
     A = {}
@@ -183,7 +198,7 @@ def load_landxml(path, s_from, s_to, log=print, margin=60.0):
     if len(tin) and sect:
         xs = np.concatenate([A[k].pos([s_from, (s_from + s_to) / 2, s_to])[0] for k in A]); ys = np.concatenate([A[k].pos([s_from, (s_from + s_to) / 2, s_to])[1] for k in A])
         # TIN pokriva i mnogo veće područje; filtriraj po koridoru (guste tačke osovine)
-        ss = np.linspace(s_from, s_to, 200); cx = np.concatenate([A[k].pos(ss)[0] for k in A]); cy = np.concatenate([A[k].pos(ss)[1] for k in A])
+        ss = np.linspace(s_from, s_to, max(200, int((s_to - s_from) / 25))); cx = np.concatenate([A[k].pos(ss)[0] for k in A]); cy = np.concatenate([A[k].pos(ss)[1] for k in A])
         keep = np.zeros(len(tin), bool)
         d, _ = _NN(np.c_[cx, cy]).query(tin[:, :2]); keep = d < 320.0
         remap = -np.ones(len(tin), int); remap[keep] = np.arange(keep.sum())
@@ -334,7 +349,7 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
     for nm in names:
         keep = []; last = -1e9
         for sta, ss in R["sect"][nm]:
-            if s_from - 1 <= sta <= s_to + 1 and sta - last >= 1.2: keep.append((sta, ss)); last = sta
+            if s_from - 1 <= sta <= s_to + 1 and sta - last >= max(1.2, (s_to - s_from) / 2500): keep.append((sta, ss)); last = sta
         sta = np.array([r[0] for r in keep]); N, E = A_[nm].pos(sta); nu = A_[nm].heading(sta)
         secs_by[nm] = dict(sta=sta, N=N, E=E, nu=nu, z0=A_[nm].z(sta), G=[section_geom(ss, 0.78, False) for _, ss in keep], k=A_[nm].curvature(sta))
     trees = {nm: _NN(np.c_[v["E"], v["N"]]) for nm, v in secs_by.items()}
@@ -453,7 +468,7 @@ def pg_hpr(A, par, a):
 def write_html(path, R_or_path, P, par, out, cfg, log=print):
     import json
     kc = cfg.get("koridor") or {}
-    s_from = float(kc.get("od", 80)); s_to = float(kc.get("do", 1580))
+    s_from, s_to = kor_range(cfg)
     R = R_or_path if isinstance(R_or_path, dict) else load_landxml(R_or_path, s_from, s_to, log=log)
     scene = build_scene(R, s_from, s_to, out, par, cfg, log=log)
     from .i18n import get_lang
@@ -555,7 +570,7 @@ def harmonize(cfg, R, log=print):
     vrsta prepreke (most / tunel) po stacionaži iz koridora. Mijenja cfg (poziva se prije proračuna)."""
     kc = cfg.get("koridor") or {}
     if not kc.get("uskladi", True): return
-    s_from = float(kc.get("od", 80)); s_to = float(kc.get("do", 1580)); off = float(kc.get("ograda_ofset", 0.78))
+    s_from, s_to = kor_range(cfg); off = float(kc.get("ograda_ofset", 0.78))
     es = []
     for nm, lst in R["sect"].items():
         for sta, ss in lst[::10]:
