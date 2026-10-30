@@ -397,7 +397,7 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
         PD = prep.get("D") or prep["L"]
         q = 0.0; prev = None
         o_ = dict(naziv=_TF("{0} – {1}", (nm + " + " + cen) if (cen and sw is not None) else nm, _T("smjer stacionaže") if sg > 0 else _T("suprotno stacionaži")), q=[], s=[], x=[], y=[], z=[], tx=[], ty=[], k=[], el=[], v=[], g=[], D=[], Lz=[], ok=[],
-                  kind=[], jn=[], gr=[], F=[], e=[], box=[], ring=[], ln=[], latD=[], latL=[], zeD=[], zeL=[], ob=[], ray=[], lim=[], hp=[])
+                  kind=[], jn=[], pt=[], gr=[], F=[], e=[], box=[], ring=[], ln=[], latD=[], latL=[], zeD=[], zeL=[], ob=[], ray=[], lim=[], hp=[])
         z0cs = []; prev_nm = None
         for nm_s, ii in order:
             if prev_nm is not None and nm_s != prev_nm and o_["jn"]: o_["jn"][-1] = 1             # spoj dvije osovine: ne crta se kolovoz preko prekida
@@ -438,11 +438,20 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
             terr_R = []; terr_L = []
             if G["kind"] == "otvorena" and dtm is not None:
                 for side, (o_end, z_end), lst in ((1, pts[-1], terr_R), (-1, pts[0], terr_L)):
-                    for dd in (4, 10, 22, 40, 70, 110, 170, 260):
+                    for dd in (3, 6, 10, 15, 21, 28, 36, 46, 58, 72, 90, 110, 135, 165, 200, 250, 310):
                         oo = o_end + side * dd; zt = dtm(x + nxd * oo, y + nyd * oo)
                         if np.ma.is_masked(zt) or zt is None: break
                         lst.append((oo, float(zt) - z0))
             full = list(reversed(terr_L)) + pts + terr_R
+            pt = None                                                           # portal tunela: visina terena iznad ulaza (poprečno), za čeoni zid
+            if G["kind"] == "tunel" and dtm is not None:
+                ik = [S["G"][j]["kind"] if 0 <= j < len(S["G"]) else "tunel" for j in (ii - 1, ii + 1)]
+                if ik[0] != "tunel" or ik[1] != "tunel":
+                    pt = []; offs = [-110, -80, -58, -42, -30, -22, -16, -12, -9, -7, -5.5, -4.5, -3.5, -2.5, -1.5, -.5]
+                    for oo in offs + [-v for v in reversed(offs)]:
+                        zt = dtm(x + nxd * oo, y + nyd * oo)
+                        if np.ma.is_masked(zt) or zt is None: pt = None; break
+                        pt.append([oo, round(float(zt) - z0, 2)])
             if G.get("gap"):
                 pvd = sorted([sorted((sg * a_, sg * b_)) for a_, b_ in G["pv"]]); med = (pvd[0][1], 0.0, pvd[1][0], 0.0)
             else: pvd = [[-G["e"], G["e"]]]
@@ -483,7 +492,7 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
             v_ = float(_interp_s(A, A["v"], sta, pp["o"])); g_ = float(_interp_s(A, A["g"], sta, pp["o"]))
             o_["q"].append(round(q, 2)); o_["s"].append(round(sta, 2)); o_["x"].append(round(x, 3)); o_["y"].append(round(y, 3)); o_["z"].append(round(z0, 3))
             o_["tx"].append(round(sg * math.sin(nu), 5)); o_["ty"].append(round(sg * math.cos(nu), 5)); o_["k"].append(round(kd, 6))
-            o_["el"].append(_elem_at(A_[nm_c], sta)); o_["kind"].append(G["kind"]); o_["jn"].append(0); o_["gr"].append(G["gr"]); o_["F"].append([[round(a_, 3), round(b_, 3)] for a_, b_ in full]); o_["e"].append(zones)
+            o_["el"].append(_elem_at(A_[nm_c], sta)); o_["kind"].append(G["kind"]); o_["jn"].append(0); o_["pt"].append(pt); o_["gr"].append(G["gr"]); o_["F"].append([[round(a_, 3), round(b_, 3)] for a_, b_ in full]); o_["e"].append(zones)
             bx = []
             for st_, a_, b_, h_, *pf in G["box"]:
                 lo, hi = sorted((sg * a_, sg * b_)); bx.append([st_, round(lo, 3), round(hi, 3), round(h_, 3)] + (list(pf) if pf else []))

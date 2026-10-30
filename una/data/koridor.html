@@ -44,7 +44,7 @@ const bs=(arr,v)=>{let lo=0,hi=arr.length-1;while(hi-lo>1){const m=(lo+hi)>>1;if
 function zp(F,o){const n=F.length;if(!n)return 0;if(o<=F[0][0])return F[0][1];if(o>=F[n-1][0])return F[n-1][1];let lo=0,hi=n-1;while(hi-lo>1){const m=(lo+hi)>>1;if(F[m][0]<=o)lo=m;else hi=m}const f=(o-F[lo][0])/((F[hi][0]-F[lo][0])||1);return F[lo][1]+(F[hi][1]-F[lo][1])*f}
 function setRoute(k){key=k;rtSel.value=k;SEC=[];const n=R_len(k);R=DATA.routes[k];
  for(let i=0;i<n;i++){const a=Math.max(0,i-1),b=Math.min(n-1,i+1);let tx=R.x[b]-R.x[a],ty=R.y[b]-R.y[a];const l=Math.hypot(tx,ty)||1;tx/=l;ty/=l;const e=R.e[i],F=R.F[i];
-  SEC.push({i,q:R.q[i],s:R.s[i],x:R.x[i],y:R.y[i],z:R.z[i],tx,ty,nx:ty,ny:-tx,F,E:e,kind:R.kind[i],jn:R.jn?R.jn[i]:0,gr:R.gr[i],ob:R.ob[i],box:R.box[i],ring:R.ring[i],v:R.v[i],g:R.g[i],k:R.k[i],el:R.el[i],D:R.D[i],Lz:R.Lz[i],ok:R.ok[i],ray:R.ray[i],lim:R.lim[i],hp:R.hp[i],ln:R.ln[i],ec:0,zl:0,lat:0})}
+  SEC.push({i,q:R.q[i],s:R.s[i],x:R.x[i],y:R.y[i],z:R.z[i],tx,ty,nx:ty,ny:-tx,F,E:e,kind:R.kind[i],jn:R.jn?R.jn[i]:0,pt:R.pt?R.pt[i]:null,gr:R.gr[i],ob:R.ob[i],box:R.box[i],ring:R.ring[i],v:R.v[i],g:R.g[i],k:R.k[i],el:R.el[i],D:R.D[i],Lz:R.Lz[i],ok:R.ok[i],ray:R.ray[i],lim:R.lim[i],hp:R.hp[i],ln:R.ln[i],ec:0,zl:0,lat:0})}
  for(let i=0;i<n;i++){let a=0,c=0;for(let j=Math.max(0,i-18);j<=Math.min(n-1,i+18);j++){a+=SEC[j].ln;c++}const w=(a/c+1)/2;SEC[i].ec=R.latL[i]+(R.latD[i]-R.latL[i])*w;SEC[i].zl=R.zeL[i]+(R.zeD[i]-R.zeL[i])*w}
  q=R.q[0];const sl=document.getElementById('sl');sl.max=R.q[n-1]-R.q[0];yawS=null;buildMini()}
 function R_len(k){return DATA.routes[k].q.length}
@@ -62,6 +62,18 @@ function mix(c1,c2,t){return `rgb(${(c1[0]+(c2[0]-c1[0])*t)|0},${(c1[1]+(c2[1]-c
 const C={sky1:[88,150,214],sky2:[200,224,244],road:[62,64,68],road2:[54,56,60],grass:[92,128,70],grass2:[84,118,64],rock:[128,116,102],shoulder:[112,110,104],conc:[178,178,172],concD:[140,140,136],rail:[196,200,204],tun:[104,106,110],tunC:[84,86,90],haze:[196,214,232],dark:[8,9,11],line:[240,240,240],yel:[255,214,80],med:[104,124,78]};
 const W=(s,o,dz)=>[s.x+s.nx*o,s.y+s.ny*o,s.z+dz];
 const hs=(n)=>{n=Math.sin(n*12.9898)*43758.5453;return n-Math.floor(n)};const sc=(c,f)=>[Math.min(255,c[0]*f),Math.min(255,c[1]*f),Math.min(255,c[2]*f)];
+function ringTop(R,x){let zt=null;for(let j=0;j<R.length-1;j++){const x1=R[j][0],x2=R[j+1][0];if((x-x1)*(x-x2)<=0&&x1!==x2){const z=R[j][1]+(R[j+1][1]-R[j][1])*(x-x1)/(x2-x1);if(zt===null||z>zt)zt=z}}return zt}
+const Wq=(s,o,dz,d)=>[s.x+s.nx*o-s.tx*d,s.y+s.ny*o-s.ty*d,s.z+dz];
+function portal(a,fog){const P=a.pt,R=a.ring,cz=2.4,TH=.9,BW=1.2;
+ for(let k=0;k<P.length-1;k++){const x1=P[k][0],x2=P[k+1][0],r1=ringTop(R,x1),r2=ringTop(R,x2),b1=r1===null?0:r1,b2=r2===null?0:r2;const t1=Math.max(b1+.6,P[k][1]),t2=Math.max(b2+.6,P[k+1][1]);
+  const nz=hs(k*3.7+Math.floor(a.q/11)),col=sc(C.rock,.85+.15*nz);poly([W(a,x1,b1),W(a,x1,t1),W(a,x2,t2),W(a,x2,b2)],fog(col))}
+ // okvir portala (debljina): čeona ploča oko otvora, unutrašnje i spoljašnje strane ispusta
+ const Q=R.map(p=>{const dx=p[0],dz=p[1]-cz,l=Math.hypot(dx,dz)||1;return [p[0]+dx/l*BW,p[1]+dz/l*BW]});
+ for(let j=0;j<R.length-1;j++){
+  poly([Wq(a,R[j][0],R[j][1],TH),Wq(a,R[j+1][0],R[j+1][1],TH),Wq(a,R[j+1][0],R[j+1][1],0),Wq(a,R[j][0],R[j][1],0)],fog([120,120,116]));        // unutrašnji ispust
+  poly([Wq(a,Q[j][0],Q[j][1],TH),Wq(a,Q[j+1][0],Q[j+1][1],TH),Wq(a,Q[j+1][0],Q[j+1][1],0),Wq(a,Q[j][0],Q[j][1],0)],fog([168,167,160]));        // gornja ploha ispusta
+  poly([Wq(a,R[j][0],R[j][1],TH),Wq(a,R[j+1][0],R[j+1][1],TH),Wq(a,Q[j+1][0],Q[j+1][1],TH),Wq(a,Q[j][0],Q[j][1],TH)],fog([196,195,188]))}       // čeona ploča
+}
 function strip(a,b,fa){
  const tun=a.kind==="tunel",fogT=1-Math.exp(-fa/420);const fog=(c)=>tun?mix(c,C.dark,Math.min(1,fa/110)):mix(c,C.haze,Math.min(.92,fogT*1.05));
  const ea=a.E,eb=b.E,e=ea.e;
@@ -74,9 +86,13 @@ function strip(a,b,fa){
   else if(a.kind==="most"){col=pave(om)?C.road:C.conc}
   else if(pave(om))col=C.road;else if(oth(om))col=C.road2;else if(med)col=C.med;
   else if(om>=ea.shL&&om<=ea.shR)col=C.shoulder;
-  else{const dz=(zp(a.F,o2)-zp(a.F,o1))/(o2-o1),sl=Math.min(1.4,Math.abs(dz)),nz=hs(Math.floor(a.q/4)*3.1+k*1.7),sh=1-Math.min(.32,sl*.22)+(dz>0?.05:-.03);
-   if(a.gr){const tw=mix(C.grass2,C.grass,nz);col=sc(C.grass,0);const g0=[C.grass2[0]+(C.grass[0]-C.grass2[0])*nz,C.grass2[1]+(C.grass[1]-C.grass2[1])*nz,C.grass2[2]+(C.grass[2]-C.grass2[2])*nz];col=sc(g0,sh*(.9+.18*hs(Math.floor(a.q/9)+k)))}
-   else{const band=Math.floor((a.z+zp(a.F,om))*1.4)&1,cr=hs(Math.floor(a.q/3)+k*5.3);col=sc(C.rock,sh*(band?.82:1.04)*(.93+.14*cr))}}
+  else{const dz=(zp(a.F,o2)-zp(a.F,o1))/(o2-o1),sl=Math.min(1.6,Math.abs(dz)),lon=(zp(b.F,om)-zp(a.F,om))/Math.max(.5,b.q-a.q),
+    sm=(x0,x1,v)=>{const u=Math.min(1,Math.max(0,(v-x0)/(x1-x0)));return u*u*(3-2*u)},hgt=a.z+zp(a.F,om),
+    cn=hs(Math.floor(a.q/7)*2.3+Math.floor(om/9)*5.1),cn2=hs(Math.floor(a.q/19)*1.7+Math.floor(om/23)*3.3),
+    lit=.80+.20*Math.max(-1,Math.min(1,(dz>0?.55:-.35)-lon*1.4)),rf=sm(.5,.95,sl+(a.gr?-.18:0)+(cn-.5)*.22);
+   const gcol=[C.grass2[0]+(C.grass[0]-C.grass2[0])*cn2,C.grass2[1]+(C.grass[1]-C.grass2[1])*cn2,C.grass2[2]+(C.grass[2]-C.grass2[2])*cn2];
+   const strata=(Math.floor(hgt*1.1)&1)?.9:1.04,rcol=[C.rock[0]*strata*(.94+.1*cn),C.rock[1]*strata*(.94+.1*cn),C.rock[2]*strata*(.94+.1*cn)];
+   const dry=sm(60,260,om<0?-om:om)*.35;col=sc([gcol[0]+(rcol[0]-gcol[0])*Math.max(rf,dry*.5),gcol[1]+(rcol[1]-gcol[1])*Math.max(rf,dry*.5),gcol[2]+(rcol[2]-gcol[2])*Math.max(rf,dry*.5)],lit*(1-Math.min(.2,sl*.1)))}
   poly([W(a,o1,zp(a.F,o1)),W(a,o2,zp(a.F,o2)),W(b,o2,zp(b.F,o2)),W(b,o1,zp(b.F,o1))],fog(col))}
  // kolotrazi (blago potamnjenje po trakama)
  if(a.kind!=="tunel"||true){const LC=[];for(const r of PVL){const nl=Math.max(1,Math.round((r[1]-r[0])/3.85));for(let j=0;j<nl;j++)LC.push(r[0]+(j+.5)*(r[1]-r[0])/nl)}for(const c0 of LC)for(const w of [-.9,.9]){const o=c0+w;poly([W(a,o-.35,zp(a.F,o-.35)+.006),W(a,o+.35,zp(a.F,o+.35)+.006),W(b,o+.35,zp(b.F,o+.35)+.006),W(b,o-.35,zp(b.F,o-.35)+.006)],fog(C.road2),.45)}}
@@ -97,6 +113,7 @@ function strip(a,b,fa){
    for(let m=0;m<NJ.length-1;m++){const p0=NJ[m],p1=NJ[m+1];poly([W(a,inn+dr*p0[0],za+p0[1]*sa),W(a,inn+dr*p1[0],za+p1[1]*sa),W(b,inb+drb*p1[0],zb+p1[1]*sb),W(b,inb+drb*p0[0],zb+p0[1]*sb)],fog(cl[m]))}
    const kq=Math.ceil(a.q/6)*6;if(kq<b.q){const f=(kq-a.q)/((b.q-a.q)||1),o=inn+(inb-inn)*f,z=za+(zb-za)*f,px=a.x+(b.x-a.x)*f+(a.nx+(b.nx-a.nx)*f)*o,py=a.y+(b.y-a.y)*f+(a.ny+(b.ny-a.ny)*f)*o,pz=a.z+(b.z-a.z)*f+z;const s1=proj([px,py,pz+.02]),s2=proj([px,py,pz+.8*sa]);if(s1&&s2){cx.strokeStyle=fog([120,119,114]);cx.lineWidth=Math.max(1,foc*.012/s1[2]);cx.beginPath();cx.moveTo(s1[0],s1[1]);cx.lineTo(s2[0],s2[1]);cx.stroke()}}}
   else{poly([W(a,inn,za),W(a,inn,ta),W(b,inb,tb),W(b,inb,zb)],fog(col));poly([W(a,inn,ta),W(a,ouA,ta),W(b,ouB,tb),W(b,inb,tb)],fog([col[0]*.88,col[1]*.88,col[2]*.88]))}}
+ if(a.pt&&a.ring.length>3){portal(a,fog)}
  if(tun&&a.ring.length&&a.ring.length===b.ring.length){const A=a.ring,B=b.ring;for(let j=0;j<A.length-1;j++){const sh=(j<4||j>A.length-5)?C.tun:C.tunC;poly([W(a,A[j][0],A[j][1]),W(a,A[j+1][0],A[j+1][1]),W(b,B[j+1][0],B[j+1][1]),W(b,B[j][0],B[j][1])],fog(sh))}
   const kq=Math.ceil(a.q/12)*12;if(kq<b.q){const pm=smp(kq),mid=A[(A.length>>1)];const s1=proj([pm.x+pm.ty*0,pm.y,pm.z+mid[1]+(a.z-pm.z)]);if(s1){const gl=mix([255,244,200],C.dark,Math.min(1,fa/280));cx.fillStyle=gl;const w=Math.max(2,foc*2.2/s1[2]);cx.fillRect(s1[0]-w/2,s1[1]-w*.1,w,w*.2)}}}
  const PVx=a.E.pv||[[-a.E.e,a.E.e]],gh=PVx.length>1?Math.abs(PVx[1][0]):0;const rails=[];
