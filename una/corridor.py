@@ -303,6 +303,9 @@ def section_geom(secs, rail_off=0.78, add_rails=True, central=False):
             pts = [(p[0], p[1]) for n, _, pp in secs if n == "Vijenac" for p in pp if p[0] * sd > e + 0.05]
             if len(pts) >= 3:
                 xs = [abs(x) for x, _ in pts]; G["box"].append([ST["parapet"], sd * min(xs), sd * max(xs), max(z for _, z in pts)])
+        if central and gap:                                          # betonska ograda u sredini mosta (jedna konstrukcija)
+            bo = [(p[0], p[1]) for n, _, pp in secs if n == "Betonska_ograda" for p in pp]
+            if len(bo) >= 3: G["box"].append([ST["medblok"], min(x for x, _ in bo), max(x for x, _ in bo), max(z for _, z in bo)])
     elif kind == "tunel":
         G["ring"] = [(round(x, 3), round(z, 3)) for x, z in _ring(secs)]
         for sd in (-1, 1):
@@ -320,7 +323,7 @@ def _zi(top, o):
 
 
 # stilovi (indeksi se koriste u JavaScript-u)
-ST = dict(road=0, ground=1, curb=2, parapet=3, lining=4, walk=5, rail=6, median=7, terrain=8, deck=9)
+ST = dict(medblok=10, road=0, ground=1, curb=2, parapet=3, lining=4, walk=5, rail=6, median=7, terrain=8, deck=9)
 
 
 # ----------------------------------------------------------------------------------------------- scena za HTML
@@ -361,12 +364,21 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
         secs_by[nm] = dict(sta=sta, N=N, E=E, nu=nu, z0=A_[nm].z(sta), G=[section_geom(ss, 0.78, False, "CENTR" in nm.upper()) for _, ss in keep], k=A_[nm].curvature(sta))
     trees = {nm: _NN(np.c_[v["E"], v["N"]]) for nm, v in secs_by.items()}
     h_oka = float(par["h_oka"]); scene = dict(routes={}, h=h_oka, range=[s_from, s_to], projekat=cfg.get("projekat", ""), h_pr=float(par["h_prepreke"]), h_auto=bool(par.get("h_auto")))
+    ug_c = 0.0
+    for sec_ in cfg.get("sekcije", []):
+        sp_ = sec_.get("centralna")
+        if isinstance(sp_, dict):
+            try: ug_c = float(sp_.get("razdjelni_pola") or sec_.get("razdjelni_pola") or 0)
+            except (TypeError, ValueError): pass
     sw = float(secs_by[cen]["sta"][0]) if (cen and len(secs_by[cen]["sta"])) else None            # st. na kojoj se razdvojene osovine nastavljaju centralnom
     for tag, nm, other, sg in plan:
         S = secs_by[nm]; n = len(S["sta"])
         ia = [(nm, int(i)) for i in range(n) if sw is None or S["sta"][i] < sw - 1e-6]
         if sw is not None: ic = [(cen, int(i)) for i in range(len(secs_by[cen]["sta"]))]
         else: ic = []
+        if sw is not None:                                            # prekid par metara prije kraja razdvojenih osovina i poslije početka centralne
+            gp = float(cfg.get("koridor", {}).get("prekid", 8.0)) if isinstance(cfg.get("koridor"), dict) else 8.0
+            ia = [t for t in ia if S["sta"][t[1]] < sw - gp]; ic = [t for t in ic if secs_by[cen]["sta"][t[1]] > sw + gp]
         order = (ia + ic) if sg > 0 else (ic[::-1] + ia[::-1])
         prep = {}
         for sd in ("D", "L"):
@@ -378,9 +390,11 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
         PD = prep.get("D") or prep["L"]
         q = 0.0; prev = None
         o_ = dict(naziv=_TF("{0} – {1}", (nm + " + " + cen) if (cen and sw is not None) else nm, _T("smjer stacionaže") if sg > 0 else _T("suprotno stacionaži")), q=[], s=[], x=[], y=[], z=[], tx=[], ty=[], k=[], el=[], v=[], g=[], D=[], Lz=[], ok=[],
-                  kind=[], gr=[], F=[], e=[], box=[], ring=[], ln=[], latD=[], latL=[], zeD=[], zeL=[], ob=[], ray=[], lim=[], hp=[])
-        z0cs = []
+                  kind=[], jn=[], gr=[], F=[], e=[], box=[], ring=[], ln=[], latD=[], latL=[], zeD=[], zeL=[], ob=[], ray=[], lim=[], hp=[])
+        z0cs = []; prev_nm = None
         for nm_s, ii in order:
+            if prev_nm is not None and nm_s != prev_nm and o_["jn"]: o_["jn"][-1] = 1             # spoj dvije osovine: ne crta se kolovoz preko prekida
+            prev_nm = nm_s
             S = secs_by[nm_s]; nm_c = nm_s; oth_a = None if nm_s == cen else other
             sta = float(S["sta"][ii]); x, y = float(S["E"][ii]), float(S["N"][ii])
             if prev is not None: q += math.hypot(x - prev[0], y - prev[1])
@@ -425,7 +439,7 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
             if G.get("gap"):
                 pvd = sorted([sorted((sg * a_, sg * b_)) for a_, b_ in G["pv"]]); med = (pvd[0][1], 0.0, pvd[1][0], 0.0)
             else: pvd = [[-G["e"], G["e"]]]
-            zones = dict(pv=[[round(a_, 3), round(b_, 3)] for a_, b_ in pvd], e=round(G["e"], 3), shL=round(sg * (G["shL"] if sg > 0 else G["shR"]), 3), shR=round(sg * (G["shR"] if sg > 0 else G["shL"]), 3),
+            zones = dict(ug=ug_c if (G.get("gap") and ug_c) else 0, pv=[[round(a_, 3), round(b_, 3)] for a_, b_ in pvd], e=round(G["e"], 3), shL=round(sg * (G["shL"] if sg > 0 else G["shR"]), 3), shR=round(sg * (G["shR"] if sg > 0 else G["shL"]), 3),
                          oe=round(oth_e[0], 3) if (oth_top and oth_e) else 0, ot=round(sg * oth_e[1], 3) if (oth_top and oth_e) else 0, med=[round(v, 3) for v in med] if med else None)
             # --- prepreke iz UNA proračuna (bočni ofset u okviru vožnje)
             ob = []
@@ -462,7 +476,7 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
             v_ = float(_interp_s(A, A["v"], sta, pp["o"])); g_ = float(_interp_s(A, A["g"], sta, pp["o"]))
             o_["q"].append(round(q, 2)); o_["s"].append(round(sta, 2)); o_["x"].append(round(x, 3)); o_["y"].append(round(y, 3)); o_["z"].append(round(z0, 3))
             o_["tx"].append(round(sg * math.sin(nu), 5)); o_["ty"].append(round(sg * math.cos(nu), 5)); o_["k"].append(round(kd, 6))
-            o_["el"].append(_elem_at(A_[nm_c], sta)); o_["kind"].append(G["kind"]); o_["gr"].append(G["gr"]); o_["F"].append([[round(a_, 3), round(b_, 3)] for a_, b_ in full]); o_["e"].append(zones)
+            o_["el"].append(_elem_at(A_[nm_c], sta)); o_["kind"].append(G["kind"]); o_["jn"].append(0); o_["gr"].append(G["gr"]); o_["F"].append([[round(a_, 3), round(b_, 3)] for a_, b_ in full]); o_["e"].append(zones)
             bx = []
             for st_, a_, b_, h_ in G["box"]:
                 lo, hi = sorted((sg * a_, sg * b_)); bx.append([st_, round(lo, 3), round(hi, 3), round(h_, 3)])

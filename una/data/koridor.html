@@ -44,7 +44,7 @@ const bs=(arr,v)=>{let lo=0,hi=arr.length-1;while(hi-lo>1){const m=(lo+hi)>>1;if
 function zp(F,o){const n=F.length;if(!n)return 0;if(o<=F[0][0])return F[0][1];if(o>=F[n-1][0])return F[n-1][1];let lo=0,hi=n-1;while(hi-lo>1){const m=(lo+hi)>>1;if(F[m][0]<=o)lo=m;else hi=m}const f=(o-F[lo][0])/((F[hi][0]-F[lo][0])||1);return F[lo][1]+(F[hi][1]-F[lo][1])*f}
 function setRoute(k){key=k;rtSel.value=k;SEC=[];const n=R_len(k);R=DATA.routes[k];
  for(let i=0;i<n;i++){const a=Math.max(0,i-1),b=Math.min(n-1,i+1);let tx=R.x[b]-R.x[a],ty=R.y[b]-R.y[a];const l=Math.hypot(tx,ty)||1;tx/=l;ty/=l;const e=R.e[i],F=R.F[i];
-  SEC.push({i,q:R.q[i],s:R.s[i],x:R.x[i],y:R.y[i],z:R.z[i],tx,ty,nx:ty,ny:-tx,F,E:e,kind:R.kind[i],gr:R.gr[i],ob:R.ob[i],box:R.box[i],ring:R.ring[i],v:R.v[i],g:R.g[i],k:R.k[i],el:R.el[i],D:R.D[i],Lz:R.Lz[i],ok:R.ok[i],ray:R.ray[i],lim:R.lim[i],hp:R.hp[i],ln:R.ln[i],ec:0,zl:0,lat:0})}
+  SEC.push({i,q:R.q[i],s:R.s[i],x:R.x[i],y:R.y[i],z:R.z[i],tx,ty,nx:ty,ny:-tx,F,E:e,kind:R.kind[i],jn:R.jn?R.jn[i]:0,gr:R.gr[i],ob:R.ob[i],box:R.box[i],ring:R.ring[i],v:R.v[i],g:R.g[i],k:R.k[i],el:R.el[i],D:R.D[i],Lz:R.Lz[i],ok:R.ok[i],ray:R.ray[i],lim:R.lim[i],hp:R.hp[i],ln:R.ln[i],ec:0,zl:0,lat:0})}
  for(let i=0;i<n;i++){let a=0,c=0;for(let j=Math.max(0,i-18);j<=Math.min(n-1,i+18);j++){a+=SEC[j].ln;c++}const w=(a/c+1)/2;SEC[i].ec=R.latL[i]+(R.latD[i]-R.latL[i])*w;SEC[i].zl=R.zeL[i]+(R.zeD[i]-R.zeL[i])*w}
  q=R.q[0];const sl=document.getElementById('sl');sl.max=R.q[n-1]-R.q[0];yawS=null;buildMini()}
 function R_len(k){return DATA.routes[k].q.length}
@@ -85,7 +85,7 @@ function strip(a,b,fa){
  for(const r of PV){ln(r[0]+.15,.15,C.line);ln(r[1]-.15,.15,C.line);const nl=Math.max(1,Math.round((r[1]-r[0])/3.85));if(dash)for(let j=1;j<nl;j++)ln(r[0]+j*(r[1]-r[0])/nl,.14,C.line)};
  if(ea.oe>0&&a.kind==="otvorena"){const c=ea.ot,w=ea.oe;ln(c-(w-.15),.15,C.line);ln(c+(w-.15),.15,C.line);if(dash)ln(c,.14,C.line)}
  // ograde, parapeti, svod
- for(let i=0;i<a.box.length;i++){const A=a.box[i],B=b.box[i];if(!B||A[0]!==B[0])continue;const inn=Math.abs(A[1])<Math.abs(A[2])?A[1]:A[2],inb=Math.abs(B[1])<Math.abs(B[2])?B[1]:B[2],ouA=inn===A[1]?A[2]:A[1],ouB=inb===B[1]?B[2]:B[1];
+ for(let i=0;i<a.box.length;i++){const A=a.box[i],B=b.box[i];if(!B||A[0]!==B[0])continue;if(A[0]===10){const cc=[196,195,188];for(const [xa_,xb_] of [[A[1],B[1]],[A[2],B[2]]]){const za_=zp(a.F,xa_),zb_=zp(b.F,xb_);poly([W(a,xa_,za_),W(a,xa_,A[3]),W(b,xb_,B[3]),W(b,xb_,zb_)],fog(cc))}poly([W(a,A[1],A[3]),W(a,A[2],A[3]),W(b,B[2],B[3]),W(b,B[1],B[3])],fog([222,221,214]));continue}const inn=Math.abs(A[1])<Math.abs(A[2])?A[1]:A[2],inb=Math.abs(B[1])<Math.abs(B[2])?B[1]:B[2],ouA=inn===A[1]?A[2]:A[1],ouB=inb===B[1]?B[2]:B[1];
   const za=zp(a.F,inn),zb=zp(b.F,inb),ta=A[3],tb=B[3],col=A[0]===3?C.conc:[165,165,160];
   if(A[0]===3){const dr=inn>=0?1:-1,drb=inb>=0?1:-1,hA=Math.max(.5,ta-za),hB=Math.max(.5,tb-zb),sa=hA/.81,sb=hB/.81;
    const NJ=[[0,0],[0,.08],[.18,.33],[.26,.81],[.41,.81]],cl=[[196,195,188],[170,169,163],[208,207,200],[222,221,214]];
@@ -94,14 +94,17 @@ function strip(a,b,fa){
   else{poly([W(a,inn,za),W(a,inn,ta),W(b,inb,tb),W(b,inb,zb)],fog(col));poly([W(a,inn,ta),W(a,ouA,ta),W(b,ouB,tb),W(b,inb,tb)],fog([col[0]*.88,col[1]*.88,col[2]*.88]))}}
  if(tun&&a.ring.length&&a.ring.length===b.ring.length){const A=a.ring,B=b.ring;for(let j=0;j<A.length-1;j++){const sh=(j<4||j>A.length-5)?C.tun:C.tunC;poly([W(a,A[j][0],A[j][1]),W(a,A[j+1][0],A[j+1][1]),W(b,B[j+1][0],B[j+1][1]),W(b,B[j][0],B[j][1])],fog(sh))}
   const kq=Math.ceil(a.q/12)*12;if(kq<b.q){const pm=smp(kq),mid=A[(A.length>>1)];const s1=proj([pm.x+pm.ty*0,pm.y,pm.z+mid[1]+(a.z-pm.z)]);if(s1){const gl=mix([255,244,200],C.dark,Math.min(1,fa/280));cx.fillStyle=gl;const w=Math.max(2,foc*2.2/s1[2]);cx.fillRect(s1[0]-w/2,s1[1]-w*.1,w,w*.2)}}}
- for(let i=0;i<2;i++){const oa=a.ob[i],ob=b.ob[i];if(oa==null||ob==null)continue;const za=zp(a.F,oa),zb=zp(b.F,ob);
-  if(a.kind==="otvorena"){const out=oa>=0?1:-1,fogr=(c)=>fog(c);
+ const PVx=a.E.pv||[[-a.E.e,a.E.e]],gh=PVx.length>1?Math.abs(PVx[1][0]):0;const rails=[];
+ for(let i=0;i<2;i++){const oa=a.ob[i],ob=b.ob[i];if(oa==null||ob==null)continue;const med=gh>0&&Math.abs(oa)<gh-.05;rails.push([oa,ob,med?(oa>=0?-1:1):(oa>=a.ec?1:-1)]);
+  if(med&&a.kind==="otvorena")rails.push([-oa,-ob,oa>=0?1:-1])}                       // razdjelni pojas: čelična ograda uz svaki kolovoz, stubovi sa strane razdjelnog pojasa (iza plašta)
+ for(const [oa,ob,out] of rails){const za=zp(a.F,oa),zb=zp(b.F,ob),fogr=(c)=>fog(c);
+  if(a.kind==="otvorena"){
    poly([W(a,oa+out*.30,za+.02),W(a,oa+out*.55,za+.02),W(b,ob+out*.55,zb+.02),W(b,ob+out*.30,zb+.02)],fog([40,50,35]),.28);
+   const kq=Math.ceil(a.q/4)*4;if(kq<b.q){const f=(kq-a.q)/((b.q-a.q)||1),o=oa+(ob-oa)*f,z=za+(zb-za)*f;const px=a.x+(b.x-a.x)*f+(a.nx+(b.nx-a.nx)*f)*(o+out*.16),py=a.y+(b.y-a.y)*f+(a.ny+(b.ny-a.ny)*f)*(o+out*.16),pz=a.z+(b.z-a.z)*f+z;const s1=proj([px,py,pz]),s2=proj([px,py,pz+.77]);if(s1&&s2){cx.strokeStyle=fogr([88,92,98]);cx.lineWidth=Math.max(1.5,foc*0.16/s1[2]);cx.beginPath();cx.moveTo(s1[0],s1[1]);cx.lineTo(s2[0],s2[1]);cx.stroke()}}
    const band=(z0,z1,c)=>poly([W(a,oa,za+z0),W(a,oa,za+z1),W(b,ob,zb+z1),W(b,ob,zb+z0)],fogr(c));
    band(.64,.77,[226,229,232]);band(.55,.64,[150,155,162]);band(.46,.55,[196,200,205]);band(.43,.46,[110,114,120]);
-   poly([W(a,oa,za+.77),W(a,oa+out*.04,za+.77),W(b,ob+out*.04,zb+.77),W(b,ob,zb+.77)],fogr([240,242,244]));
-   const kq=Math.ceil(a.q/4)*4;if(kq<b.q){const f=(kq-a.q)/((b.q-a.q)||1),o=oa+(ob-oa)*f,z=za+(zb-za)*f;const px=a.x+(b.x-a.x)*f+(a.nx+(b.nx-a.nx)*f)*(o+out*.08),py=a.y+(b.y-a.y)*f+(a.ny+(b.ny-a.ny)*f)*(o+out*.08),pz=a.z+(b.z-a.z)*f+z;const s1=proj([px,py,pz]),s2=proj([px,py,pz+.77]);if(s1&&s2){cx.strokeStyle=fogr([88,92,98]);cx.lineWidth=Math.max(1.5,foc*0.16/s1[2]);cx.beginPath();cx.moveTo(s1[0],s1[1]);cx.lineTo(s2[0],s2[1]);cx.stroke();const rf=proj([px-a.ty*0,py,pz+.7]);if(rf){cx.fillStyle=fogr([255,170,40]);const r=Math.max(1,foc*.05/s1[2]);cx.fillRect(s2[0]-r,s2[1]-r*.6,r*2,r*1.2)}}}}
-  else{poly([W(a,oa,za),W(a,oa,za+.25),W(b,ob,zb+.25),W(b,ob,zb)],fog([255,120,60]),.22)}}
+   poly([W(a,oa,za+.77),W(a,oa+out*.04,za+.77),W(b,ob+out*.04,zb+.77),W(b,ob,zb+.77)],fogr([240,242,244]))}
+  else if(oa===rails[0][0]||true){if(Math.abs(oa)>=gh||gh===0)poly([W(a,oa,za),W(a,oa,za+.25),W(b,ob,zb+.25),W(b,ob,zb)],fog([255,120,60]),.22)}}
 }
 function lineRay(P0,P1,colL,wpx){const N=60,pts=[];for(let k=0;k<=N;k++){const f=k/N,P=[P0[0]+(P1[0]-P0[0])*f,P0[1]+(P1[1]-P0[1])*f,P0[2]+(P1[2]-P0[2])*f];const s=proj(P);if(s)pts.push(s)}
  if(pts.length>1){cx.lineCap="round";cx.lineJoin="round";for(const [c,w] of [["rgba(0,0,0,.55)",wpx+4],[colL,wpx]]){cx.strokeStyle=c;cx.lineWidth=w;cx.beginPath();pts.forEach((s,i)=>i?cx.lineTo(s[0],s[1]):cx.moveTo(s[0],s[1]));cx.stroke()}}}
@@ -126,14 +129,14 @@ function frame(){
   const hz=cx.createLinearGradient(0,hy-Hd*.09,0,hy+Hd*.03);hz.addColorStop(0,"rgba(214,230,243,0)");hz.addColorStop(.7,"rgba(214,230,243,.75)");hz.addColorStop(1,"rgba(214,230,243,.3)");cx.fillStyle=hz;cx.fillRect(0,hy-Hd*.09,Wd,Hd*.12)}
  const n=SEC.length,qend=SEC[n-1].q-1e-3,maxd=tun?280:620;let i0=bs(R.q,q+1.5);const idx=[i0];let j=i0;
  while(j<n-1){const d=SEC[j].q-q;const st=d<40?1:d<120?2:d<300?4:8;j=Math.min(n-1,j+st);idx.push(j);if(SEC[j].q-q>maxd)break}
- for(let k=idx.length-2;k>=0;k--)strip(SEC[idx[k]],SEC[idx[k+1]],SEC[idx[k]].q-q);
+ for(let k=idx.length-2;k>=0;k--)if(!SEC[idx[k]].jn)strip(SEC[idx[k]],SEC[idx[k+1]],SEC[idx[k]].q-q);
  const Lz=e.Lz,Dv=Math.min(e.D,900),bad=e.ok!==0&&Dv<Lz;
  rays(e.sec,bad);
   {const vg=cx.createRadialGradient(Wd/2,Hd*.5,Math.min(Wd,Hd)*.45,Wd/2,Hd*.5,Math.max(Wd,Hd)*.75);vg.addColorStop(0,"rgba(0,0,0,0)");vg.addColorStop(1,tun?"rgba(0,0,0,.35)":"rgba(10,20,35,.28)");cx.fillStyle=vg;cx.fillRect(0,0,Wd,Hd)}
  const hg=cx.createLinearGradient(0,Hd*.92,0,Hd);hg.addColorStop(0,"rgba(0,0,0,0)");hg.addColorStop(1,"rgba(0,0,0,.85)");cx.fillStyle=hg;cx.fillRect(0,Hd*.9,Wd,Hd*.1);
  hud(e,bad,Lz,Dv);chart();mini(e)}
 function fmtSta(s){const k=Math.floor(s/1000),m=s-k*1000;return 'km '+k+'+'+m.toFixed(2).padStart(6,'0')}
-function obTxt(a,t){const v=a.ob.filter(x=>x!=null);if(!v.length)return t.nop;const PV=a.E.pv||[[-a.E.e,a.E.e]],dd=x=>Math.min(...PV.map(r=>x<r[0]?r[0]-x:(x>r[1]?x-r[1]:0)));return v.map(x=>dd(x).toFixed(2)+' m').join(' / ')}
+function obTxt(a,t){const v=a.ob.filter(x=>x!=null);if(!v.length)return t.nop;const PV=a.E.pv||[[-a.E.e,a.E.e]],ug=a.E.ug||0,dd=x=>(ug&&Math.abs(x)<ug)?ug-Math.abs(x):Math.min(...PV.map(r=>x<r[0]?r[0]-x:(x>r[1]?x-r[1]:0)));return v.map(x=>dd(x).toFixed(2)+' m').join(' / ')}
 function hud(e,bad,Lz,Dv){const t=T(),id=x=>document.getElementById(x),a=e.sec;id('t_proj').textContent=(DATA.projekat||'')+' · '+t.title;id('v').textContent=e.v.toFixed(0);
  const k=Math.abs(e.k),Rr=k>1/9000?1/k:0,dir=e.k>0?t.right:t.left;
  let csl=(zp(a.F,a.E.e)-zp(a.F,0))/(a.E.e||1)*100;if(a.E.pv&&a.E.pv.length>1){const r=a.E.pv.reduce((u,w)=>Math.abs((u[0]+u[1])/2-a.ec)<Math.abs((w[0]+w[1])/2-a.ec)?u:w),wd=(r[1]-r[0])||1;csl=((r[0]+r[1])/2>=0?zp(a.F,r[1])-zp(a.F,r[0]):zp(a.F,r[0])-zp(a.F,r[1]))/wd*100}
