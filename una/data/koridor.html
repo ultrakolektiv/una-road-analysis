@@ -57,7 +57,10 @@ function setCam(){const e=smp(q),a=smp(q+18),b=smp(q+45);const ez=e.z+eyeH;const
  CAM={ex:e.x,ey:e.y,ez:ez,cy:Math.cos(yawS),sy:Math.sin(yawS),cp:Math.cos(pitS),sp:Math.sin(pitS),e}}
 let Wd=0,Hd=0,foc=1,hx=0,hy=0;
 function proj(P){const dx=P[0]-CAM.ex,dy=P[1]-CAM.ey,dz=P[2]-CAM.ez;const f=dx*CAM.cy+dy*CAM.sy,r=dx*CAM.sy-dy*CAM.cy;const f2=f*CAM.cp+dz*CAM.sp,u2=dz*CAM.cp-f*CAM.sp;if(f2<0.35)return null;return [hx+foc*r/f2,hy-foc*u2/f2,f2]}
-function poly(pts,col,alpha){const o=[];for(const P of pts){const s=proj(P);if(!s)return;o.push(s)}cx.beginPath();cx.moveTo(o[0][0],o[0][1]);for(let i=1;i<o.length;i++)cx.lineTo(o[i][0],o[i][1]);cx.closePath();if(alpha!=null)cx.globalAlpha=alpha;cx.fillStyle=col;cx.fill();cx.strokeStyle=col;cx.lineWidth=.6;cx.stroke();if(alpha!=null)cx.globalAlpha=1}
+function clipN(pts){const NEAR=.35,c=pts.map(P=>{const dx=P[0]-CAM.ex,dy=P[1]-CAM.ey,dz=P[2]-CAM.ez;const f=dx*CAM.cy+dy*CAM.sy,r=dx*CAM.sy-dy*CAM.cy;return [r,f*CAM.cp+dz*CAM.sp,dz*CAM.cp-f*CAM.sp]});
+ const o=[];for(let i=0;i<c.length;i++){const A=c[i],B=c[(i+1)%c.length],ia=A[1]>=NEAR,ib=B[1]>=NEAR;if(ia)o.push(A);if(ia!==ib){const u=(NEAR-A[1])/(B[1]-A[1]);o.push([A[0]+(B[0]-A[0])*u,NEAR,A[2]+(B[2]-A[2])*u])}}
+ return o.map(p=>[hx+foc*p[0]/p[1],hy-foc*p[2]/p[1],p[1]])}
+function poly(pts,col,alpha){const o=clipN(pts);if(o.length<3)return;cx.beginPath();cx.moveTo(o[0][0],o[0][1]);for(let i=1;i<o.length;i++)cx.lineTo(o[i][0],o[i][1]);cx.closePath();if(alpha!=null)cx.globalAlpha=alpha;cx.fillStyle=col;cx.fill();cx.strokeStyle=col;cx.lineWidth=.6;cx.stroke();if(alpha!=null)cx.globalAlpha=1}
 function mix(c1,c2,t){return `rgb(${(c1[0]+(c2[0]-c1[0])*t)|0},${(c1[1]+(c2[1]-c1[1])*t)|0},${(c1[2]+(c2[2]-c1[2])*t)|0})`}
 const C={sky1:[88,150,214],sky2:[200,224,244],road:[62,64,68],road2:[54,56,60],grass:[92,128,70],grass2:[84,118,64],rock:[128,116,102],shoulder:[112,110,104],conc:[178,178,172],concD:[140,140,136],rail:[196,200,204],tun:[104,106,110],tunC:[84,86,90],haze:[196,214,232],dark:[8,9,11],line:[240,240,240],yel:[255,214,80],med:[104,124,78]};
 const W=(s,o,dz)=>[s.x+s.nx*o,s.y+s.ny*o,s.z+dz];
@@ -144,7 +147,7 @@ function frame(){
  Wd=cv.width;Hd=cv.height;foc=Wd/(2*Math.tan(35*Math.PI/180));hx=Wd/2;hy=Hd*0.47;
  setCam();const e=CAM.e,tun=e.sec.kind==="tunel";
  const g=cx.createLinearGradient(0,0,0,hy);if(tun){g.addColorStop(0,"#0a0b0d");g.addColorStop(1,"#14161a")}else{g.addColorStop(0,"#2f6fb8");g.addColorStop(.55,"#6ea6dc");g.addColorStop(.88,"#cfe3f3");g.addColorStop(1,"#eaf2f8")}
- cx.fillStyle=g;cx.fillRect(0,0,Wd,Hd);cx.fillStyle=tun?"#0a0b0d":mix(C.grass,C.haze,.8);cx.fillRect(0,hy,Wd,Hd-hy);
+ cx.fillStyle=g;cx.fillRect(0,0,Wd,Hd);cx.fillStyle=tun?"#0a0b0d":mix(C.grass,C.rock,.25);cx.fillRect(0,hy,Wd,Hd-hy);
  if(!tun){const az=x=>yawS+Math.atan((x-hx)/foc),sunAz=0.55,sx=hx+foc*Math.tan(sunAz-yawS>Math.PI?sunAz-yawS-2*Math.PI:sunAz-yawS);
   if(Math.abs(sunAz-yawS)<1.2){const sg=cx.createRadialGradient(sx,hy*.45,4,sx,hy*.45,Wd*.35);sg.addColorStop(0,"rgba(255,246,214,.95)");sg.addColorStop(.12,"rgba(255,238,190,.5)");sg.addColorStop(1,"rgba(255,238,190,0)");cx.fillStyle=sg;cx.fillRect(0,0,Wd,hy)}
   for(let L=0;L<3;L++){const amp=Hd*(.055+.03*L),base=hy-Hd*(.004+.0*L),f1=1.7+L*.9,f2=4.1+L*1.7,off=L*2.3;cx.beginPath();cx.moveTo(0,hy);for(let x=0;x<=Wd;x+=8){const A=az(x);const y=base-amp*(.55+.3*Math.sin(A*f1+off)+.15*Math.sin(A*f2+off*1.7))*(.7+.3*Math.sin(A*.6+L));cx.lineTo(x,y)}cx.lineTo(Wd,hy);cx.closePath();cx.fillStyle=mix([70,96,120],C.haze,.45+.17*(2-L)*(.5));cx.globalAlpha=.9;cx.fill();cx.globalAlpha=1}
