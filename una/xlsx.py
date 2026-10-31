@@ -64,11 +64,12 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
             ("g", P.g, "m/s²", ""), ("Gustina zraka ρ", P.rho, "kg/m³", ""), (_T('Specifična potrošnja goriva b'), P.b, "l/kWh", "pretpostavka"),
             (_T('Potrošnja u praznom hodu'), P.prazan_hod, "l/h", "pretpostavka"),
             (_T('Ulazna brzina putničkog na ulazu u lanac'), P.ulazna_brzina, "km/h", "slobodan tok"),
-            (_T('SCENARIJ: 1 = geometrija, 2 = sa ograničenjima (tabela dolje)'), 1, "–", ""),
-            ("f_rl0 (otpor kotrljanja)", P.frl0, "–", "f_rl = f_rl0·(1+V/44,73)"), (_T('Brzinski parametar f_rl'), P.frl_v, "m/s", "")]
+            (_T('Gornja granica Vp,R (najveći max Vr po zonama)'), None, "km/h", _T('računa se iz zona Vr (tabela dolje)')),
+            ("f_rl0 (otpor kotrljanja)", P.frl0, "–", "f_rl = f_rl0·(1+V/44,73)"), (_T('Brzinski parametar f_rl'), P.frl_v, "m/s", ""),
+            (_T('Dodatak max Vr = Vr + dodatak'), P.dodatak_maxVr, "km/h", "Prilog 2"), (_T('max Vr prema tabeli 3-04 (999 = bez ograničenja)'), float(P.maxVr_tab) if P.maxVr_tab not in (None, "", 0) else 999.0, "km/h", "Prilog 2")]
     for i, (a, b, c, d) in enumerate(rows):
         r = 4 + i; put(u, f"A{r}", a); put(u, f"B{r}", b, BLUE); put(u, f"C{r}", c); put(u, f"D{r}", d)
-    # adrese: B4 Vr,B5 maxVr,B6 a,B7 d,B8 step,B9 g,B10 rho,B11 b,B12 idle,B13 vin,B14 scen,B15 frl0,B16 frl_v
+    # adrese: B4 Vr,B5 maxVr,B6 a,B7 d,B8 step,B9 g,B10 rho,B11 b,B12 idle,B13 vin,B14 max Vp,R gornja granica,B15 frl0,B16 frl_v,B17 dodatak,B18 tab 3-04
     hdr(u, 20, [_T('Parametar vozila')] + [v["kratko"] for v in P.vozila])
     vp = [("Masa m [kg]", "m"), ("Snaga motora P [kW]", "P"), ("CdA [m²]", "CdA"), (_T('Stepen iskorištenja η'), "eta"), (_T('Ograničenje brzine v_lim [km/h]'), "vlim"), (_T('Faktor rotirajućih masa γm'), "gam"), ("Koef. prianjanja μ", "mu"), (_T('Specifična potrošnja goriva b [l/kWh]'), "b"), (_T('Potrošnja u praznom hodu [l/h]'), "prazan_hod")]
     for i, (lab, k) in enumerate(vp):
@@ -91,10 +92,10 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
     for i in range(ni): put(u, f"A{T2 + i}", P.iN_tab[i], BLUE); put(u, f"B{T2 + i}", P.ViN_tab[i], BLUE)
     T2e = T2 + ni - 1; put(u, f"C{T2 - 1}", _T('Tabela 2: sastavljena na osnovu dijagrama (slika 3-08, Prilog 2 pravilnika)'))
     T3 = T2e + 5; NZ = 10
-    hdr(u, T3 - 1, [_T('Ograničenje od st. [m]'), _T('do st. [m]'), _T('brzina [km/h]')]); put(u, f"D{T3 - 1}", _T('Tabela ograničenja brzine (važi kad je B14 = 2), oba smjera'))
+    hdr(u, T3 - 1, [_T('Zona Vr od st. [m]'), _T('do st. [m]'), _T('računska brzina Vr [km/h]')]); put(u, f"D{T3 - 1}", _T('Tabela zona računske brzine (izvan zona važi Vr iz B4), oba smjera'))
     zones = []
     for c in cases:
-        for z in c.caps:
+        for z in c.zvr:
             if z not in zones: zones.append(z)
     for i in range(NZ):
         r = T3 + i
@@ -103,6 +104,7 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
         else:
             for j in range(3): put(u, f"{CL(1 + j)}{r}", None, BLUE)
     T3e = T3 + NZ - 1
+    put(u, "B14", f"=MAX(B5,IF(COUNT(C{T3}:C{T3e})>0,MIN(MAX(C{T3}:C{T3e})+B17,B18),0))", BLK, "0.0")
     u.column_dimensions["A"].width = 56
     for c in "BCD": u.column_dimensions[c].width = 22
     Pm = "Parametri!"
@@ -121,8 +123,8 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
             put(w, f"A{r}", e["no"], BLUE); put(w, f"B{r}", e["typ"], BLUE); put(w, f"C{r}", e["s0"], BLUE, "0.000"); put(w, f"D{r}", e["s1"], BLUE, "0.000"); put(w, f"E{r}", f"=D{r}-C{r}", BLK, "0.000")
             put(w, f"F{r}", 0 if math.isinf(e["R0"]) else e["R0"], BLUE, "0.00"); put(w, f"G{r}", 0 if math.isinf(e["R1"]) else e["R1"], BLUE, "0.00"); put(w, f"H{r}", e["A"] if e["A"] else None, BLUE, "0.000")
             m = f"MATCH(ABS(F{r}),{Pm}$B${T1}:$B${T1e},1)"
-            put(w, f"I{r}", (f'=IF(B{r}="KRUZNI_LUK",MIN({Pm}$B$5,IF(ABS(F{r})<={Pm}$B${T1},{Pm}$A${T1},IF(ABS(F{r})>={Pm}$B${T1e},{Pm}$A${T1e},'
-                f'INDEX({Pm}$A${T1}:$A${T1e},{m})+(ABS(F{r})-INDEX({Pm}$B${T1}:$B${T1e},{m}))*(INDEX({Pm}$A${T1}:$A${T1e},{m}+1)-INDEX({Pm}$A${T1}:$A${T1e},{m}))/(INDEX({Pm}$B${T1}:$B${T1e},{m}+1)-INDEX({Pm}$B${T1}:$B${T1e},{m}))))),{Pm}$B$5)'), BLK, "0.0")
+            put(w, f"I{r}", (f'=IF(B{r}="KRUZNI_LUK",MIN({Pm}$B$14,IF(ABS(F{r})<={Pm}$B${T1},{Pm}$A${T1},IF(ABS(F{r})>={Pm}$B${T1e},{Pm}$A${T1e},'
+                f'INDEX({Pm}$A${T1}:$A${T1e},{m})+(ABS(F{r})-INDEX({Pm}$B${T1}:$B${T1e},{m}))*(INDEX({Pm}$A${T1}:$A${T1e},{m}+1)-INDEX({Pm}$A${T1}:$A${T1e},{m}))/(INDEX({Pm}$B${T1}:$B${T1e},{m}+1)-INDEX({Pm}$B${T1}:$B${T1e},{m}))))),{Pm}$B$14)'), BLK, "0.0")
             put(w, f"J{r}", _TF('=IF(B{0}="PRIJELAZNICA",SQRT(MAX(ABS(F{1}),ABS(G{2}))*E{3}),"")', r, r, r, r), BLK, "0.000")
             put(w, f"K{r}", f'=IF(B{r}="PRAVAC","",IF(IF(F{r}=0,G{r},F{r})>0,"desno","lijevo"))', BLK)
             put(w, f"L{r}", f"=IF(F{r}=0,0,1000/F{r})", BLK, "0.000"); put(w, f"M{r}", f"=IF(G{r}=0,0,1000/G{r})", BLK, "0.000")
@@ -164,7 +166,7 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
         U = ULAZ[id(c.axis)]; ug = U["sheet"]; N = c.N; sg = c.sg
         p = wb.create_sheet(f"Profil_{c.key}")
         put(p, "A1", _TF('REZULTIRAJUĆI PROFIL PROJEKTNE BRZINE – PUTNIČKO VOZILO – {0}', c.label), BOLD)
-        put(p, "A2", _TF('Osovina: {0}. Cilj T = min(Vp,R ; Vp,iN u smjeru vožnje ; ograničenje po scenariju). Prolaz 1: ubrzanje a; prolaz 2: usporenje d (v² = v₀² + 2·a·Δs). Kota i nagib iz prelomnih tačaka ({1}).', c.axis.name, ug), BLK)
+        put(p, "A2", _TF('Osovina: {0}. Cilj T = min(Vp,R ; Vp,iN u smjeru vožnje ; max Vr u zoni Vr). Prolaz 1: ubrzanje a; prolaz 2: usporenje d (v² = v₀² + 2·a·Δs). Kota i nagib iz prelomnih tačaka ({1}).', c.axis.name, ug), BLK)
         put(p, "A3", "Smjer (+1/−1)"); put(p, "B3", sg, BLUE, "0"); put(p, "C3", _T('SA [m]')); put(p, "D3", float(c.SA), BLUE, "0.000"); put(p, "E3", "SB [m]"); put(p, "F3", float(c.SB), BLUE, "0.000")
         put(p, "G3", "Korak [m]"); put(p, "H3", f"={Pm}B8", GREEN, "0.0"); put(p, "I3", _T('Ulazna brzina [km/h]'))
         ch, q = chain_pos(c)
@@ -195,7 +197,7 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
             put(p, f"E{r}", f'=IF(INDEX({E("B")},F{r})="KRUZNI_LUK",ABS(INDEX({E("F")},F{r})),0)', BLK, "0.00")
             put(p, f"G{r}", f"=INDEX({E('I')},F{r})", GREEN, "0.0")
             put(p, f"H{r}", "=" + iNf(f"({sgn}D{r})"), BLK, "0.0")
-            put(p, f"I{r}", f"=MIN(G{r},H{r},IF(AND({Pm}$B$14=2,COUNTIFS({Pm}$A${T3}:$A${T3e},\"<=\"&{s},{Pm}$B${T3}:$B${T3e},\">=\"&{s})>0),_xlfn.MINIFS({Pm}$C${T3}:$C${T3e},{Pm}$A${T3}:$A${T3e},\"<=\"&{s},{Pm}$B${T3}:$B${T3e},\">=\"&{s}),999))", BLK, "0.0")
+            put(p, f"I{r}", f"=MIN(G{r},H{r},IF(COUNTIFS({Pm}$A${T3}:$A${T3e},\"<=\"&{s},{Pm}$B${T3}:$B${T3e},\">=\"&{s})>0,MIN(_xlfn.MAXIFS({Pm}$C${T3}:$C${T3e},{Pm}$A${T3}:$A${T3e},\"<=\"&{s},{Pm}$B${T3}:$B${T3e},\">=\"&{s})+{Pm}$B$17,{Pm}$B$18),{Pm}$B$5))", BLK, "0.0")
             put(p, f"M{r}", f"=INDEX({E('L')},F{r})+(INDEX({E('M')},F{r})-INDEX({E('L')},F{r}))*({s}-INDEX({E('C')},F{r}))/MAX(INDEX({E('E')},F{r}),0.000000001)", BLK, "0.000")
             for colx, tgt in ((U["lcol"], "N"), (U["rcol"], "Q")):
                 mm = f"MATCH({s},{Cc('AC')},1)"

@@ -71,6 +71,11 @@ class Params:
     def fRv(self, V):
         return float(np.interp(V, self.Vr_tab, self.fR))
 
+    def maxVr_at(self, vr):
+        m = vr + self.dodatak_maxVr
+        if self.maxVr_tab not in (None, "", 0): m = min(m, float(self.maxVr_tab))
+        return m
+
     def RminVr(self):
         return float(np.interp(self.Vr, self.Vr_tab, self.Rmin_tab))
 
@@ -106,7 +111,11 @@ def build_cases(cfg, P, log=print):
             c.key = f"{tag}{si}"; c.axis = axis(sec[role], aname)
             c.short = f"{short} [{sa:.0f}–{sb:.0f}]"; c.shortname = short
             c.SA, c.SB = sa, sb
-            c.caps = [(float(z["od"]), float(z["do"]), float(z["v"])) for z in sec.get("ogranicenja", [])]
+            c.zvr = []                                                       # zone računske brzine Vr po stacionaži (OD; DO; Vr)
+            for z in sec.get("zone_Vr", []):
+                zo, zd, zv = float(z["od"]), float(z["do"]), float(z["v"])
+                if not (zd > zo and zv > 0): raise ValueError(_TF("Zona računske brzine: neispravan red (OD {0}; DO {1}; Vr {2}).", zo, zd, zv))
+                c.zvr.append((zo, zd, zv))
             c.label = f"{_T('Desni kolovoz') if tag=='D' and tip=='razdvojene' else _T('Lijevi kolovoz') if tag=='L' and tip=='razdvojene' else _T('Centralna osovina') if tip=='centralna' else _T('Osovina')}, " + \
                       _TF("{0}, st. {1:.0f} – {2:.0f}", _T('smjer stacionaže') if sg==1 else _T('suprotno smjeru stacionaže'), sa, sb)
             cases.append(c)
@@ -127,8 +136,9 @@ def prepare(c, P):
     zg = [ax.vert(s) for s in S]; c.Z = np.array([a for a, b in zg]); c.G = np.array([b for a, b in zg])
     c.RR = np.array([abs(ax.elems[i]["R0"]) if ax.elems[i]["typ"] == "KRUZNI_LUK" else 0.0 for i in c.IDX])
     c.ENO = np.array([ax.elems[i]["no"] for i in c.IDX])
-    vpR_el = [P.vpR(abs(e["R0"])) if e["typ"] == "KRUZNI_LUK" else P.maxVr for e in ax.elems]
-    c.VPR = np.array([vpR_el[i] for i in c.IDX])
+    c.VRS = np.array([vr_at(c, s, P) for s in S])                                  # računska brzina Vr na svakoj tački (zone ili osnovna)
+    c.VMX = np.array([P.maxVr_at(v) for v in c.VRS])                              # max Vr = Vr + dodatak (ograničeno tabelom 3-04)
+    c.VPR = np.array([min(c.VMX[k], float(np.interp(c.RR[k], P.Rmin_tab, P.Vr_tab))) if c.RR[k] > 0 else c.VMX[k] for k in range(len(S))])
     c.VPG = np.array([P.vpG(c.sg * g) for g in c.G])
     c.CL = np.array([ax.cross(s) for s in S])
     c.L = c.SB - c.SA
@@ -149,21 +159,21 @@ def prepare(c, P):
     c.units = units
 
 
-def capval(c, s, scen):
-    if scen != 2: return 1e9
-    v = [z[2] for z in c.caps if z[0] <= s <= z[1]]
-    return min(v) if v else 1e9
+def vr_at(c, s, P):
+    """Računska brzina Vr na stacionaži s: zona (OD; DO; Vr) ili osnovna Vr projekta (preklapanje zona: veća Vr)."""
+    v = [z[2] for z in c.zvr if z[0] - 1e-9 <= s <= z[1] + 1e-9]
+    return max(v) if v else P.Vr
 
 
-def target(c, P, scen):
-    return np.array([min(c.VPR[i], c.VPG[i], capval(c, c.S[i], scen)) for i in range(c.N)])
+def target(c, P):
+    return np.array([min(c.VPR[i], c.VPG[i]) for i in range(c.N)])
 
 
-def car_chain(chain, P, scen):
+def car_chain(chain, P):
     """Prolaz ubrzanja naprijed i usporenja nazad kroz cijeli lanac slučajeva (u smjeru vožnje)."""
     trav = []
     for c in chain:
-        T = target(c, P, scen); c.T = T
+        T = target(c, P); c.T = T
         order = np.arange(c.N) if c.sg == 1 else np.arange(c.N - 1, -1, -1)
         ds = np.abs(np.diff(c.S[order]))
         trav.append((c, order, T[order] / 3.6, ds))
@@ -234,17 +244,10 @@ def run(cfg, log=print):
     sections, cases, axes = build_cases(cfg, P, log)
     for c in cases: prepare(c, P)
     fw, bw = chains(cases)
-    has_caps = any(c.caps for c in cases)
-    res = {}
-    for scen in ([1, 2] if has_caps else [1]):
-        for ch in (fw, bw):
-            if ch: car_chain(ch, P, scen)
-        res[scen] = {c.key: (c.V.copy(), c.T.copy(), c.Vacc.copy()) for c in cases}
-    # scenarij 1 postaje osnovni rezultat
-    for c in cases: c.V, c.T, c.Vacc = res[1][c.key]
-    for c in cases:
-        c.stc = stat(c, c.V)
-        if has_caps: c.V2, c.T2, _ = res[2][c.key]; c.stc2 = stat(c, c.V2)
+    has_caps = False
+    for ch in (fw, bw):
+        if ch: car_chain(ch, P)
+    for c in cases: c.caps = []; c.stc = stat(c, c.V)
     for ch in (fw, bw):
         prev = [None] * len(P.vozila)
         for c in ch:

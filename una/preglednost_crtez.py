@@ -119,7 +119,7 @@ def draw(P, cases, par, res, cfg, path, mode="vp", log=print, preview_png=None, 
                 mx, my = (x[a] + ex) / 2, (y[a] + ey) / 2; ang = math.degrees(math.atan2(ey - y[a], ex - x[a]))
                 if ang > 90 or ang < -90: ang += 180
                 if mode == "vp": tx_ = f"Lz={r['Lz']:.0f} m (Vp={r['V']:.0f}, i={r['g']:+.1f}%)"
-                elif mode == "vr": tx_ = f"Pz={r['Lz']:.0f} m (Vr={par['Vr']:g}, i={r['g']:+.1f}%)"
+                elif mode == "vr": tx_ = f"Pz={r['Lz']:.0f} m (Vr={(r.get('vr') or par['Vr']):g}, i={r['g']:+.1f}%)"
                 elif mode == "zaht": tx_ = f"Pzp={r['Lz']:.0f} m" + ("" if par["L_zahtijevano"] else f" (Vp={r['V']:.0f})")
                 else: tx_ = _TF('raspoloživo {0:.0f} m (potrebno {1:.0f} m)', r['D'], r['Lz'])
                 d.text("TEKST_ZRAKA", mx, my, 0.8 * H, tx_, rot=ang, align="c")

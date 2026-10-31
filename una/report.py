@@ -46,8 +46,6 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
     proj = cfg.get("projekat", _T('Dionica'))
     chains = [(ch, _T('smjer rastuće stacionaže')) for ch in (fw,) if ch] + [(ch, _T('suprotno smjeru stacionaže')) for ch in (bw,) if ch]
     s_lo = min(c.SA for c in cases); s_hi = max(c.SB for c in cases)
-    chap_sc = 6 if has_caps else None; chap_zk = 7 if has_caps else 6
-    capzones = sorted({(z[0], z[1], z[2]) for c in cases for z in c.caps})
     uniq = []; seen = set()
     for c in cases:
         k = (id(c.axis), c.SA, c.SB)
@@ -59,8 +57,6 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
         items = [sel(c) for c in ch]; return combine(items)
     rs_car = {id(ch): rstat(ch, lambda c: dict(c.stc, L=c.L)) for ch, _ in chains}
     rs_trk = {(id(ch), q): rstat(ch, lambda c, q=q: dict(c.trk[q]["stat"], L=c.L)) for ch, _ in chains for q in range(len(P.vozila))}
-    if has_caps:
-        rs_car2 = {id(ch): rstat(ch, lambda c: dict(c.stc2, L=c.L)) for ch, _ in chains}
     maxG = {c.key: float(np.abs(c.G).max()) for c in cases}
     # lukovi
     def arcs(c):
@@ -70,10 +66,11 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
                 a = max(e["s0"], c.SA); b = min(e["s1"], c.SB); m = (c.S >= a - 1e-9) & (c.S <= b + 1e-9)
                 if not m.any(): continue
                 R = abs(e["R0"]); V = float(c.V[m].min()); mid = (a + b) / 2
-                ipk = min(7, max(2.5, 7 * (Rmin_Vr / R) ** 0.74)); ipa = abs(c.axis.cross(mid))
+                RmA = float(np.interp(float(c.VRS[m].min()), P.Vr_tab, P.Rmin_tab))      # Rmin za računsku brzinu na luku (zona Vr ili osnovna)
+                ipk = min(7, max(2.5, 7 * (RmA / R) ** 0.74)); ipa = abs(c.axis.cross(mid))
                 fR = P.fRv(V); fp = V * V / (127 * R) - ipa / 100; ipr = max(2.5, (V * V / (127 * R) - fR) * 100)
                 out.append(dict(no=e["no"], R=R, dir="desno" if e["R0"] > 0 else "lijevo", s0=e["s0"], s1=e["s1"], a=a, b=b, V=V, ipk=ipk, ipa=ipa, fR=fR, fp=fp, ipr=ipr,
-                                ok1=ipa >= round(ipk, 1) - 1e-9, ok2=fp <= fR + 1e-9, ok3=R >= Rmin_Vr, vpR=P.vpR(R), partial=(e["s0"] < c.SA - 1 or e["s1"] > c.SB + 1)))
+                                ok1=ipa >= round(ipk, 1) - 1e-9, ok2=fp <= fR + 1e-9, ok3=R >= RmA - 1e-9, Rmin=RmA, Vrl=float(c.VRS[m].min()), vpR=min(P.vpR(R), float(c.VMX[m].min())), vmx=float(c.VMX[m].min()), partial=(e["s0"] < c.SA - 1 or e["s1"] > c.SB + 1)))
         return out
     ARC = {c.key: arcs(c) for c in cases}
     def unitT(c, un, X):
@@ -91,7 +88,6 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
             res.append((i, u, vt, vr, dvt, dvr))
         return rows, res
     UN = {c.key: unit_rows(c, c.T, c.V) for c in cases}
-    UN2 = {c.key: unit_rows(c, c.T2, c.V2) for c in cases if has_caps and c.caps}
 
     # =========================================================== naslovna
     desc = "; ".join(f"{('st. %s – %s' % (fm(s['od'], 0), fm(s['do'], 3).rstrip('0').rstrip(','))) }: {_T(TIPOVI[s['tip']])}" for s in sections)
@@ -108,13 +104,15 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
                "centralna": _T('centralna osovina sa jednim zajedničkim ispisom geometrije; proračun je urađen za oba smjera vožnje (u smjeru stacionaže i suprotno)'),
                "jedna_naprijed": _T('jedna osovina, proračun samo za smjer rastuće stacionaže'),
                "jedna_nazad": _T('jedna osovina, proračun samo za smjer opadajuće stacionaže')}[tip]
-        zone = [z for c in cs[:1] for z in c.caps]
-        extra = (_T('; ograničenje brzine (scenarij): ') + ", ".join(_TF('{0} km/h na st. {1} – {2}', fm(z[2], 0), fm(z[0], 3), fm(z[1], 3)) for z in zone)) if zone else ""
+        zone = [z for c in cs[:1] for z in c.zvr]
+        extra = (_T('; zone računske brzine: ') + ", ".join(_TF('V~r~ = {0} km/h na st. {1} – {2}', fm(z[2], 0), fm(z[0], 3), fm(z[1], 3)) for z in zone)) if zone else ""
         A(_TF("- **sekcija {0}: st. {1} – {2} m** – {3} ({4}){5}", i, fm(od, 3), fm(do, 3), txt, axn, extra) + (";" if sec is not sections[-1] else "."))
     A("")
     if cfg.get("opis_sekcija"): A(str(cfg["opis_sekcija"]) + "\n")
-    A(_TF('Sa računskom brzinom **V~r~ = {0:.0f} km/h** analiza obuhvata:\n', Vr))
-    A(_TF('- rezultirajući profil projektne brzine V~p~ (V85) za putničko vozilo i teška vozila ({0}) u uslovima slobodnog saobraćajnog toka, za sve smjerove vožnje na cijeloj trasi;\n- usklađivanje (harmonizaciju) elemenata trase i statističke pokazatelje dinamičke homogenosti: srednju vrijednost projektne brzine, srednje kvadratno odstupanje i koeficijent dinamičke homogenosti;\n- profil brzina, vrijeme putovanja i potrošnju goriva teških vozila;\n- provjeru poprečnih nagiba kolovoza na kružnim lukovima za dobijene projektne brzine{1}.\n\n**Zahtijevana preglednost i optičke analize (Elaborat 4) nisu predmet ovog elaborata.** Rezultirajući profili projektne brzine iz poglavlja 4 su ulazni podatak za te analize (P~zp~ = f(V~p~)).\n\nNumerički proračun dat je tabelarno u ovom elaboratu (prilozi A) i u pratećoj radnoj knjizi (Excel), u kojoj su svi koraci urađeni formulama, a svi dijagrami iz ovog elaborata izrađeni su kao Excel dijagrami koji se automatski preračunavaju kada se u listove *Ulaz_n* ubace novi ispisi (ulazni podaci su označeni plavom bojom).\n', ', '.join(v['kratko'].lower() for v in P.vozila), ('; ' + 'scenarij sa ograničenjem brzine na dijelu trase (poglavlje %d)' % chap_sc) if has_caps else ''))
+    zv = sorted({z for c in cases for z in c.zvr})
+    if zv: A(_TF('Računska brzina je promijenjena na zonama: {0}; izvan zona važi V~r~ = {1:.0f} km/h. U zonama se max V~r~ = V~r~ + {2} km/h, R~min~(V~r~), granica V~p,R~ i provjere lukova računaju za računsku brzinu zone, a prijelazi brzine između zona izvode se ubrzanjem a i usporenjem d.\n', "; ".join(_TF('V~r~ = {0} km/h na st. {1} – {2}', fm(z[2], 0), fm(z[0], 3), fm(z[1], 3)) for z in zv), Vr, fm(P.dodatak_maxVr, 0)))
+    A(_TF('Sa osnovnom računskom brzinom **V~r~ = {0:.0f} km/h** analiza obuhvata:\n', Vr))
+    A(_TF('- rezultirajući profil projektne brzine V~p~ (V85) za putničko vozilo i teška vozila ({0}) u uslovima slobodnog saobraćajnog toka, za sve smjerove vožnje na cijeloj trasi;\n- usklađivanje (harmonizaciju) elemenata trase i statističke pokazatelje dinamičke homogenosti: srednju vrijednost projektne brzine, srednje kvadratno odstupanje i koeficijent dinamičke homogenosti;\n- profil brzina, vrijeme putovanja i potrošnju goriva teških vozila;\n- provjeru poprečnih nagiba kolovoza na kružnim lukovima za dobijene projektne brzine{1}.\n\n**Zahtijevana preglednost i optičke analize (Elaborat 4) nisu predmet ovog elaborata.** Rezultirajući profili projektne brzine iz poglavlja 4 su ulazni podatak za te analize (P~zp~ = f(V~p~)).\n\nNumerički proračun dat je tabelarno u ovom elaboratu (prilozi A) i u pratećoj radnoj knjizi (Excel), u kojoj su svi koraci urađeni formulama, a svi dijagrami iz ovog elaborata izrađeni su kao Excel dijagrami koji se automatski preračunavaju kada se u listove *Ulaz_n* ubace novi ispisi (ulazni podaci su označeni plavom bojom).\n', ', '.join(v['kratko'].lower() for v in P.vozila), ''))
     A(_T("\n# Oznake i simboli {.unnumbered}\n"))
     A(_T('Brojevi u uglastim zagradama [n] u tekstu odnose se na popis literature na kraju elaborata. Indeksi slučajeva (smjerova vožnje): ') + "; ".join(f"**{c.key}** – {c.label}" for c in cases) + _T('.\n\n**Tabela O1 – Značenje oznaka**\n\n'))
     A(tbl(["Oznaka", _T('Značenje'), "Jedinica", "Izvor vrijednosti", "Gdje se koristi"], [list(r) for r in tr_obj(SYM)], ["l", "l", "c", "l", "l"]))
@@ -144,7 +142,7 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
             A(T(_T('**Primjer – kružni luk br. <<no>> ({<<ax>>}, R = <<R>> m, st. <<s0>> – <<s1>>):** R leži između R~j~ = <<R1>> m (V = <<V1>> km/h) i R~j+1~ = <<R2>> m (V = <<V2>> km/h):\n\n$$V_p(<<R>>) = <<V1>> + \\frac{<<R>> - <<R1>>}{<<R2>> - <<R1>>}\\,(<<V2>> - <<V1>>) = <<V1>> + <<q>> \\cdot <<dV>> = <<y>>\\ \\text{km/h}$$\n').replace("{<<ax>>}", "<<ax>>"), no=ar0["no"], ax=c0.axis.name, R=fm(ar0["R"], 1), s0=fm(ar0["s0"], 1), s1=fm(ar0["s1"], 1), R1=fm(R1, 0), R2=fm(R2, 0), V1=fm(V1, 0), V2=fm(V2, 0), q=fm((ar0["R"] - R1) / (R2 - R1), 4), dV=fm(V2 - V1, 0), y=fm(y, 2)))
         else:
             A(_TF('Na svim kružnim lukovima najmanji radijus je R = {0} m (osovina {1}, luk br. {2}), što daje V~p,R~ = {3} km/h (ograničenje max V~r~ = {4} km/h).\n', fm(ar0['R'], 1), c0.axis.name, ar0['no'], fm(ar0['vpR'], 1), fm(maxVr, 0)))
-        lim = [(c, ar) for c, ar in allarcs if ar["vpR"] < maxVr - 1e-6]
+        lim = [(c, ar) for c, ar in allarcs if ar["vpR"] < ar["vmx"] - 1e-6]
         if lim:
             A(_T('Lukovi kod kojih zakonitost V~p~ – R ograničava brzinu: ') + "; ".join(_TF('{0}, luk br. {1} (R = {2} m, st. {3} – {4}) – V~p,R~ = {5} km/h', c.axis.name, ar['no'], fm(ar['R'], 2), fm(ar['s0'], 1), fm(ar['s1'], 1), fm(ar['vpR'], 1)) for c, ar in lim) + _TF('. Svi ostali kružni lukovi imaju V~p,R~ = {0} km/h (ograničenje max V~r~).\n', fm(maxVr, 0)))
         else:
@@ -257,7 +255,7 @@ $$V_p(i_N) = <<v1>> + \frac{<<g>> - <<g1>>}{<<g2>> - <<g1>>}\,(<<v2>> - <<v1>>) 
         A(_TF('**Provjera uslova V~ri~ ≤ V~p~.** Prema tački 3.3.3 Priloga 2 pravilnika mora biti V~ri~ ≤ V~p~ ≤ max V~r~. Računska brzina je V~r~ = {0} km/h, a rezultirajuća V~p~ je manja od nje ', fm(Vr, 0)) + " i ".join(w) + _T('. Ti elementi ne zadovoljavaju računsku brzinu i treba ih ispraviti ili obrazložiti; brzina se u profilu ne podiže na V~r~ jer bi to prikrilo stvarno ograničenje.\n'))
     else:
         A(_TF('**Provjera uslova V~ri~ ≤ V~p~.** Na cijeloj trasi je V~p~ ≥ V~r~ = {0} km/h (tačka 3.3.3 Priloga 2 pravilnika).\n', fm(Vr, 0)))
-    A(_TF('![]({0}){{width=16cm}}\n\n*Slika 4 – Rezultirajući profili projektne brzine – putničko vozilo', os.path.basename(F['putnicko'])) + (_T('; isprekidana ljubičasta linija – scenarij sa ograničenjem brzine') if has_caps else "") + "*\n")
+    A(_TF('![]({0}){{width=16cm}}\n\n*Slika 4 – Rezultirajući profili projektne brzine – putničko vozilo', os.path.basename(F['putnicko'])) + "*\n")
     t_first = tn[0] + 1; bad_dv = []
     for c in cases:
         rows, res = UN[c.key]
@@ -387,61 +385,6 @@ $$\Delta B = <<b>> \cdot \frac{<<Fu>> \cdot <<vav>>}{<<eta>> \cdot 1000} \cdot \
         tt = sum(rs_trk[(id(ch), q)]["time"] for ch, _ in chains); ff = sum(rs_trk[(id(ch), q)]["fuel"] for ch, _ in chains)
         tot.append(f"{v['kratko'].lower()} {fm(tt / 60, 2)} min i {fm(ff, 2)} l")
     A(_T('Ukupno za obilazak cijele trase (svi analizirani smjerovi): ') + "; ".join(tot) + _T('. Potrošnja u smjeru nizbrdice je mala jer se vozilo kreće uz kočenje motorom, a potrošnju u smjeru uspona određuje rad motora punom snagom. Apsolutne vrijednosti zavise od usvojenih parametara vozila (poglavlje 5.1) i služe za poređenje varijanti, a ne kao garantovana potrošnja.\n'))
-    # =========================================================== 6 scenarij
-    if has_caps:
-        A(_T('\n# Scenarij sa ograničenjem brzine\n'))
-        A(_T('## Polazište\n'))
-        zones = "; ".join(_TF('{0} km/h na st. {1} – {2}', fm(z[2], 0), fm(z[0], 3), fm(z[1], 3)) for z in capzones)
-        A(_TF('Pored osnovnog proračuna (poglavlja 2 – 5), u kojem brzina V85 proizlazi **samo iz geometrije**, urađen je scenarij sa dodatnim ograničenjem brzine: {0}. Ograničenje djeluje kao dodatna ciljna brzina T = min(V~p,R~; V~p~(i~N~); v~ogr~), a prije njega vozilo se usporava sa d = {1} m/s², a poslije njega ubrzava sa a = {2} m/s². Ograničenje brzine snižava stvarnu brzinu V85 samo ako se vozači pridržavaju ograničenja; zato ovaj scenarij vrijedi uz odgovarajuću signalizaciju i, po potrebi, fizičke mjere usporavanja, a za preglednost (Elaborat 4) treba provjeriti i rezultat iz geometrije.\n', zones, fm(d_, 1), fm(a_, 1)))
-        if cfg.get("scenarij_obrazlozenje"): A(str(cfg["scenarij_obrazlozenje"]) + "\n")
-        z0 = capzones[0]; sdec = ((maxVr / 3.6) ** 2 - (z0[2] / 3.6) ** 2) / (2 * d_)
-        A(T(_T('Dužina potrebna za usporenje sa <<v1>> na <<v2>> km/h:\n\n$$s = \\frac{(<<v1>>/3,6)^2 - (<<v2>>/3,6)^2}{2 \\cdot <<d>>} = \\frac{<<a>> - <<b>>}{<<d2>>} = <<s>>\\ \\text{m}$$\n\nPrema tome, za zonu koja počinje na st. <<zs>> m, usporenje (u smjeru vožnje ka zoni) počinje najkasnije oko <<s>> m ispred početka zone, pa ograničenje i najavu treba postaviti najkasnije na tom mjestu.'),
-               v1=fm(maxVr, 0), v2=fm(z0[2], 0), d=fm(d_, 2), a=fm((maxVr / 3.6) ** 2, 2), b=fm((z0[2] / 3.6) ** 2, 2), d2=fm(2 * d_, 3), s=fm(sdec, 1), zs=fm(z0[0], 3)))
-        A(_T("\n## Rezultati\n"))
-        A(_TF('![]({0}){{width=16cm}}\n\n*Slika 7 – Putničko vozilo: geometrija (V85) i scenarij sa ograničenjem brzine*\n', os.path.basename(F['scenarij'])))
-        A(newtab(_T('Poređenje scenarija, putničko vozilo'), _T('Statistika brzine putničkog vozila za geometriju i scenarij sa ograničenjem (kolone kao u Tabeli o homogenosti).')))
-        rows = []
-        for c in cases:
-            if c.caps:
-                for lab, x in ((_T("geometrija"), c.stc), (_T('ograničenje'), c.stc2)):
-                    rows.append([f"{c.key}: {c.shortname}, {lab}", fm(x["mean"], 2), fm(x["sd"], 3), fm(x["Dh"], 2), fm(x["vmin"], 1), fm(x["vmax"], 1), fm(x["time"], 1)])
-        for ch, lab in chains:
-            if any(c.caps for c in ch):
-                for l2, x in ((_T("geometrija"), rs_car[id(ch)]), (_T('ograničenje'), rs_car2[id(ch)])):
-                    rows.append([_TF('**Cijela trasa, {0}, {1}**', lab, l2), fm(x["mean"], 2), fm(x["sd"], 3), fm(x["Dh"], 2), fm(x["vmin"], 1), fm(x["vmax"], 1), fm(x["time"], 1)])
-        A(tbl([_T('Dionica / scenarij'), "V~p,sr~ [km/h]", "σ [km/h]", "D~h~ [%]", "V~min~ [km/h]", "V~max~ [km/h]", "T [s]"], rows))
-        A(newtab(_T('Usklađenost susjednih elemenata uz ograničenje brzine'), _T('Kolone kao u tabelama usklađenosti (poglavlje 4.1), za scenarij.')))
-        rows = []
-        for c in cases:
-            if c.key in UN2:
-                for r in UN2[c.key][0]: rows.append([c.key] + r)
-        A(tbl([_T('Slučaj'), "Br.", "Element", _T('St. od [m]'), _T('St. do [m]'), "L [m]", "R [m]", "Smjer", "V~p,i~ cilj [km/h]", "ΔV~cilj~ [km/h]", "Ocjena", "V~p,i~ rez. [km/h]", "ΔV~rez~ [km/h]"], rows))
-        # provjera nagiba za ograničenu brzinu
-        A(newtab(_T('Provjera poprečnog nagiba lukova u zoni ograničenja za ograničenu brzinu'), _T('Kolone kao u Tabelama poprečnih nagiba, uz V = rezultirajuća brzina scenarija na luku; R~min~ za brzinu luka dobija se interpolacijom iz Tabele 1.')))
-        rows = []
-        for c in cases:
-            if not c.caps: continue
-            for e in c.axis.elems:
-                if e["typ"] == "KRUZNI_LUK" and e["s1"] > c.SA and e["s0"] < c.SB:
-                    a = max(e["s0"], c.SA); b = min(e["s1"], c.SB); m = (c.S >= a - 1e-9) & (c.S <= b + 1e-9)
-                    if not m.any(): continue
-                    V = float(c.V2[m].min()); R = abs(e["R0"]); ip = abs(c.axis.cross((a + b) / 2)); fR = P.fRv(V); fp = V * V / (127 * R) - ip / 100
-                    Rm = float(np.interp(V, P.Vr_tab, P.Rmin_tab))
-                    rows.append([c.key, e["no"], fm(R, 2), fm(V, 1), fm(ip, 1), fm(fR, 3), fm(max(2.5, (V * V / (127 * R) - fR) * 100), 2), fm(fp, 3), "da" if fp <= fR + 1e-9 else "NE", "da" if R >= Rm else f"NE (R~min~({fm(V, 0)}) = {fm(Rm, 0)} m)"])
-        A(tbl([_T('Slučaj'), _T('Luk br.'), "R [m]", "V [km/h]", "i~p~ prim. [%]", "f~R~(V)", "i~p,potr~ [%]", "f~pot~", "f~pot~ ≤ f~R~", "R ≥ R~min~(V)"], rows))
-        obs = []
-        for c in cases:
-            if c.key in UN2:
-                for i, u, vt_, vr_, dvt, dvr in UN2[c.key][1]:
-                    if dvt is not None and dvt > 10: obs.append(_TF("{0}, elementi {1}–{2}: ΔV~cilj~ = {3} km/h (**{4}**), ΔV~rez~ = {5} km/h", c.key, i + 1, i + 2, fm(dvt, 1), ocj(dvt), fm(dvr, 1)))
-        dz = []
-        for ch, lab in chains:
-            if any(c.caps for c in ch): dz.append(_TF('{0}: D~h~ {1} → {2} %, vrijeme {3} s duže', lab, fm(rs_car[id(ch)]['Dh'], 2), fm(rs_car2[id(ch)]['Dh'], 2), fm(rs_car2[id(ch)]['time'] - rs_car[id(ch)]['time'], 1)))
-        A(_T('\n**Zapažanja.**\n'))
-        A("1. " + (_T('Razlike ciljnih brzina susjednih elemenata veće od 10 km/h: ') + "; ".join(obs) + _T('. Ove razlike ne mogu se ublažiti geometrijom bez povećanja radijusa, pa je neophodna najava ograničenja (znak, uzdužne oznake, po potrebi prethodno ograničenje).') if obs else _T('Razlike ciljnih brzina susjednih elemenata ostaju ≤ 10 km/h.')))
-        A(_T('2. Koeficijent dinamičke homogenosti i vrijeme putovanja po cijeloj trasi (geometrija → ograničenje): ') + "; ".join(dz) + _T('. Teška vozila nisu pogođena ako je njihova brzina ionako ≤ ograničenje.'))
-        A(_T('3. Elementi koji nisu u dijelu analize (npr. naplatna rampa i izlaz iz nje) nisu modelirani; ako se zahtijeva provjera zaustavnog puta ili uslova na prilazu, brzinu na prilazu treba zadati posebno.'))
-        A(_T('4. Početak i kraj zone ograničenja mogu se promijeniti u radnoj knjizi (list *Parametri*, tablica zona ograničenja; scenarij se uključuje ćelijom B14 = 2).\n'))
     # =========================================================== zaključci
     A(_T('\n# Zaključci i preporuke\n'))
     z = []
@@ -463,8 +406,6 @@ $$\Delta B = <<b>> \cdot \frac{<<Fu>> \cdot <<vav>>}{<<eta>> \cdot 1000} \cdot \
         tt.append(_TF('{0}: putničko {1} min; ', lab, fm(rs_car[id(ch)]['time'] / 60, 2)) + "; ".join(f"{v['kratko'].lower()} {fm(rs_trk[(id(ch), q)]['time'] / 60, 2)} min / {fm(rs_trk[(id(ch), q)]['fuel'], 2)} l" for q, v in enumerate(P.vozila)))
     zk.append(_T('Vrijeme putovanja i potrošnja goriva po smjerovima: ') + " | ".join(tt) + ".")
     zk.append(_TF('Brzine teških vozila u smjeru uspona padaju do {0} km/h; razlika prema putničkim vozilima jedan je od ulaznih podataka za analizu preticanja, dodatne trake za spora vozila i saobraćajne opreme.', fm(min(c.trk[0]['v'].min() for c in cases), 0)))
-    if has_caps:
-        zk.append(_T('Scenarij sa ograničenjem brzine: ') + "; ".join(dz) + f" (poglavlje {chap_sc}).")
     for i, t in enumerate(zk, 1): A(f"{i}. {t}")
     A(_T('\n# Sadržaj i uslovi obrade\n'))
     A(_T('Elaborat je urađen u skladu sa Projektnim zadatkom (Elaborat vozno-dinamičkih analiza) i uslovima obrade iz Opšteg dijela. Numerički proračun dat je u tabelama (prilozi A) i u radnoj knjizi (Excel) sa formulama, dijagramima i svim tabelama iz ovog elaborata. Grafički prilozi (prilog B) prikazuju krivinu, uzdužni profil i profile brzina po segmentima trase za sve smjerove vožnje. Za grafičke priloge u razmjeri 1:1000 podaci iz radne knjige (listovi *Profil_n*) mogu se direktno prenijeti u CAD; prilozi u ovom dokumentu prilagođeni su formatu A4.\n'))
@@ -502,7 +443,6 @@ $$\Delta B = <<b>> \cdot \frac{<<Fu>> \cdot <<vav>>}{<<eta>> \cdot 1000} \cdot \
         _T('**Kriterij ΔV** (10 / 20 km/h) preuzet je iz literature (Lamm i dr.) [5] i primijenjen na razliku ciljnih brzina elemenata; ako Priručnik ima drugačije granice, uskladiti.'),
         _T('**Preglednost** (Elaborat 4) nije obrađena.'),
     ]
-    if has_caps: pre.append(_T('**Scenarij sa ograničenjem brzine**: ograničenje je primijenjeno na zadatim zonama (') + "; ".join(f"{fm(z[2], 0)} km/h, st. {fm(z[0], 3)} – {fm(z[1], 3)}" for z in capzones) + _T('); stacionaže početka i kraja zone treba potvrditi, a dokument i datum zahtjeva (Investitor) navesti.'))
     pre.append(_TF('**Referentni najveći podužni nagib** za V~r~ = {0} km/h uzet je {1} % (potvrditi).', fm(Vr, 0), fm(P.max_nagib, 1)))
     for i, t in enumerate(pre, 1): A(f"{i}. {t}")
     if cfg.get("napomene"):

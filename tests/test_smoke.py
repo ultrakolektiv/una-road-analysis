@@ -45,6 +45,19 @@ def test_proracun_i_preglednost(tmp_path):
     assert any(n.endswith(".xlsx") for n in names) and any(n.endswith(".dxf") for n in names)
 
 
+def test_zone_racunske_brzine(tmp_path):
+    cfg = _cfg(tmp_path); P0, sec0, c0, *_ = engine.run(cfg, log=lambda *a: None)
+    s0, s1 = c0[0].SA, c0[0].SB; za, zb = s0 + (s1 - s0) * 0.4, s0 + (s1 - s0) * 0.6
+    cfg2 = pipeline.load_cfg(os.path.join(ROOT, "primjer", "primjer_projekat.json")); cfg2["izlaz"] = str(tmp_path); cfg2["optika"] = {"ukljuci": False}
+    cfg2["sekcije"][0]["zone_Vr"] = [{"od": za, "do": zb, "v": 60.0}]
+    P, sec, cs, ax, fw, bw, hc = engine.run(cfg2, log=lambda *a: None)
+    c = cs[0]; m = (c.S >= za) & (c.S <= zb)
+    assert hc is False and abs(c.VRS[m].max() - 60) < 1e-9 and abs(c.VRS[~m].min() - P.Vr) < 1e-9
+    assert c.VMX[m].max() <= 60 + P.dodatak_maxVr + 1e-9 and c.V[m].max() <= 80 + 1e-6      # u zoni Vp ≤ Vr_zone + dodatak
+    outs, _ = pipeline.generate(cfg2, str(tmp_path), log=lambda s: None, word=False, excel=True, sight=True)
+    assert any(o.endswith(".xlsx") for o in outs)
+
+
 @pytest.mark.skipif(shutil.which("pandoc") is None, reason="pandoc nije instaliran")
 def test_word_elaborat(tmp_path):
     outs, _ = pipeline.generate(_cfg(tmp_path), str(tmp_path), log=lambda s: None, word=True, excel=False, sight=False)

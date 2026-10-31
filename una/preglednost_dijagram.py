@@ -128,8 +128,9 @@ def make_vr(P, par, out, outdir, name, log=print):
     o2 = dict(vp={}, zaht=None, ocek={})
     for key, R in out["vp"].items():
         def fix(r):
-            L = lzn(P.Vr, r["g"], par) + par["dodatak_L"]
-            r2 = dict(r, V=float(P.Vr), Lz=L)
+            vr_ = float(R["A"]["vr"][r["i"]]) if ("vr" in R["A"] and r.get("i") is not None) else float(P.Vr)      # Vr zone na tački
+            L = lzn(vr_, r["g"], par) + par["dodatak_L"]
+            r2 = dict(r, V=vr_, Lz=L)
             r2["okH"] = bool(r["Dh"] >= L - 1e-6 or r.get("trunc")); r2["okV"] = bool(r["Dv"] >= L - 1e-6 or r.get("trunc")); r2["ok"] = bool(r["D"] >= L - 1e-6 or r.get("trunc"))
             return r2
         av = [fix(r) for r in R["avail"]["rows"]]

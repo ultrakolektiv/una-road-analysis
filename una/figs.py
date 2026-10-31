@@ -85,15 +85,16 @@ def make_all(P, sections, cases, axes, fw, bw, has_caps, outdir, log=print):
     # 4 putnicko
     n = len(chains)
     fig, axs = plt.subplots(n, 1, figsize=(7.2, 3.3 * n + 0.6), sharex=True, squeeze=False); axs = axs[:, 0]
-    lo = max(40, min([c.V.min() for c in cases] + [c.V2.min() for c in cases if has_caps and c.caps]) - 8)
+    lo = max(40, min(c.V.min() for c in cases) - 8)
 
     for ax, (ch, lab) in zip(axs, chains):
         for j, c in enumerate(ch):
             ax.plot(c.S, c.T, "--", color="grey", lw=1, label=_T('Ciljna brzina T') if j == 0 else None)
             ax.plot(c.S, c.V, color=color_of(c, cases), lw=1.8, label=_TF('Rezultirajući profil Vp – {0}', c.shortname))
-            if has_caps and c.caps: ax.plot(c.S, c.V2, color="m", lw=1.3, ls="-.", label=_T('Scenarij: ograničenje brzine') if not any(x.caps for x in ch[:j]) else None)
-        sbound(ax); ax.axhline(Vr, color="C3", lw=1, ls=":"); ax.text(s_lo + 20, Vr + 0.4, f"Vr = {Vr:.0f} km/h", color="C3", fontsize=8)
-        ax.set_ylim(lo, P.maxVr + 5); ax.set_ylabel(_T('Brzina [km/h]')); ax.set_title(f"{lab} ({run_label(ch)})", fontsize=9); ax.legend(loc="lower left", fontsize=7, ncol=2)
+        sbound(ax)
+        for j, c in enumerate(ch): ax.plot(c.S, c.VRS, color="C3", lw=1, ls=":", drawstyle="steps-post")
+        ax.text(s_lo + 20, Vr + 0.4, f"Vr = {Vr:.0f} km/h", color="C3", fontsize=8)
+        ax.set_ylim(lo, max(c.VMX.max() for c in cases) + 5); ax.set_ylabel(_T('Brzina [km/h]')); ax.set_title(f"{lab} ({run_label(ch)})", fontsize=9); ax.legend(loc="lower left", fontsize=7, ncol=2)
     axs[-1].set_xlabel(_T('Stacionaža [m]')); plt.tight_layout(); p = f"{outdir}/f_putnicko.png"; plt.savefig(p); plt.close(); F["putnicko"] = p
 
     # 5 teska
@@ -105,7 +106,7 @@ def make_all(P, sections, cases, axes, fw, bw, has_caps, outdir, log=print):
             for q, t in enumerate(c.trk):
                 ax.plot(c.S, t["v"], color=color_of(c, cases), ls=["-", "--", ":", "-."][q % 4], lw=1.6, label=f"{P.vozila[q]['kratko']} – {c.shortname}")
         sbound(ax); ax.set_ylabel(_T('Brzina [km/h]')); ax.set_title(f"{lab} ({run_label(ch)})", fontsize=9); ax.legend(loc="lower left", fontsize=7, ncol=2)
-        ax.set_ylim(max(0, allv.min() - 8), P.maxVr + 5)
+        ax.set_ylim(max(0, allv.min() - 8), max(c.VMX.max() for c in cases) + 5)
     axs[-1].set_xlabel(_T('Stacionaža [m]')); plt.tight_layout(); p = f"{outdir}/f_teska.png"; plt.savefig(p); plt.close(); F["teska"] = p
 
     # 6 kumulativno
@@ -123,20 +124,6 @@ def make_all(P, sections, cases, axes, fw, bw, has_caps, outdir, log=print):
     a1.set_xlabel(_T('Pređeni put [m]')); a1.set_ylabel("Vrijeme [min]"); a1.legend(fontsize=6); a2.set_xlabel(_T('Pređeni put [m]')); a2.set_ylabel(_T('Potrošnja goriva [l]')); a2.legend(fontsize=6)
     fig.suptitle(_TF('Kumulativno vrijeme putovanja i potrošnja goriva teških vozila (st. {0:.0f} – {1:.0f})', s_lo, s_hi)); plt.tight_layout()
     p = f"{outdir}/f_vrijeme_gorivo.png"; plt.savefig(p); plt.close(); F["vrijeme"] = p
-
-    # 7 scenarij
-    if has_caps:
-        fig, axs = plt.subplots(n, 1, figsize=(7.2, 2.9 * n + 0.8), sharex=True, squeeze=False); axs = axs[:, 0]
-        for ax, (ch, lab) in zip(axs, chains):
-            for j, c in enumerate(ch):
-                ax.plot(c.S, c.T, "--", color="grey", lw=1, label=_T('Ciljna brzina T (geometrija)') if j == 0 else None)
-                ax.plot(c.S, c.V, color=color_of(c, cases), lw=1.8, label="Vp – geometrija (V85)" if j == 0 else None)
-                if c.caps:
-                    ax.plot(c.S, c.V2, "m", lw=1.8, ls="-.", label=_T('Vp – sa ograničenjem') if j == 0 or True else None)
-                    for z in c.caps: ax.axvspan(z[0], z[1], color="orange", alpha=.12)
-            ax.axhline(Vr, color="C3", lw=1, ls=":"); ax.set_ylabel(_T('Brzina [km/h]')); ax.set_title(lab, fontsize=9); ax.legend(fontsize=7, loc="lower left")
-            ax.set_ylim(min(c.V2.min() for c in ch if c.caps) - 8, P.maxVr + 5)
-        axs[-1].set_xlabel(_T('Stacionaža [m]')); plt.tight_layout(); p = f"{outdir}/f_scenarij.png"; plt.savefig(p); plt.close(); F["scenarij"] = p
 
     # grafički prilozi – trake
     seg = 1330.0; nseg = max(1, math.ceil((s_hi - s_lo) / seg)); seg = (s_hi - s_lo) / nseg
@@ -163,10 +150,11 @@ def make_all(P, sections, cases, axes, fw, bw, has_caps, outdir, log=print):
                 m = (c.S >= a) & (c.S <= b)
                 ax.plot(c.S[m], c.V[m], "k", lw=1.6, label=_T('Putničko') if first else None)
                 for q, t in enumerate(c.trk): ax.plot(c.S[m], t["v"][m], color=["C0", "C2", "C4", "C5"][q % 4], ls=["-", "--", ":", "-."][q % 4], label=P.vozila[q]["kratko"] if first else None)
+                ax.plot(c.S[m], c.VRS[m], color="C3", ls=":", lw=1, drawstyle="steps-post")
                 first = False
-            ax.axhline(Vr, color="C3", ls=":", lw=1); ax.set_ylim(max(0, allv.min() - 8), P.maxVr + 5); ax.set_ylabel(_T('Brzina [km/h]')); ax.set_title(lab, fontsize=8); ax.legend(ncol=4, fontsize=7, loc="lower center")
+            ax.axhline(Vr, color="C3", ls=":", lw=0.6, alpha=0.0); ax.set_ylim(max(0, allv.min() - 8), max(c.VMX.max() for c in cases) + 5); ax.set_ylabel(_T('Brzina [km/h]')); ax.set_title(lab, fontsize=8); ax.legend(ncol=4, fontsize=7, loc="lower center")
         axs[-1].set_xlabel(_T('Stacionaža [m]')); axs[-1].set_xlim(a, b)
         t0 = int(math.ceil(a / 100) * 100); axs[-1].set_xticks(range(t0, int(b) + 1, 100)); plt.setp(axs[-1].get_xticklabels(), rotation=60, fontsize=7)
         plt.tight_layout(); p = f"{outdir}/s{k + 1}.png"; plt.savefig(p); plt.close(); F["strips"].append(p)
-    log(_TF('Slike: {0}', len(F['strips']) + 6 + int(has_caps)))
+    log(_TF('Slike: {0}', len(F['strips']) + 6 + 0))
     return F

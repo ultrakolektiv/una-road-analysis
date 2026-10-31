@@ -37,7 +37,7 @@ def sec_summary(s):
     for r, _ in roles:
         sp = s.get(r) or {}
         fl.append(os.path.basename(sp.get("h", "?")))
-    cap = "; ".join(f"{z['v']:.0f} km/h na {z['od']}–{z['do']}" for z in s.get("ogranicenja", []))
+    cap = "; ".join(f"Vr {z['v']:.0f} km/h na {z['od']}–{z['do']}" for z in s.get("zone_Vr", []))
     return fl, cap
 
 
@@ -115,11 +115,10 @@ class SectionDialog(tk.Toplevel):
         ttk.Button(top, text="Postavi OD/DO prema ispisima", command=self.autorange).grid(row=1, column=4, padx=6)
         self.body = ttk.Frame(top); self.body.grid(row=2, column=0, columnspan=5, sticky="we", pady=6)
         self.sec0 = sec; self.pickers = {}
-        cf = ttk.LabelFrame(top, text="Ograničenja brzine u scenariju (opciono) – jedan red: OD; DO; brzina km/h", padding=6); cf.grid(row=3, column=0, columnspan=5, sticky="we")
+        cf = ttk.LabelFrame(top, text="Zone računske brzine Vr (opciono) – jedan red: OD; DO; Vr km/h", padding=6); cf.grid(row=3, column=0, columnspan=5, sticky="we")
         self.caps = tk.Text(cf, width=70, height=3); self.caps.pack()
-        self.caps.insert("1.0", "\n".join(f"{z['od']}; {z['do']}; {z['v']}" for z in sec.get("ogranicenja", [])))
-        self.obr = tk.StringVar(value=sec.get("ogranicenja_opis", ""))
-        ttk.Label(cf, text="Obrazloženje ograničenja (ulazi u elaborat, npr. zahtjev Investitora):").pack(anchor="w"); ttk.Entry(cf, textvariable=self.obr, width=90).pack(fill="x")
+        self.caps.insert("1.0", "\n".join(f"{z['od']}; {z['do']}; {z['v']}" for z in sec.get("zone_Vr", [])))
+        ttk.Label(cf, text="Unutar zone proračun (Vp, Rmin, zrake preglednosti) koristi računsku brzinu zone.").pack(anchor="w")
         bf = ttk.Frame(top); bf.grid(row=4, column=0, columnspan=5, sticky="e", pady=6)
         ttk.Button(bf, text="U redu", command=self.ok).pack(side="left", padx=4); ttk.Button(bf, text="Otkaži", command=self.destroy).pack(side="left")
         self.rebuild()
@@ -162,10 +161,9 @@ class SectionDialog(tk.Toplevel):
                 ln = ln.strip()
                 if not ln: continue
                 a = [fnum(x) for x in ln.replace(";", " ").replace("\t", " ").split()]
-                if len(a) != 3 or None in a: raise ValueError(f"Ograničenje: neispravan red '{ln}' (OD; DO; brzina).")
+                if len(a) != 3 or None in a: raise ValueError(f"Zona Vr: neispravan red '{ln}' (OD; DO; Vr).")
                 caps.append({"od": a[0], "do": a[1], "v": a[2]})
-            if caps: s["ogranicenja"] = caps
-            if self.obr.get().strip(): s["ogranicenja_opis"] = self.obr.get().strip()
+            if caps: s["zone_Vr"] = caps
             self.result = s; self.destroy()
         except Exception as e:
             messagebox.showerror("Greška", str(e), parent=self)
@@ -250,13 +248,12 @@ class NotesDialog(tk.Toplevel):
         f = ttk.Frame(self, padding=8); f.pack(fill="both", expand=True)
         ttk.Label(f, text="Datum / verzija (na naslovnoj strani):").pack(anchor="w"); self.dat = tk.StringVar(value=cfg.get("datum", "")); ttk.Entry(f, textvariable=self.dat, width=70).pack(fill="x")
         ttk.Label(f, text="Dodatni opis trase (ubacuje se u Uvod):").pack(anchor="w", pady=(8, 0)); self.opis = tk.Text(f, width=80, height=4); self.opis.pack(); self.opis.insert("1.0", cfg.get("opis_sekcija", ""))
-        ttk.Label(f, text="Obrazloženje scenarija sa ograničenjem (poglavlje Scenarij):").pack(anchor="w", pady=(8, 0)); self.sc = tk.Text(f, width=80, height=4); self.sc.pack(); self.sc.insert("1.0", cfg.get("scenarij_obrazlozenje", ""))
         ttk.Label(f, text="Dodatne napomene / pretpostavke (jedna po redu, idu u Prilog C):").pack(anchor="w", pady=(8, 0)); self.nap = tk.Text(f, width=80, height=5); self.nap.pack()
         nn = cfg.get("napomene", []); nn = nn if isinstance(nn, list) else [nn]; self.nap.insert("1.0", "\n".join(nn))
         bf = ttk.Frame(f); bf.pack(fill="x", pady=6); ttk.Button(bf, text="U redu", command=self.ok).pack(side="right"); ttk.Button(bf, text="Otkaži", command=self.destroy).pack(side="right", padx=4)
 
     def ok(self):
-        self.result = {"datum": self.dat.get().strip(), "opis_sekcija": self.opis.get("1.0", "end").strip(), "scenarij_obrazlozenje": self.sc.get("1.0", "end").strip(),
+        self.result = {"datum": self.dat.get().strip(), "opis_sekcija": self.opis.get("1.0", "end").strip(),
                        "napomene": [x.strip() for x in self.nap.get("1.0", "end").splitlines() if x.strip()]}
         self.destroy()
 
@@ -552,7 +549,7 @@ class App(tk.Tk):
         mid = ttk.LabelFrame(self, text="2. Sekcije trase (redom po stacionaži; svaka ima svoj tip: razdvojene osovine / centralna / jedna osovina)", padding=8); mid.pack(fill="both", expand=True, padx=8, pady=4)
         cols = ("br", "tip", "od", "do", "fajlovi", "ogr")
         self.tree = ttk.Treeview(mid, columns=cols, show="headings", height=7)
-        for c, t, w in (("br", "Br.", 40), ("tip", "Vrsta", 280), ("od", "Od [m]", 80), ("do", "Do [m]", 80), ("fajlovi", "Horizontale (datoteke)", 260), ("ogr", "Ograničenje (scenarij)", 180)):
+        for c, t, w in (("br", "Br.", 40), ("tip", "Vrsta", 280), ("od", "Od [m]", 80), ("do", "Do [m]", 80), ("fajlovi", "Horizontale (datoteke)", 260), ("ogr", "Zone Vr", 180)):
             self.tree.heading(c, text=t); self.tree.column(c, width=w)
         self.tree.pack(side="left", fill="both", expand=True); self.tree.bind("<Double-1>", lambda e: self.edit())
         bf = ttk.Frame(mid); bf.pack(side="left", fill="y", padx=6)

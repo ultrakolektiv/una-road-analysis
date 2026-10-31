@@ -25,7 +25,7 @@ sr: {
  new:"Novi", open:"Otvori…", save:"Spremi", save_as:"Spremi kao…", untitled:"Novi projekat", unsaved:"nije spremljeno",
  p_title:"Projekat", p_sub:"Osnovni podaci o dionici i izlazu.", p_name:"Naziv dionice", p_vr:"Računska brzina Vr [km/h]", p_out:"Izlazni folder", p_browse:"Odaberi…",
  p_lang:"Jezik dokumenata", p_lang_h:"Jezik (bosanski ili engleski) u kome se prave Word/Excel/DXF izlazi.", p_notes:"Tekst za elaborat", p_notes_h:"Naslovna strana i dodatni opisi koji ulaze u elaborat.",
- p_date:"Datum / verzija (naslovna strana)", p_desc:"Dodatni opis trase (Uvod)", p_scen:"Obrazloženje scenarija sa ograničenjem", p_remarks:"Dodatne napomene / pretpostavke (jedna po redu, Prilog C)",
+ p_date:"Datum / verzija (naslovna strana)", p_desc:"Dodatni opis trase (Uvod)", p_remarks:"Dodatne napomene / pretpostavke (jedna po redu, Prilog C)",
  p_settings:"Postavke za sljedeći projekat", p_settings_h:"Spremite napredne parametre (bez sekcija i ispisa) i učitajte ih u novom projektu.", p_save_set:"Spremi postavke…", p_load_set:"Učitaj postavke…",
  s_title:"Sekcije trase", s_sub:"Redom po stacionaži. Svaka sekcija ima svoj tip: razdvojene osovine, centralna ili jedna osovina.", s_add:"Dodaj sekciju", s_edit:"Uredi", s_del:"Ukloni", s_up:"Gore", s_down:"Dolje",
  s_empty:"Još nema sekcija. Dodajte prvu sekciju i odaberite ispise osovine (horizontala, uzdužni profil, poprečni nagibi).", s_confirm_del:"Ukloniti sekciju {0}?",
@@ -33,12 +33,12 @@ sr: {
  r_desna:"DESNA osovina (desni kolovoz, vožnja u smjeru stacionaže)", r_lijeva:"LIJEVA osovina (lijevi kolovoz, vožnja suprotno stacionaži)", r_centralna:"CENTRALNA osovina", r_osovina:"Osovina",
  f_h:"Horizontalna osovina (elementi)", f_v:"Uzdužni profil (prelomne tačke)", f_x:"Poprečni nagibi", f_pick3:"Odaberi sva 3 fajla odjednom (automatsko prepoznavanje)", f_none:"nije odabrano",
  d_title_new:"Nova sekcija", d_title_edit:"Sekcija trase", d_type:"Vrsta sekcije", d_from:"Stacionaža OD [m]", d_to:"DO [m]", d_auto:"Postavi OD/DO prema ispisima",
- d_caps:"Ograničenja brzine u scenariju (opciono)", d_caps_h:"Jedan red: OD; DO; brzina km/h", d_caps_why:"Obrazloženje ograničenja (ulazi u elaborat, npr. zahtjev Investitora)",
+ d_caps:"Zone računske brzine Vr (opciono)", d_caps_h:"Jedan red: OD; DO; Vr km/h. Unutar zone proračun (Vp, Rmin, zrake preglednosti) koristi tu računsku brzinu.", d_caps_why:"Napomena uz zone (ne ulazi u proračun)",
  d_cs:"Kolona poprečnog nagiba LIJEVE strane (redni broj trake, prazno = automatski)", d_cross:"Poprečni profil i ofset osovine vozne trake (prazno = podrazumijevano)",
  d_half:"Centralna osovina: POLA širine razdjelnog pojasa [m]", d_wr:"Širine traka DESNO od osovine puta [m] (npr. 3.5, 3.5)", d_wl:"Širine traka LIJEVO od osovine puta [m] (npr. 3.5, 3.5)",
  d_or:"Osovina oka vozača DESNO od osovine kolovoza [m]", d_ol:"Osovina oka vozača LIJEVO od osovine kolovoza [m]", d_range:"Zajednički raspon ispisa: {0} – {1} m. Prilagodite OD/DO prema stvarnoj sekciji.",
  ok:"U redu", cancel:"Otkaži", close:"Zatvori", yes:"Da", no:"Ne",
- e_range:"Stacionaže OD / DO nisu ispravne (DO mora biti veće od OD).", e_file:"Datoteka ne postoji: {0}", e_cap:"Ograničenje: neispravan red '{0}' (OD; DO; brzina).", e_num:"Neispravan broj: {0}",
+ e_range:"Stacionaže OD / DO nisu ispravne (DO mora biti veće od OD).", e_file:"Datoteka ne postoji: {0}", e_cap:"Zona Vr: neispravan red '{0}' (OD; DO; Vr).", e_num:"Neispravan broj: {0}",
  e_unrec:"Nisu prepoznate sve tri vrste datoteka – dopunite ručno.", dlg_pick_one:"Odaberite datoteku.", s_lx:"Uvezi osovine iz LandXML-a", s_lx_wait:"Čitam LandXML (velike datoteke traju nekoliko minuta)…", s_lx_replace:"Zamijeniti postojeće sekcije osovinama iz LandXML-a?", s_lx_ok:"Uvezene osovine:", dlg_opening:"Otvaram dijalog za odabir datoteke …", e_nodlg:"Prozor za odabir datoteka nije dostupan – upišite putanju ručno.",
  pa_title:"Napredni parametri", pa_sub:"Model vožnje, tablice iz Priloga 2 pravilnika i vozila za dinamički proračun (poglavlje 5).", pa_reset:"Vrati podrazumijevano",
  pa_model:"Model vožnje", pa_tables:"Tablice", pa_tables_h:"Vrijednosti odvojene zarezom ili razmakom. Vp–R koristi Vr i Rmin tablicu.", pa_veh:"Vozila", pa_veh_h:"vlim prazno = max Vr; b i prazan hod prazno = opšte vrijednosti; P prazno = kriva sile vuče iz Pravilnika.",
@@ -77,7 +77,7 @@ en: {
  new:"New", open:"Open…", save:"Save", save_as:"Save as…", untitled:"New project", unsaved:"not saved",
  p_title:"Project", p_sub:"Basic data about the road section and the output.", p_name:"Section name", p_vr:"Design speed Vr [km/h]", p_out:"Output folder", p_browse:"Browse…",
  p_lang:"Document language", p_lang_h:"Language of the Word/Excel/DXF outputs.", p_notes:"Text for the study", p_notes_h:"Title page and additional descriptions included in the study.",
- p_date:"Date / version (title page)", p_desc:"Additional alignment description (Introduction)", p_scen:"Justification of the speed-limit scenario", p_remarks:"Additional remarks / assumptions (one per line, Appendix C)",
+ p_date:"Date / version (title page)", p_desc:"Additional alignment description (Introduction)", p_remarks:"Additional remarks / assumptions (one per line, Appendix C)",
  p_settings:"Settings for the next project", p_settings_h:"Save the advanced parameters (without segments and printouts) and load them in a new project.", p_save_set:"Save settings…", p_load_set:"Load settings…",
  s_title:"Alignment segments", s_sub:"In order of chainage. Each segment has its own type: separate carriageway axes, central axis, or a single axis.", s_add:"Add segment", s_edit:"Edit", s_del:"Remove", s_up:"Up", s_down:"Down",
  s_empty:"No segments yet. Add the first segment and choose the axis printouts (horizontal, longitudinal profile, cross-slopes).", s_confirm_del:"Remove segment {0}?",
@@ -85,12 +85,12 @@ en: {
  r_desna:"RIGHT axis (right carriageway, driving in the direction of chainage)", r_lijeva:"LEFT axis (left carriageway, driving against chainage)", r_centralna:"CENTRAL axis", r_osovina:"Axis",
  f_h:"Horizontal axis (elements)", f_v:"Longitudinal profile (break points)", f_x:"Cross-slopes", f_pick3:"Choose all 3 files at once (automatic recognition)", f_none:"not selected",
  d_title_new:"New segment", d_title_edit:"Alignment segment", d_type:"Segment type", d_from:"Chainage FROM [m]", d_to:"TO [m]", d_auto:"Set FROM/TO from the printouts",
- d_caps:"Speed limits in the scenario (optional)", d_caps_h:"One row: FROM; TO; speed km/h", d_caps_why:"Justification of the limit (goes into the study, e.g. Investor's request)",
+ d_caps:"Design-speed zones Vr (optional)", d_caps_h:"One row: FROM; TO; Vr km/h. Inside a zone the calculation (Vp, Rmin, sight-distance rays) uses that design speed.", d_caps_why:"Note on the zones (not used in calculation)",
  d_cs:"Cross-slope column of the LEFT side (lane number, empty = automatic)", d_cross:"Cross-section and offset of the driving-lane axis (empty = default)",
  d_half:"Central axis: HALF width of the median [m]", d_wr:"Lane widths RIGHT of the road axis [m] (e.g. 3.5, 3.5)", d_wl:"Lane widths LEFT of the road axis [m] (e.g. 3.5, 3.5)",
  d_or:"Driver's eye axis RIGHT of the carriageway axis [m]", d_ol:"Driver's eye axis LEFT of the carriageway axis [m]", d_range:"Common range of the printouts: {0} – {1} m. Adjust FROM/TO to the actual segment.",
  ok:"OK", cancel:"Cancel", close:"Close", yes:"Yes", no:"No",
- e_range:"Chainages FROM / TO are not valid (TO must be greater than FROM).", e_file:"File does not exist: {0}", e_cap:"Limit: invalid row '{0}' (FROM; TO; speed).", e_num:"Invalid number: {0}",
+ e_range:"Chainages FROM / TO are not valid (TO must be greater than FROM).", e_file:"File does not exist: {0}", e_cap:"Vr zone: invalid row '{0}' (FROM; TO; Vr).", e_num:"Invalid number: {0}",
  e_unrec:"Not all three file kinds were recognised – complete them manually.", dlg_pick_one:"Select a file.", s_lx:"Import alignments from LandXML", s_lx_wait:"Reading LandXML (large files take a few minutes)…", s_lx_replace:"Replace the existing segments with the alignments from LandXML?", s_lx_ok:"Imported alignments:", dlg_opening:"Opening the file dialog …", e_nodlg:"The file dialog is not available – type the path manually.",
  pa_title:"Advanced parameters", pa_sub:"Driving model, tables from Annex 2 of the Rulebook and vehicles for the dynamic calculation (chapter 5).", pa_reset:"Restore defaults",
  pa_model:"Driving model", pa_tables:"Tables", pa_tables_h:"Values separated by comma or space. Vp–R uses the Vr and Rmin tables.", pa_veh:"Vehicles", pa_veh_h:"vlim empty = max Vr; b and idle empty = general values; P empty = traction curve from the Rulebook.",
@@ -275,7 +275,7 @@ function pageProject() {
       field(t("p_out"), pathRow(out, "folder", t("dlg_out"))), field(t("p_lang"), lang, t("p_lang_h")))),
     h("div", { class: "card" }, h("h3", {}, t("p_notes")), h("p", { class: "hint" }, t("p_notes_h")),
       h("div", { class: "grid" }, field(t("p_date"), txt(c.datum || "", { oninput: e => { c.datum = e.target.value; dirty(); } })),
-        field(t("p_desc"), ta("opis_sekcija")), field(t("p_scen"), ta("scenarij_obrazlozenje")), field(t("p_remarks"), rem))),
+        field(t("p_desc"), ta("opis_sekcija")), field(t("p_remarks"), rem))),
     h("div", { class: "card" }, h("h3", {}, t("p_settings")), h("p", { class: "hint" }, t("p_settings_h")),
       h("div", { class: "row" }, h("button", { class: "btn", onclick: saveSettings }, t("p_save_set")), h("button", { class: "btn", onclick: loadSettings }, t("p_load_set")))),
     navButtons(null, "sections"));
@@ -303,7 +303,7 @@ function pageSections() {
   const list = secs.length ? h("div", { class: "secs" }, secs.map((s, i) => h("div", { class: "sec" },
       h("div", { class: "no" }, i + 1),
       h("div", {}, h("div", { class: "t" }, t("t_" + s.tip)), h("div", { class: "m" }, h("span", { class: "range" }, `${fmtn(s.od)} – ${fmtn(s.do)} m`), "  ·  ", secOf(s),
-        (s.ogranicenja || []).length ? h("span", { class: "chip warn", style: "margin-left:8px" }, s.ogranicenja.map(z => `${z.v} km/h`).join(", ")) : null),
+        (s.zone_Vr || []).length ? h("span", { class: "chip warn", style: "margin-left:8px" }, s.zone_Vr.map(z => `Vr ${z.v}`).join(", ")) : null),
         h("div", { class: "bar" }, h("i", { style: `left:${(s.od - lo) / span * 100}%;width:${Math.max(1, (s.do - s.od) / span * 100)}%` }))),
       h("div", { class: "row" }, h("button", { class: "btn sm", disabled: i === 0, title: t("s_up"), onclick: () => moveSec(i, -1) }, "↑"), h("button", { class: "btn sm", disabled: i === secs.length - 1, title: t("s_down"), onclick: () => moveSec(i, 1) }, "↓"),
         h("button", { class: "btn sm", onclick: () => editSec(i) }, t("s_edit")), h("button", { class: "btn sm danger", onclick: () => delSec(i) }, t("s_del"))))))
@@ -355,8 +355,8 @@ async function editSec(i) {
     for (const k of ["razdjelni_pola", "ofset_desno", "ofset_lijevo"]) { const v = num(a.pf[k].querySelector("input").value); if (v != null) d[k] = v; }
     return d;
   }
-  const caps = h("textarea", { rows: 3, class: "mono" }); caps.value = (cur.ogranicenja || []).map(z => `${z.od}; ${z.do}; ${z.v}`).join("\n");
-  const why = txt(cur.ogranicenja_opis || "");
+  const caps = h("textarea", { rows: 3, class: "mono" }); caps.value = (cur.zone_Vr || []).map(z => `${z.od}; ${z.do}; ${z.v}`).join("\n");
+  const why = txt(cur.zone_Vr_opis || "");
   const auto = h("button", { class: "btn sm", onclick: async () => {
       const specs = Object.values(ax).map(a => specOf(a, false)); const r = await api("axisrange", { specs });
       if (r.error || r.lo == null) return toast(t("e_file", "") + " " + (r.error || ""), true);
@@ -371,7 +371,7 @@ async function editSec(i) {
     if (s.od == null || s.do == null || s.do <= s.od) throw new Error(t("e_range"));
     for (const [r, a] of Object.entries(ax)) { s[r] = specOf(a, true); }
     const cp = []; for (const ln of caps.value.split("\n")) { const l = ln.trim(); if (!l) continue; const p = l.replace(/;/g, " ").split(/\s+/).map(x => num(x)); if (p.length !== 3 || p.includes(null)) throw new Error(t("e_cap", l)); cp.push({ od: p[0], do: p[1], v: p[2] }); }
-    if (cp.length) s.ogranicenja = cp; if (why.value.trim()) s.ogranicenja_opis = why.value.trim();
+    if (cp.length) s.zone_Vr = cp; if (why.value.trim()) s.zone_Vr_opis = why.value.trim();
     return s;
   } });
   if (!res || res === true) return;

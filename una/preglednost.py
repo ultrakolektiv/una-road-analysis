@@ -187,7 +187,7 @@ def case_frame(c, par, s):
 
 def build_chain(ch, P, par, scen=1, side="D"):
     """Lanac slučajeva u smjeru vožnje → čvorovi (korak 1 m) po osovini vozne trake na strani side ('D' desno / 'L' lijevo od osovine)."""
-    cols = {k: [] for k in ("x", "y", "s", "ci", "z", "v", "g")}
+    cols = {k: [] for k in ("x", "y", "s", "ci", "z", "v", "g", "vr")}
     ob = {k: [] for k in ("rx", "ry", "lx", "ly")}            # prepreke u smjeru vožnje (desno/lijevo od vozača), CAD koordinate
     for ci, c in enumerate(ch):
         pr = case_prof(c, par)
@@ -209,7 +209,8 @@ def build_chain(ch, P, par, scen=1, side="D"):
         zc = np.interp(s, c.S, c.Z)
         if cols["z"]: zc = zc + (cols["z"][-1] - zc[0])
         cols["z"] += list(zc)
-        V = c.V2 if (scen == 2 and hasattr(c, "V2")) else c.V
+        V = c.V
+        cols["vr"] += list(np.interp(s, c.S, c.VRS))        # računska brzina Vr (zone) na tački
         cols["v"] += list(np.interp(s, c.S, V)); cols["g"] += list(c.sg * np.interp(s, c.S, c.G))
     A = {k: np.array(v) for k, v in cols.items()}
     for k, v in ob.items(): A["ob" + k] = np.array(v)
@@ -256,7 +257,7 @@ def _vert(A, par, a, b):
 
 def L_vp(A, par, a): return lzn(A["v"][a], A["g"][a], par) + par["dodatak_L"]      # + dodatak (npr. 7 m za puteve A kategorije – unosi korisnik)
 def L_fix(A, par, a): return float(par["L_zahtijevano"])
-def L_vr(A, par, a): return lzn(par["Vr"], A["g"][a], par) + par["dodatak_L"]      # preglednost za računsku brzinu Vr (nagib iz nivelete)
+def L_vr(A, par, a): return lzn(float(A["vr"][a]) if "vr" in A else par["Vr"], A["g"][a], par) + par["dodatak_L"]      # preglednost za računsku brzinu Vr (nagib iz nivelete)
 def L_zaht(A, par, a): return L_fix(A, par, a) if par["L_zahtijevano"] else L_vp(A, par, a)      # zahtijevana preglednost Pzp = preglednost na osnovu projektne brzine Vp i nagiba
 
 
@@ -274,7 +275,7 @@ def analyse(A, par, Lfun=L_vp):
             ux, uy = x[b] - x[a], y[b] - y[a]; un = math.hypot(ux, uy) + 1e-12
             k = np.arange(a + 1, b); cr = (ux * (y[k] - y[a]) - uy * (x[k] - x[a])) / un        # >0: čvor lijevo od tetive → tetiva desno od puta
             mR[k] = np.maximum(mR[k], np.where(cr > 0, cr, 0.0)); mL[k] = np.maximum(mL[k], np.where(cr < 0, -cr, 0.0))
-        rows.append(dict(i=a, s=float(A["s"][a]), q=float(q[a]), V=float(A["v"][a]), g=float(A["g"][a]), Lz=L, Lx=float(Lx), Dv=float(min(Dv, Lx)), trunc=trunc,
+        rows.append(dict(i=a, s=float(A["s"][a]), q=float(q[a]), V=float(A["v"][a]), vr=(float(A["vr"][a]) if "vr" in A else None), g=float(A["g"][a]), Lz=L, Lx=float(Lx), Dv=float(min(Dv, Lx)), trunc=trunc,
                          ok=(min(Dv, Lx) >= Lx - 1e-6), b=b))
     return dict(rows=rows, mR=mR, mL=mL)
 
