@@ -397,7 +397,7 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
         PD = prep.get("D") or prep["L"]
         q = 0.0; prev = None
         o_ = dict(naziv=_TF("{0} – {1}", (nm + " + " + cen) if (cen and sw is not None) else nm, _T("smjer stacionaže") if sg > 0 else _T("suprotno stacionaži")), q=[], s=[], x=[], y=[], z=[], tx=[], ty=[], k=[], el=[], v=[], g=[], D=[], Lz=[], ok=[],
-                  kind=[], jn=[], pt=[], gr=[], F=[], e=[], box=[], ring=[], ln=[], latD=[], latL=[], zeD=[], zeL=[], ob=[], ray=[], lim=[], hp=[])
+                  kind=[], jn=[], pt=[], hl=[], gr=[], F=[], e=[], box=[], ring=[], ln=[], latD=[], latL=[], zeD=[], zeL=[], ob=[], ray=[], lim=[], hp=[])
         z0cs = []; prev_nm = None
         for nm_s, ii in order:
             if prev_nm is not None and nm_s != prev_nm and o_["jn"]: o_["jn"][-1] = 1             # spoj dvije osovine: ne crta se kolovoz preko prekida
@@ -444,6 +444,27 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
                         lst.append((oo, float(zt) - z0))
             full = list(reversed(terr_L)) + pts + terr_R
             pt = None                                                           # portal tunela: visina terena iznad ulaza (poprečno), za čeoni zid
+            hl = None
+            if G["kind"] == "tunel" and dtm is not None:                        # brdo iznad tunela iz DTM-a (ne ispod krune svoda)
+                rg = G.get("ring") or []
+                def _crown(oo):
+                    zs = [zz for xx, zz in rg]; xs = [sg * xx for xx, zz in rg]
+                    if not xs or oo < min(xs) or oo > max(xs): return None
+                    return float(np.interp(oo, *zip(*sorted(zip(xs, zs)))))
+                hl = []
+                for oo in (-300, -220, -160, -115, -80, -55, -38, -26, -17, -11, -6, 0, 6, 11, 17, 26, 38, 55, 80, 115, 160, 220, 300):
+                    zt = dtm(x + nxd * oo, y + nyd * oo)
+                    zt = None if (zt is None or np.ma.is_masked(zt) or not np.isfinite(float(zt))) else float(zt) - z0
+                    cr = _crown(oo)
+                    if zt is not None and cr is not None: zt = max(zt, cr + 1.6)
+                    hl.append([oo, zt])
+                vv = [r_[1] for r_ in hl if r_[1] is not None]
+                if len(vv) < 5: hl = None
+                else:
+                    for j_ in range(len(hl)):                                    # izvan DTM-a: najbliža poznata visina
+                        if hl[j_][1] is None:
+                            k_ = min((r_ for r_ in range(len(hl)) if hl[r_][1] is not None), key=lambda r_: abs(r_ - j_)); hl[j_][1] = hl[k_][1]
+                    hl = [[o_a, round(z_a, 2)] for o_a, z_a in hl]
             if G["kind"] == "tunel" and dtm is not None:
                 ik = [S["G"][j]["kind"] if 0 <= j < len(S["G"]) else "tunel" for j in (ii - 1, ii + 1)]
                 if ik[0] != "tunel" or ik[1] != "tunel":
@@ -492,7 +513,7 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
             v_ = float(_interp_s(A, A["v"], sta, pp["o"])); g_ = float(_interp_s(A, A["g"], sta, pp["o"]))
             o_["q"].append(round(q, 2)); o_["s"].append(round(sta, 2)); o_["x"].append(round(x, 3)); o_["y"].append(round(y, 3)); o_["z"].append(round(z0, 3))
             o_["tx"].append(round(sg * math.sin(nu), 5)); o_["ty"].append(round(sg * math.cos(nu), 5)); o_["k"].append(round(kd, 6))
-            o_["el"].append(_elem_at(A_[nm_c], sta)); o_["kind"].append(G["kind"]); o_["jn"].append(0); o_["pt"].append(pt); o_["gr"].append(G["gr"]); o_["F"].append([[round(a_, 3), round(b_, 3)] for a_, b_ in full]); o_["e"].append(zones)
+            o_["el"].append(_elem_at(A_[nm_c], sta)); o_["kind"].append(G["kind"]); o_["jn"].append(0); o_["pt"].append(pt); o_["hl"].append(hl); o_["gr"].append(G["gr"]); o_["F"].append([[round(a_, 3), round(b_, 3)] for a_, b_ in full]); o_["e"].append(zones)
             bx = []
             for st_, a_, b_, h_, *pf in G["box"]:
                 lo, hi = sorted((sg * a_, sg * b_)); bx.append([st_, round(lo, 3), round(hi, 3), round(h_, 3)] + (list(pf) if pf else []))

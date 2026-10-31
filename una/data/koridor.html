@@ -44,8 +44,9 @@ const bs=(arr,v)=>{let lo=0,hi=arr.length-1;while(hi-lo>1){const m=(lo+hi)>>1;if
 function zp(F,o){const n=F.length;if(!n)return 0;if(o<=F[0][0])return F[0][1];if(o>=F[n-1][0])return F[n-1][1];let lo=0,hi=n-1;while(hi-lo>1){const m=(lo+hi)>>1;if(F[m][0]<=o)lo=m;else hi=m}const f=(o-F[lo][0])/((F[hi][0]-F[lo][0])||1);return F[lo][1]+(F[hi][1]-F[lo][1])*f}
 function setRoute(k){key=k;rtSel.value=k;SEC=[];const n=R_len(k);R=DATA.routes[k];
  for(let i=0;i<n;i++){const a=Math.max(0,i-1),b=Math.min(n-1,i+1);let tx=R.x[b]-R.x[a],ty=R.y[b]-R.y[a];const l=Math.hypot(tx,ty)||1;tx/=l;ty/=l;const e=R.e[i],F=R.F[i];
-  SEC.push({i,q:R.q[i],s:R.s[i],x:R.x[i],y:R.y[i],z:R.z[i],tx,ty,nx:ty,ny:-tx,F,E:e,kind:R.kind[i],jn:R.jn?R.jn[i]:0,pt:R.pt?R.pt[i]:null,gr:R.gr[i],ob:R.ob[i],box:R.box[i],ring:R.ring[i],v:R.v[i],g:R.g[i],k:R.k[i],el:R.el[i],D:R.D[i],Lz:R.Lz[i],ok:R.ok[i],ray:R.ray[i],lim:R.lim[i],hp:R.hp[i],ln:R.ln[i],ec:0,zl:0,lat:0})}
+  SEC.push({i,q:R.q[i],s:R.s[i],x:R.x[i],y:R.y[i],z:R.z[i],tx,ty,nx:ty,ny:-tx,F,E:e,kind:R.kind[i],jn:R.jn?R.jn[i]:0,pt:R.pt?R.pt[i]:null,hl:R.hl?R.hl[i]:null,gr:R.gr[i],ob:R.ob[i],box:R.box[i],ring:R.ring[i],v:R.v[i],g:R.g[i],k:R.k[i],el:R.el[i],D:R.D[i],Lz:R.Lz[i],ok:R.ok[i],ray:R.ray[i],lim:R.lim[i],hp:R.hp[i],ln:R.ln[i],ec:0,zl:0,lat:0})}
  for(let i=0;i<n;i++){let a=0,c=0;for(let j=Math.max(0,i-18);j<=Math.min(n-1,i+18);j++){a+=SEC[j].ln;c++}const w=(a/c+1)/2;SEC[i].ec=R.latL[i]+(R.latD[i]-R.latL[i])*w;SEC[i].zl=R.zeL[i]+(R.zeD[i]-R.zeL[i])*w}
+ PTI=[];for(let i=0;i<n;i++)if(SEC[i].pt)PTI.push(i);
  q=R.q[0];const sl=document.getElementById('sl');sl.max=R.q[n-1]-R.q[0];yawS=null;buildMini()}
 function R_len(k){return DATA.routes[k].q.length}
 function smp(v){const n=SEC.length;v=Math.min(Math.max(v,SEC[0].q),SEC[n-1].q-1e-6);const i=bs(R.q,v),a=SEC[i],b=SEC[i+1],f=(v-a.q)/((b.q-a.q)||1);const lp=(u,w)=>u+(w-u)*f;
@@ -55,7 +56,7 @@ let CAM=null;
 function setCam(){const e=smp(q),a=smp(q+18),b=smp(q+45);const ez=e.z+eyeH;const yaw=Math.atan2(a.y-e.y,a.x-e.x);const pit=Math.atan2(b.z+eyeH-ez,45)*0.85;
  if(yawS===null)yawS=yaw;let d=yaw-yawS;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;yawS+=d*0.25;pitS+=(pit-pitS)*0.2;
  CAM={ex:e.x,ey:e.y,ez:ez,cy:Math.cos(yawS),sy:Math.sin(yawS),cp:Math.cos(pitS),sp:Math.sin(pitS),e}}
-let Wd=0,Hd=0,foc=1,hx=0,hy=0;
+let PTI=[],camTun=false,Wd=0,Hd=0,foc=1,hx=0,hy=0;
 function proj(P){const dx=P[0]-CAM.ex,dy=P[1]-CAM.ey,dz=P[2]-CAM.ez;const f=dx*CAM.cy+dy*CAM.sy,r=dx*CAM.sy-dy*CAM.cy;const f2=f*CAM.cp+dz*CAM.sp,u2=dz*CAM.cp-f*CAM.sp;if(f2<0.35)return null;return [hx+foc*r/f2,hy-foc*u2/f2,f2]}
 function clipN(pts){const NEAR=.35,c=pts.map(P=>{const dx=P[0]-CAM.ex,dy=P[1]-CAM.ey,dz=P[2]-CAM.ez;const f=dx*CAM.cy+dy*CAM.sy,r=dx*CAM.sy-dy*CAM.cy;return [r,f*CAM.cp+dz*CAM.sp,dz*CAM.cp-f*CAM.sp]});
  const o=[];for(let i=0;i<c.length;i++){const A=c[i],B=c[(i+1)%c.length],ia=A[1]>=NEAR,ib=B[1]>=NEAR;if(ia)o.push(A);if(ia!==ib){const u=(NEAR-A[1])/(B[1]-A[1]);o.push([A[0]+(B[0]-A[0])*u,NEAR,A[2]+(B[2]-A[2])*u])}}
@@ -77,6 +78,13 @@ function portal(a,fog){const P=a.pt,R=a.ring,cz=2.4,TH=.9,BW=1.2;
   poly([Wq(a,Q[j][0],Q[j][1],TH),Wq(a,Q[j+1][0],Q[j+1][1],TH),Wq(a,Q[j+1][0],Q[j+1][1],0),Wq(a,Q[j][0],Q[j][1],0)],fog([168,167,160]));        // gornja ploha ispusta
   poly([Wq(a,R[j][0],R[j][1],TH),Wq(a,R[j+1][0],R[j+1][1],TH),Wq(a,Q[j+1][0],Q[j+1][1],TH),Wq(a,Q[j][0],Q[j][1],TH)],fog([196,195,188]))}       // čeona ploča
 }
+function hill(a,b,fa){const fg=1-Math.exp(-fa/420),H=a.hl,Hb=b.hl,sm=(x0,x1,v)=>{const u=Math.min(1,Math.max(0,(v-x0)/(x1-x0)));return u*u*(3-2*u)};
+ for(let k=0;k<H.length-1;k++){const o1=H[k][0],o2=H[k+1][0],z1=H[k][1],z2=H[k+1][1],zb1=Hb[k][1],zb2=Hb[k+1][1],om=(o1+o2)/2;
+  const dz=(z2-z1)/(o2-o1),sl=Math.min(1.6,Math.abs(dz)),lon=((zb1+zb2)-(z1+z2))/2/Math.max(.5,b.q-a.q),hg=a.z+(z1+z2)/2,
+   cn=hs(Math.floor(a.q/7)*2.3+Math.floor(om/9)*5.1),cn2=hs(Math.floor(a.q/19)*1.7+Math.floor(om/23)*3.3),lit=.80+.20*Math.max(-1,Math.min(1,(dz>0?.55:-.35)-lon*1.4)),rf=sm(.5,.95,sl+(cn-.5)*.22),
+   st=(Math.floor(hg*1.1)&1)?.9:1.04,g=[C.grass2[0]+(C.grass[0]-C.grass2[0])*cn2,C.grass2[1]+(C.grass[1]-C.grass2[1])*cn2,C.grass2[2]+(C.grass[2]-C.grass2[2])*cn2],
+   rk=[C.rock[0]*st*(.94+.1*cn),C.rock[1]*st*(.94+.1*cn),C.rock[2]*st*(.94+.1*cn)],col=sc([g[0]+(rk[0]-g[0])*rf,g[1]+(rk[1]-g[1])*rf,g[2]+(rk[2]-g[2])*rf],lit*(1-Math.min(.2,sl*.1)));
+  poly([W(a,o1,z1),W(a,o2,z2),W(b,o2,zb2),W(b,o1,zb1)],mix(col,C.haze,Math.min(.92,fg*1.05)))}}
 function strip(a,b,fa){
  const tun=a.kind==="tunel",fogT=1-Math.exp(-fa/420);const fog=(c)=>tun?mix(c,C.dark,Math.min(1,fa/110)):mix(c,C.haze,Math.min(.92,fogT*1.05));
  const ea=a.E,eb=b.E,e=ea.e;
@@ -116,7 +124,7 @@ function strip(a,b,fa){
    for(let m=0;m<NJ.length-1;m++){const p0=NJ[m],p1=NJ[m+1];poly([W(a,inn+dr*p0[0],za+p0[1]*sa),W(a,inn+dr*p1[0],za+p1[1]*sa),W(b,inb+drb*p1[0],zb+p1[1]*sb),W(b,inb+drb*p0[0],zb+p0[1]*sb)],fog(cl[m]))}
    const kq=Math.ceil(a.q/6)*6;if(kq<b.q){const f=(kq-a.q)/((b.q-a.q)||1),o=inn+(inb-inn)*f,z=za+(zb-za)*f,px=a.x+(b.x-a.x)*f+(a.nx+(b.nx-a.nx)*f)*o,py=a.y+(b.y-a.y)*f+(a.ny+(b.ny-a.ny)*f)*o,pz=a.z+(b.z-a.z)*f+z;const s1=proj([px,py,pz+.02]),s2=proj([px,py,pz+.8*sa]);if(s1&&s2){cx.strokeStyle=fog([120,119,114]);cx.lineWidth=Math.max(1,foc*.012/s1[2]);cx.beginPath();cx.moveTo(s1[0],s1[1]);cx.lineTo(s2[0],s2[1]);cx.stroke()}}}
   else{poly([W(a,inn,za),W(a,inn,ta),W(b,inb,tb),W(b,inb,zb)],fog(col));poly([W(a,inn,ta),W(a,ouA,ta),W(b,ouB,tb),W(b,inb,tb)],fog([col[0]*.88,col[1]*.88,col[2]*.88]))}}
- if(a.pt&&a.ring.length>3){portal(a,fog)}
+ if(a.pt&&a.ring.length>3){portal(a,(c)=>camTun?fog(c):mix(c,C.haze,Math.min(.92,fogT*1.05)))}
  if(tun&&a.ring.length&&a.ring.length===b.ring.length){const A=a.ring,B=b.ring;for(let j=0;j<A.length-1;j++){const sh=(j<4||j>A.length-5)?C.tun:C.tunC;poly([W(a,A[j][0],A[j][1]),W(a,A[j+1][0],A[j+1][1]),W(b,B[j+1][0],B[j+1][1]),W(b,B[j][0],B[j][1])],fog(sh))}
   const kq=Math.ceil(a.q/12)*12;if(kq<b.q){const pm=smp(kq),mid=A[(A.length>>1)];const s1=proj([pm.x+pm.ty*0,pm.y,pm.z+mid[1]+(a.z-pm.z)]);if(s1){const gl=mix([255,244,200],C.dark,Math.min(1,fa/280));cx.fillStyle=gl;const w=Math.max(2,foc*2.2/s1[2]);cx.fillRect(s1[0]-w/2,s1[1]-w*.1,w,w*.2)}}}
  const PVx=a.E.pv||[[-a.E.e,a.E.e]],gh=PVx.length>1?Math.abs(PVx[1][0]):0;const rails=[];
@@ -145,7 +153,7 @@ function rays(sec,bad){const r=sec.ray;if(!r)return;const t=T();
 function frame(){
  const dpr=Math.min(2,window.devicePixelRatio||1);if(cv.width!==(cv.clientWidth*dpr|0)||cv.height!==(cv.clientHeight*dpr|0)){cv.width=cv.clientWidth*dpr;cv.height=cv.clientHeight*dpr}
  Wd=cv.width;Hd=cv.height;foc=Wd/(2*Math.tan(35*Math.PI/180));hx=Wd/2;hy=Hd*0.47;
- setCam();const e=CAM.e,tun=e.sec.kind==="tunel";
+ setCam();const e=CAM.e,tun=e.sec.kind==="tunel";camTun=tun;
  const g=cx.createLinearGradient(0,0,0,hy);if(tun){g.addColorStop(0,"#0a0b0d");g.addColorStop(1,"#14161a")}else{g.addColorStop(0,"#2f6fb8");g.addColorStop(.55,"#6ea6dc");g.addColorStop(.88,"#cfe3f3");g.addColorStop(1,"#eaf2f8")}
  cx.fillStyle=g;cx.fillRect(0,0,Wd,Hd);cx.fillStyle=tun?"#0a0b0d":mix(C.grass,C.rock,.25);cx.fillRect(0,hy,Wd,Hd-hy);
  if(!tun){const az=x=>yawS+Math.atan((x-hx)/foc),sunAz=0.55,sx=hx+foc*Math.tan(sunAz-yawS>Math.PI?sunAz-yawS-2*Math.PI:sunAz-yawS);
@@ -153,8 +161,9 @@ function frame(){
   for(let L=0;L<3;L++){const amp=Hd*(.055+.03*L),base=hy-Hd*(.004+.0*L),f1=1.7+L*.9,f2=4.1+L*1.7,off=L*2.3;cx.beginPath();cx.moveTo(0,hy);for(let x=0;x<=Wd;x+=8){const A=az(x);const y=base-amp*(.55+.3*Math.sin(A*f1+off)+.15*Math.sin(A*f2+off*1.7))*(.7+.3*Math.sin(A*.6+L));cx.lineTo(x,y)}cx.lineTo(Wd,hy);cx.closePath();cx.fillStyle=mix([70,96,120],C.haze,.45+.17*(2-L)*(.5));cx.globalAlpha=.9;cx.fill();cx.globalAlpha=1}
   const hz=cx.createLinearGradient(0,hy-Hd*.09,0,hy+Hd*.03);hz.addColorStop(0,"rgba(214,230,243,0)");hz.addColorStop(.7,"rgba(214,230,243,.75)");hz.addColorStop(1,"rgba(214,230,243,.3)");cx.fillStyle=hz;cx.fillRect(0,hy-Hd*.09,Wd,Hd*.12)}
  const n=SEC.length,qend=SEC[n-1].q-1e-3,maxd=tun?280:620;let i0=bs(R.q,q+1.5);const idx=[i0];let j=i0;
- while(j<n-1){const d=SEC[j].q-q;const st=d<40?1:d<120?2:d<300?4:8;j=Math.min(n-1,j+st);idx.push(j);if(SEC[j].q-q>maxd)break}
- for(let k=idx.length-2;k>=0;k--)if(!SEC[idx[k]].jn)strip(SEC[idx[k]],SEC[idx[k+1]],SEC[idx[k]].q-q);
+ while(j<n-1){const d=SEC[j].q-q;const st=d<40?1:d<120?2:d<300?4:8;j=Math.min(n-1,(Math.floor(j/st)+1)*st);idx.push(j);if(SEC[j].q-q>maxd)break}
+ for(let m=0;m<PTI.length;m++){const p=PTI[m];if(p>idx[0]&&p<idx[idx.length-1]&&idx.indexOf(p)<0){let u=0;while(idx[u]<p)u++;idx.splice(u,0,p)}}
+ for(let k=idx.length-2;k>=0;k--)if(!SEC[idx[k]].jn){const A_=SEC[idx[k]],B_=SEC[idx[k+1]];strip(A_,B_,A_.q-q);if(A_.kind==="tunel"&&!camTun&&A_.hl&&B_.hl&&A_.hl.length===B_.hl.length)hill(A_,B_,A_.q-q)}
  const Lz=e.Lz,Dv=Math.min(e.D,900),bad=e.ok!==0&&Dv<Lz;
  rays(e.sec,bad);
   {const vg=cx.createRadialGradient(Wd/2,Hd*.5,Math.min(Wd,Hd)*.45,Wd/2,Hd*.5,Math.max(Wd,Hd)*.75);vg.addColorStop(0,"rgba(0,0,0,0)");vg.addColorStop(1,tun?"rgba(0,0,0,.35)":"rgba(10,20,35,.28)");cx.fillStyle=vg;cx.fillRect(0,0,Wd,Hd)}
