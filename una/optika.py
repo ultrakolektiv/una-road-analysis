@@ -63,7 +63,7 @@ def xd_rows(out, k, dv_min=2.0):
 
 def run_pp(P, par, out, o, log=print):
     """Preticajna preglednost po tragovima: oko 1,0 m, predmet 1,3 m; ostvareni % = dio dužine gdje je raspoloživa preglednost ≥ Pp."""
-    par2 = dict(par); par2["Lmax"] = max(Pp_of(P.Vr, o), Pp_of(max(float(np.max(R["A"]["v"])) for R in out["vp"].values()), o)); 
+    par2 = dict(par); par2["Lmax"] = max(Pp_of(max(float(np.max(R["A"].get("vr", [P.Vr]))) for R in out["vp"].values()), o), Pp_of(max(float(np.max(R["A"]["v"])) for R in out["vp"].values()), o)); 
     if o["h_predmeta_preticanje"] is not None: par2["h_prepreke"] = par2["h_pr"] = o["h_predmeta_preticanje"]; par2["h_auto"] = False
     res = {}
     for key, R in out["vp"].items():
@@ -71,7 +71,7 @@ def run_pp(P, par, out, o, log=print):
         A = R["A"]
         if o["Pp_po"] == "Vp": Lf = lambda A_, p_, a: Pp_of(A_["v"][a], o)
         else:
-            Pv = Pp_of(P.Vr, o); Lf = lambda A_, p_, a, Pv=Pv: Pv
+            Lf = lambda A_, p_, a: Pp_of(float(A_["vr"][a]) if "vr" in A_ else P.Vr, o)       # Pp za računsku brzinu na tački (zone Vr)
         E = pg.expected(A, par2, Lf)
         rows = E["rows"]; use = [r for r in rows if not r["trunc"]] or rows
         okn = sum(1 for r in use if r["ok"]); pr = 100.0 * okn / len(use)
@@ -193,6 +193,8 @@ def build_md(P, par, out, pp, o, cfg, figs, att, name, template_mode=False):
         A(tab(_T('Zaustavna preglednost Pz u funkciji računske brzine deonice (Pravilnik, tabela 4-01)')))
         A(table(["Vri [km/h]"] + [str(v) for v in pg.PZ_RS_V], [["Pz [m]"] + [str(v) for v in pg.PZ_RS]]))
     A(_TF('Za računsku brzinu Vr = {0} km/h zaustavna preglednost je Pz = {1} m', fm(P.Vr), fm(pg.lzn(P.Vr, 0, par) + par['dodatak_L'])) + (_T(' (Pravilnik, tabela 4-01).') if RS else _T(' (Crtež 52, nagib 0 %).')) + "\n")
+    vrs = sorted({round(float(v), 1) for R_ in out["vp"].values() if "vr" in R_["A"] for v in R_["A"]["vr"]} - {round(float(P.Vr), 1)})
+    if vrs: A(_T('U zonama računske brzine zahtijevana zaustavna preglednost i preticajna preglednost određuju se za računsku brzinu zone: ') + "; ".join(_TF('Vr = {0} km/h – Pz = {1} m', fm(v), fm(pg.lzn(v, 0, par) + par['dodatak_L'])) for v in vrs) + ".\n")
     A(_T('# Raspoloživa i preticajna preglednost\n'))
     A(_T('## Raspoloživa preglednost Pr\n'))
     A(_T('Raspoloživa preglednost Pr određena je kao najduža tetiva od oka vozača koju dozvoljavaju prepreka uz kolovoz (horizontalna preglednost) i niveleta (vertikalna preglednost). Rezultati su dati po tragovima, za oba smjera vožnje, a kompletan proračun je u prilogu (Excel i Tabela 4).\n'))

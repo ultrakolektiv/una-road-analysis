@@ -34,24 +34,24 @@ button{cursor:pointer}button:hover{background:#26304a}
 <div class="pn" id="bot"><canvas id="mm" width="300" height="220"></canvas><canvas id="ch" width="1600" height="220"></canvas></div>
 <script>
 const DATA=/*__DATA__*/null;
-const L={bs:{title:"Vožnja kroz koridor (Civil 3D) – oko vozača",st:"Stacionaža",sp:"Brzina Vp",rad:"Radijus",str:"pravac",cs:"Poprečni nagib",gr:"Uzdužni nagib",el:"Element",e0:"pravac",e1:"prijelaznica",e2:"kružni luk",sd:"Raspoloživa preglednost",rq:"Zahtijevana preglednost",oko:"Oko od ose kolovoza",pre:"Prepreka od ivice kolovoza",ob:"Prepreka (zraka)",nop:"nema",okt:"PREGLEDNOST ZADOVOLJAVA",bh:"NEDOVOLJNO – horizontalna (prepreka)",bv:"NEDOVOLJNO – vertikalna (niveleta)",eye:"Oko [m]",left:"lijevo",right:"desno",t:{otvorena:"Otvorena trasa",most:"Most / vijadukt",tunel:"Tunel"},ln:"Raspoloživa",lr:"Zahtijevana",spd:"Brzina",pr:"Profil",rail:"Čelična ograda",rl:"na"},
-en:{title:"Corridor drive-through (Civil 3D) – driver's eye",st:"Chainage",sp:"Speed Vp",rad:"Radius",str:"tangent",cs:"Cross slope",gr:"Grade",el:"Element",e0:"tangent",e1:"transition",e2:"circular arc",sd:"Available sight distance",rq:"Required sight distance",oko:"Eye from carriageway axis",pre:"Obstacle from carriageway edge",ob:"Obstacle (ray)",nop:"none",okt:"SIGHT DISTANCE OK",bh:"INSUFFICIENT – horizontal (obstacle)",bv:"INSUFFICIENT – vertical (grade line)",eye:"Eye [m]",left:"left",right:"right",t:{otvorena:"Open road",most:"Bridge / viaduct",tunel:"Tunnel"},ln:"Available",lr:"Required",spd:"Speed",pr:"Section",rail:"Steel barrier",rl:"at"}};
+const L={bs:{title:"Vožnja kroz koridor (Civil 3D) – oko vozača",st:"Stacionaža",vr:"Računska brzina Vr",sp:"Brzina Vp",rad:"Radijus",str:"pravac",cs:"Poprečni nagib",gr:"Uzdužni nagib",el:"Element",e0:"pravac",e1:"prijelaznica",e2:"kružni luk",sd:"Raspoloživa preglednost",rq:"Zahtijevana preglednost",oko:"Oko od ose kolovoza",pre:"Prepreka od ivice kolovoza",ob:"Prepreka (zraka)",nop:"nema",okt:"PREGLEDNOST ZADOVOLJAVA",bh:"NEDOVOLJNO – horizontalna (prepreka)",bv:"NEDOVOLJNO – vertikalna (niveleta)",eye:"Oko [m]",left:"lijevo",right:"desno",t:{otvorena:"Otvorena trasa",most:"Most / vijadukt",tunel:"Tunel"},ln:"Raspoloživa",lr:"Zahtijevana",spd:"Brzina",pr:"Profil",rail:"Čelična ograda",rl:"na"},
+en:{title:"Corridor drive-through (Civil 3D) – driver's eye",st:"Chainage",vr:"Design speed Vr",sp:"Speed Vp",rad:"Radius",str:"tangent",cs:"Cross slope",gr:"Grade",el:"Element",e0:"tangent",e1:"transition",e2:"circular arc",sd:"Available sight distance",rq:"Required sight distance",oko:"Eye from carriageway axis",pre:"Obstacle from carriageway edge",ob:"Obstacle (ray)",nop:"none",okt:"SIGHT DISTANCE OK",bh:"INSUFFICIENT – horizontal (obstacle)",bv:"INSUFFICIENT – vertical (grade line)",eye:"Eye [m]",left:"left",right:"right",t:{otvorena:"Open road",most:"Bridge / viaduct",tunel:"Tunnel"},ln:"Available",lr:"Required",spd:"Speed",pr:"Section",rail:"Steel barrier",rl:"at"}};
 let lang=DATA.lang==="en"?"en":"bs";const T=()=>L[lang];
 const cv=document.getElementById('cv'),cx=cv.getContext('2d'),mm=document.getElementById('mm'),mx=mm.getContext('2d'),ch=document.getElementById('ch'),chx=ch.getContext('2d');
-const rtSel=document.getElementById('rt');Object.keys(DATA.routes).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=DATA.routes[k].naziv;rtSel.appendChild(o)});
+const rtSel=document.getElementById('rt');Object.keys(DATA.routes).forEach(k=>{const o=document.createElement('option');o.value=k;o.dataset.k=k;o.textContent=DATA.routes[k].naziv;rtSel.appendChild(o)});function rtLab(){[...rtSel.options].forEach(o=>{const r=DATA.routes[o.dataset.k];o.textContent=(lang==='en'?r.naziv_en:r.naziv_bs)||r.naziv})};
 let R=null,key=null,q=0,playing=true,speedF=1,eyeH=DATA.h,last=0,yawS=null,pitS=0,SEC=[];
 const bs=(arr,v)=>{let lo=0,hi=arr.length-1;while(hi-lo>1){const m=(lo+hi)>>1;if(arr[m]<=v)lo=m;else hi=m}return lo};
 function zp(F,o){const n=F.length;if(!n)return 0;if(o<=F[0][0])return F[0][1];if(o>=F[n-1][0])return F[n-1][1];let lo=0,hi=n-1;while(hi-lo>1){const m=(lo+hi)>>1;if(F[m][0]<=o)lo=m;else hi=m}const f=(o-F[lo][0])/((F[hi][0]-F[lo][0])||1);return F[lo][1]+(F[hi][1]-F[lo][1])*f}
 function setRoute(k){key=k;rtSel.value=k;SEC=[];const n=R_len(k);R=DATA.routes[k];
  for(let i=0;i<n;i++){const a=Math.max(0,i-1),b=Math.min(n-1,i+1);let tx=R.x[b]-R.x[a],ty=R.y[b]-R.y[a];const l=Math.hypot(tx,ty)||1;tx/=l;ty/=l;const e=R.e[i],F=R.F[i];
-  SEC.push({i,q:R.q[i],s:R.s[i],x:R.x[i],y:R.y[i],z:R.z[i],tx,ty,nx:ty,ny:-tx,F,E:e,kind:R.kind[i],jn:R.jn?R.jn[i]:0,pt:R.pt?R.pt[i]:null,hl:R.hl?R.hl[i]:null,gr:R.gr[i],ob:R.ob[i],box:R.box[i],ring:R.ring[i],v:R.v[i],g:R.g[i],k:R.k[i],el:R.el[i],D:R.D[i],Lz:R.Lz[i],ok:R.ok[i],ray:R.ray[i],lim:R.lim[i],hp:R.hp[i],ln:R.ln[i],ec:0,zl:0,lat:0})}
+  SEC.push({i,q:R.q[i],s:R.s[i],x:R.x[i],y:R.y[i],z:R.z[i],tx,ty,nx:ty,ny:-tx,F,E:e,kind:R.kind[i],vr:R.vr?R.vr[i]:null,jn:R.jn?R.jn[i]:0,pt:R.pt?R.pt[i]:null,hl:R.hl?R.hl[i]:null,gr:R.gr[i],ob:R.ob[i],box:R.box[i],ring:R.ring[i],v:R.v[i],g:R.g[i],k:R.k[i],el:R.el[i],D:R.D[i],Lz:R.Lz[i],ok:R.ok[i],ray:R.ray[i],lim:R.lim[i],hp:R.hp[i],ln:R.ln[i],ec:0,zl:0,lat:0})}
  for(let i=0;i<n;i++){let a=0,c=0;for(let j=Math.max(0,i-18);j<=Math.min(n-1,i+18);j++){a+=SEC[j].ln;c++}const w=(a/c+1)/2;SEC[i].ec=R.latL[i]+(R.latD[i]-R.latL[i])*w;SEC[i].zl=R.zeL[i]+(R.zeD[i]-R.zeL[i])*w}
  PTI=[];for(let i=0;i<n;i++)if(SEC[i].pt)PTI.push(i);
  q=R.q[0];const sl=document.getElementById('sl');sl.max=R.q[n-1]-R.q[0];yawS=null;buildMini()}
 function R_len(k){return DATA.routes[k].q.length}
 function smp(v){const n=SEC.length;v=Math.min(Math.max(v,SEC[0].q),SEC[n-1].q-1e-6);const i=bs(R.q,v),a=SEC[i],b=SEC[i+1],f=(v-a.q)/((b.q-a.q)||1);const lp=(u,w)=>u+(w-u)*f;
  let tx=lp(a.tx,b.tx),ty=lp(a.ty,b.ty);const l=Math.hypot(tx,ty)||1;tx/=l;ty/=l;const ec=lp(a.ec,b.ec);
- return {i,q:v,x:lp(a.x,b.x)+ty*ec,y:lp(a.y,b.y)-tx*ec,z:lp(a.zl,b.zl),tx,ty,s:lp(a.s,b.s),v:lp(a.v,b.v),g:lp(a.g,b.g),k:lp(a.k,b.k),D:lp(a.D,b.D),Lz:lp(a.Lz,b.Lz),ok:a.ok,el:a.el,sec:a,sb:b,f}}
+ return {i,q:v,x:lp(a.x,b.x)+ty*ec,y:lp(a.y,b.y)-tx*ec,z:lp(a.zl,b.zl),tx,ty,s:lp(a.s,b.s),v:lp(a.v,b.v),g:lp(a.g,b.g),k:lp(a.k,b.k),D:lp(a.D,b.D),Lz:lp(a.Lz,b.Lz),ok:a.ok,el:a.el,vr:a.vr,sec:a,sb:b,f}}
 let CAM=null;
 function setCam(){const e=smp(q),a=smp(q+18),b=smp(q+45);const ez=e.z+eyeH;const yaw=Math.atan2(a.y-e.y,a.x-e.x);const pit=Math.atan2(b.z+eyeH-ez,45)*0.85;
  if(yawS===null)yawS=yaw;let d=yaw-yawS;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;yawS+=d*0.25;pitS+=(pit-pitS)*0.2;
@@ -174,7 +174,7 @@ function obTxt(a,t){const v=a.ob.filter(x=>x!=null);if(!v.length)return t.nop;co
 function hud(e,bad,Lz,Dv){const t=T(),id=x=>document.getElementById(x),a=e.sec;id('t_proj').textContent=(DATA.projekat||'')+' · '+t.title;id('v').textContent=e.v.toFixed(0);
  const k=Math.abs(e.k),Rr=k>1/9000?1/k:0,dir=e.k>0?t.right:t.left;
  let csl=(zp(a.F,a.E.e)-zp(a.F,0))/(a.E.e||1)*100;if(a.E.pv&&a.E.pv.length>1){const r=a.E.pv.reduce((u,w)=>Math.abs((u[0]+u[1])/2-a.ec)<Math.abs((w[0]+w[1])/2-a.ec)?u:w),wd=(r[1]-r[0])||1;csl=((r[0]+r[1])/2>=0?zp(a.F,r[1])-zp(a.F,r[0]):zp(a.F,r[0])-zp(a.F,r[1]))/wd*100}
- const rows=[[t.st,fmtSta(e.s)],[t.el,t['e'+e.el]],[t.rad,Rr?`R=${Rr.toFixed(0)} m (${dir})`:t.str],[t.cs,csl.toFixed(1)+' %'],[t.gr,(e.g>=0?'+':'')+e.g.toFixed(2)+' %'],[t.pr,t.t[a.kind]||a.kind],[t.sd,Dv>=900?'>900 m':Dv.toFixed(0)+' m'],[t.rq,Lz.toFixed(0)+' m'],[t.oko,Math.abs(e.sec.ec).toFixed(2)+' m ('+(e.sec.ec>=0?t.right:t.left)+')'],[t.pre,obTxt(a,t)]];
+ const rows=[[t.st,fmtSta(e.s)],[t.el,t['e'+e.el]],[t.rad,Rr?`R=${Rr.toFixed(0)} m (${dir})`:t.str],[t.cs,csl.toFixed(1)+' %'],[t.gr,(e.g>=0?'+':'')+e.g.toFixed(2)+' %'],[t.pr,t.t[a.kind]||a.kind],[t.sd,Dv>=900?'>900 m':Dv.toFixed(0)+' m'],[t.rq,Lz.toFixed(0)+' m'],[t.oko,Math.abs(e.sec.ec).toFixed(2)+' m ('+(e.sec.ec>=0?t.right:t.left)+')'],[t.pre,obTxt(a,t)]];if(R.vr&&R.vr[0]!=null&&Math.max(...R.vr)-Math.min(...R.vr)>.5)rows.splice(1,0,[t.vr,e.vr!=null?e.vr.toFixed(0)+' km/h':'']);
  id('tb').innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('');
  const st=id('st');const lim=e.ok===1?t.bh:e.ok===2?t.bv:'';st.className=bad?'bad':'ok';st.textContent=bad?lim:t.okt;
  id('pfn').textContent=t.t[a.kind]||a.kind;id('pfo').textContent='';
@@ -189,6 +189,7 @@ function chart(){const w=ch.width,h=ch.height,n=R.q.length;chx.clearRect(0,0,w,h
  for(let i=0;i<n-1;i++){const t=R.kind[i];if(t!=="otvorena"){chx.fillStyle=t==="tunel"?"rgba(150,155,165,.35)":"rgba(209,154,102,.35)";chx.fillRect(X(R.q[i]),0,X(R.q[i+1])-X(R.q[i])+1,h)}}
  const vmax=Math.max(60,Math.ceil(Math.max(...R.v)/20)*20),Y=(v,m)=>h-8-(v/m)*(h-16);
  const line=(arr,col,m,cap)=>{chx.strokeStyle=col;chx.lineWidth=2;chx.beginPath();for(let i=0;i<n;i++){const x=X(R.q[i]),y=Y(cap?Math.min(arr[i],cap):arr[i],m);i?chx.lineTo(x,y):chx.moveTo(x,y)}chx.stroke()};
+ if(R.vr&&R.vr[0]!=null&&Math.max(...R.vr)-Math.min(...R.vr)>.5){chx.strokeStyle="#ff5a4f";chx.setLineDash([6,5]);chx.lineWidth=1.5;chx.beginPath();for(let i=0;i<n;i++){const x=X(R.q[i]),y=Y(R.vr[i],vmax);i?chx.lineTo(x,y):chx.moveTo(x,y)}chx.stroke();chx.setLineDash([])}
  line(R.v,"#3ddc84",vmax);line(R.Lz,"#ffb020",500,500);line(R.D,"#4cc3ff",500,500);
  for(let i=0;i<n-1;i++)if(R.ok[i]&&R.D[i]<R.Lz[i]){chx.fillStyle="rgba(255,90,79,.9)";chx.fillRect(X(R.q[i]),h-6,Math.max(2,X(R.q[i+1])-X(R.q[i])),6)}
  chx.fillStyle="#9aa7b8";chx.font="18px system-ui";chx.fillText("— "+T().spd+"  — "+T().lr+"  — "+T().ln+" (0–500 m)",14,22);
@@ -198,12 +199,12 @@ document.getElementById('sl').addEventListener('input',e=>{q=R.q[0]+(+e.target.v
 document.getElementById('pl').onclick=()=>{playing=!playing;document.getElementById('pl').textContent=playing?'⏸':'▶'};
 document.getElementById('sp').onchange=e=>speedF=+e.target.value;rtSel.onchange=e=>setRoute(e.target.value);
 const eh=document.getElementById('eh');eh.value=eyeH;eh.onchange=()=>{eyeH=Math.min(3,Math.max(.5,+eh.value||1))};
-document.getElementById('lg').onclick=()=>{lang=lang==='en'?'bs':'en';document.getElementById('lg').textContent=lang==='en'?'BS':'EN';stat()};
+document.getElementById('lg').onclick=()=>{lang=lang==='en'?'bs':'en';rtLab();document.getElementById('lg').textContent=lang==='en'?'BS':'EN';stat()};
 function stat(){document.getElementById('t_h').textContent=T().eye}
 window.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();document.getElementById('pl').click()}if(e.code==='ArrowRight'){q+=40;yawS=null}if(e.code==='ArrowLeft'){q-=40;yawS=null}});
 function loop(t){const dt=Math.min(.1,(t-last)/1000||0);last=t;if(playing){const e=smp(q);q+=Math.max(5,e.v)/3.6*dt*speedF;if(q>=R.q[R.q.length-1]-2)q=R.q[0]}
  q=Math.min(Math.max(q,R.q[0]),R.q[R.q.length-1]-2);frame();requestAnimationFrame(loop)}
-document.getElementById('lg').textContent=lang==='en'?'BS':'EN';stat();
+document.getElementById('lg').textContent=lang==='en'?'BS':'EN';rtLab();stat();
 window.UNA={set:(v,p)=>{q=R.q[0]+v;playing=p===undefined?false:p;yawS=null;document.getElementById('pl').textContent=playing?'⏸':'▶'},route:setRoute,R:()=>R};
 setRoute(Object.keys(DATA.routes)[0]);requestAnimationFrame(loop);
 </script></body></html>

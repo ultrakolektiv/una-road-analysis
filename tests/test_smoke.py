@@ -48,7 +48,7 @@ def test_proracun_i_preglednost(tmp_path):
 def test_zone_racunske_brzine(tmp_path):
     cfg = _cfg(tmp_path); P0, sec0, c0, *_ = engine.run(cfg, log=lambda *a: None)
     s0, s1 = c0[0].SA, c0[0].SB; za, zb = s0 + (s1 - s0) * 0.4, s0 + (s1 - s0) * 0.6
-    cfg2 = pipeline.load_cfg(os.path.join(ROOT, "primjer", "primjer_projekat.json")); cfg2["izlaz"] = str(tmp_path); cfg2["optika"] = {"ukljuci": False}
+    cfg2 = pipeline.load_cfg(os.path.join(ROOT, "primjer", "primjer_projekat.json")); cfg2["izlaz"] = str(tmp_path); cfg2["optika"] = {"ukljuci": True}
     cfg2["sekcije"][0]["zone_Vr"] = [{"od": za, "do": zb, "v": 60.0}]
     P, sec, cs, ax, fw, bw, hc = engine.run(cfg2, log=lambda *a: None)
     c = cs[0]; m = (c.S >= za) & (c.S <= zb)
