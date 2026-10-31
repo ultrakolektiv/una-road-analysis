@@ -78,13 +78,17 @@ function ringTop(R,x){let zt=null;for(let j=0;j<R.length-1;j++){const x1=R[j][0]
 const Wq=(s,o,dz,d)=>[s.x+s.nx*o-s.tx*d,s.y+s.ny*o-s.ty*d,s.z+dz];
 function portal(a,fog){const P=a.pt,R=a.ring,cz=2.4,TH=1.8,BW=1.3,TS=TH*((SEC[a.i-1]&&SEC[a.i-1].kind==="otvorena")?1:-1);
  for(let k=0;k<P.length-1;k++){const x1=P[k][0],x2=P[k+1][0],r1=ringTop(R,x1),r2=ringTop(R,x2),b1=r1===null?0:r1,b2=r2===null?0:r2;const t1=Math.max(b1+.6,P[k][1]),t2=Math.max(b2+.6,P[k+1][1]);
-  const nz=hs(k*3.7+Math.floor(a.q/11)),col=sc(C.rock,.85+.15*nz);poly([W(a,x1,b1),W(a,x1,t1),W(a,x2,t2),W(a,x2,b2)],fog(col))}
+  const nz=hs(k*3.7+Math.floor(a.q/11)),col=sc(C.rock,1.0+.15*nz);poly([W(a,x1,b1),W(a,x1,t1),W(a,x2,t2),W(a,x2,b2)],fog(col))}
  // okvir portala (debljina): čeona ploča oko otvora, unutrašnje i spoljašnje strane ispusta
  const Q=R.map(p=>{const dx=p[0],dz=p[1]-cz,l=Math.hypot(dx,dz)||1;return [p[0]+dx/l*BW,p[1]+dz/l*BW]});
  for(let j=0;j<R.length-1;j++){
   poly([Wq(a,R[j][0],R[j][1],TS),Wq(a,R[j+1][0],R[j+1][1],TS),Wq(a,R[j+1][0],R[j+1][1],0),Wq(a,R[j][0],R[j][1],0)],fog([120,120,116]));        // unutrašnji ispust
   poly([Wq(a,Q[j][0],Q[j][1],TS),Wq(a,Q[j+1][0],Q[j+1][1],TS),Wq(a,Q[j+1][0],Q[j+1][1],0),Wq(a,Q[j][0],Q[j][1],0)],fog([168,167,160]));        // gornja ploha ispusta
   poly([Wq(a,R[j][0],R[j][1],TS),Wq(a,R[j+1][0],R[j+1][1],TS),Wq(a,Q[j+1][0],Q[j+1][1],TS),Wq(a,Q[j][0],Q[j][1],TS)],fog([196,195,188]))}       // čeona ploča
+ const z0=zp(a.F,0)-.05;for(const k of [0,R.length-1]){const sd=k?1:-1,zf=zp(a.F,sd*3.5)-.05;
+  poly([Wq(a,R[k][0],R[k][1],TS),Wq(a,R[k][0],zf,TS),Wq(a,R[k][0],zf,0),Wq(a,R[k][0],R[k][1],0)],fog([120,120,116]));
+  poly([Wq(a,Q[k][0],Q[k][1],TS),Wq(a,Q[k][0],zf,TS),Wq(a,Q[k][0],zf,0),Wq(a,Q[k][0],Q[k][1],0)],fog([168,167,160]));
+  poly([Wq(a,R[k][0],R[k][1],TS),Wq(a,Q[k][0],Q[k][1],TS),Wq(a,Q[k][0],zf,TS),Wq(a,R[k][0],zf,TS)],fog([196,195,188]))}
 }
 function hill(a,b,fa){GOFF=100;const fg=1-Math.exp(-fa/420),H=a.hl,Hb=b.hl,sm=(x0,x1,v)=>{const u=Math.min(1,Math.max(0,(v-x0)/(x1-x0)));return u*u*(3-2*u)};
  for(let k=0;k<H.length-1;k++){const o1=H[k][0],o2=H[k+1][0],z1=H[k][1],z2=H[k+1][1],zb1=Hb[k][1],zb2=Hb[k+1][1],om=(o1+o2)/2;
@@ -140,7 +144,7 @@ function strip(a,b,fa){
  if(!BUILD&&!tun&&a.kind==='otvorena'&&fa<420)trees(a,b,fa,fog);
  if(a.pt&&a.ring.length>3){const _bl=BLIT;BLIT=0;portal(a,(c)=>camTun?fog(c):mix(c,C.haze,Math.min(.92,fogT*1.05)));BLIT=_bl}
  if(tun&&a.ring.length&&a.ring.length===b.ring.length){const A=a.ring,B=b.ring;for(let j=0;j<A.length-1;j++){const sh=(j<4||j>A.length-5)?C.tun:C.tunC;poly([W(a,A[j][0],A[j][1]),W(a,A[j+1][0],A[j+1][1]),W(b,B[j+1][0],B[j+1][1]),W(b,B[j][0],B[j][1])],fog(sh))}
-  const kq=Math.ceil(a.q/12)*12;if(kq<b.q){const pm=smp(kq),mid=A[(A.length>>1)];if(BUILD)glamp(pm,mid,a);const s1=proj([pm.x+pm.ty*0,pm.y,pm.z+mid[1]+(a.z-pm.z)]);if(s1){const gl=mix([255,244,200],C.dark,Math.min(1,fa/280));lampGlow(s1,fa,pm,a)}}}
+  const kq=Math.ceil(a.q/12)*12;if(kq<b.q){const pm=smp(kq),mid=A[(A.length>>1)];if(BUILD)glamp(a,b,kq);const s1=proj([pm.x+pm.ty*0,pm.y,pm.z+mid[1]+(a.z-pm.z)]);if(s1){const gl=mix([255,244,200],C.dark,Math.min(1,fa/280));lampGlow(s1,fa,pm,a)}}}
  const PVx=a.E.pv||[[-a.E.e,a.E.e]],gh=PVx.length>1?Math.abs(PVx[1][0]):0;const rails=[];
  for(let i=0;i<2;i++){const oa=obv(a,i),ob=obv(b,i);if(oa==null||ob==null)continue;const med=gh>0&&Math.abs(oa)<gh-.05;rails.push([oa,ob,med?(oa>=0?-1:1):(oa>=a.ec?1:-1)]);
   if(med&&a.kind==="otvorena")rails.push([-oa,-ob,oa>=0?1:-1])}                       // razdjelni pojas: čelična ograda uz svaki kolovoz, stubovi sa strane razdjelnog pojasa (iza plašta)
@@ -217,9 +221,9 @@ function bloom(tun){if(!('filter' in cx))return;const w=Math.max(8,Wd>>2),h=Math
  bx.clearRect(0,0,w,h);bx.filter='brightness(.82) contrast(2.8) blur(6px)';bx.drawImage(cv,0,0,w,h);bx.filter='none';cx.save();cx.globalCompositeOperation='lighter';cx.globalAlpha=tun?.55:.38;cx.drawImage(bc,0,0,Wd,Hd);cx.restore()}
 // ===================== WebGL2 renderer (bez biblioteka) =====================
 let BUILD=false,BLIT=0,GOFF=0;const GLC={ok:false,route:null};let GLs=null;
-const GBUF={n:0,cap:0,p:null,nr:null,c:null,m:null,chunks:[],o:[0,0,0]};
-function gGrow(k){if(GBUF.n+k<=GBUF.cap)return;const nc=Math.max(GBUF.cap*2,1<<20,GBUF.n+k),np=new Float32Array(nc*3),nn=new Int8Array(nc*4),nco=new Uint8Array(nc*4),nm=new Uint8Array(nc*4);if(GBUF.p){np.set(GBUF.p.subarray(0,GBUF.n*3));nn.set(GBUF.nr.subarray(0,GBUF.n*4));nco.set(GBUF.c.subarray(0,GBUF.n*4));nm.set(GBUF.m.subarray(0,GBUF.n*4))}GBUF.p=np;GBUF.nr=nn;GBUF.c=nco;GBUF.m=nm;GBUF.cap=nc}
-function gTri(A,B,C,r,g,b,mat,N){gGrow(3);const o=GBUF.o,V=[A,B,C];for(let k=0;k<3;k++){const i=GBUF.n++,P=V[k];GBUF.p[i*3]=P[0]-o[0];GBUF.p[i*3+1]=P[1]-o[1];GBUF.p[i*3+2]=P[2]-o[2];GBUF.nr[i*4]=N[0]*127;GBUF.nr[i*4+1]=N[1]*127;GBUF.nr[i*4+2]=N[2]*127;GBUF.c[i*4]=r;GBUF.c[i*4+1]=g;GBUF.c[i*4+2]=b;GBUF.c[i*4+3]=mat*40;GBUF.m[i*4]=Math.min(255,GOFF*2.5);GBUF.m[i*4+3]=BLIT?255:0}}
+let GSEC=null;const GBUF={n:0,cap:0,p:null,nr:null,c:null,m:null,q:null,chunks:[],o:[0,0,0]};
+function gGrow(k){if(GBUF.n+k<=GBUF.cap)return;const nc=Math.max(GBUF.cap*2,1<<20,GBUF.n+k),np=new Float32Array(nc*3),nn=new Int8Array(nc*4),nco=new Uint8Array(nc*4),nm=new Uint8Array(nc*4),nq=new Float32Array(nc);if(GBUF.p){nq.set(GBUF.q.subarray(0,GBUF.n));np.set(GBUF.p.subarray(0,GBUF.n*3));nn.set(GBUF.nr.subarray(0,GBUF.n*4));nco.set(GBUF.c.subarray(0,GBUF.n*4));nm.set(GBUF.m.subarray(0,GBUF.n*4))}GBUF.p=np;GBUF.nr=nn;GBUF.c=nco;GBUF.m=nm;GBUF.q=nq;GBUF.cap=nc}
+function gTri(A,B,C,r,g,b,mat,N){gGrow(3);const o=GBUF.o,V=[A,B,C];for(let k=0;k<3;k++){const i=GBUF.n++,P=V[k];GBUF.p[i*3]=P[0]-o[0];GBUF.p[i*3+1]=P[1]-o[1];GBUF.p[i*3+2]=P[2]-o[2];GBUF.nr[i*4]=N[0]*127;GBUF.nr[i*4+1]=N[1]*127;GBUF.nr[i*4+2]=N[2]*127;GBUF.c[i*4]=r;GBUF.c[i*4+1]=g;GBUF.c[i*4+2]=b;GBUF.c[i*4+3]=mat*40;GBUF.q[i]=GSEC?(GSEC.q+(P[0]-GSEC.x)*GSEC.tx+(P[1]-GSEC.y)*GSEC.ty):0;GBUF.m[i*4]=Math.min(255,GOFF*2.5);GBUF.m[i*4+3]=BLIT?255:0}}
 function gNorm(pts){let nx=0,ny=0,nz=0;for(let i=0;i<pts.length;i++){const a=pts[i],b=pts[(i+1)%pts.length];nx+=(a[1]-b[1])*(a[2]+b[2]);ny+=(a[2]-b[2])*(a[0]+b[0]);nz+=(a[0]-b[0])*(a[1]+b[1])}const l=Math.hypot(nx,ny,nz);return l<1e-9?null:[nx/l,ny/l,nz/l]}
 function bpoly(pts,col,alpha){if(alpha!=null||pts.length<3)return;const m=/(\d+)\D+(\d+)\D+(\d+)/.exec(col);if(!m)return;const r=+m[1],g=+m[2],b=+m[3];let mat=1;
  if((r===240&&g===240&&b===240)||(r===255&&g===214&&b===80))mat=3;else if(r===112&&g===110&&b===104)mat=0;else if(Math.max(r,g,b)<=72)mat=0;else if(g>r*1.04&&g>b)mat=2;else if(r-b>=22&&r<=165)mat=2;else if(b>r+4)mat=4;
@@ -229,7 +233,9 @@ function gbox(x,y,z0,h,w,tx,ty,r,g,b,mat){const nx=-ty,ny=tx,hw=w/2,hl=w/2,P=(u,
 function bpolyC(pts,r,g,b,mat){const N=gNorm(pts);if(!N)return;for(let i=1;i<pts.length-1;i++)gTri(pts[0],pts[i],pts[i+1],r,g,b,mat,N)}
 function gpost(px,py,pz,h,w){const e=smp(Math.min(SEC[SEC.length-1].q-1e-3,Math.max(SEC[0].q,GCUR_Q)));gbox(px,py,pz,h,w,e.tx,e.ty,88,92,98,4)}
 let GCUR_Q=0;
-function glamp(pm,mid,a){const z=a.z+mid[1];bpolyC([[pm.x-pm.tx*.45-pm.ty*.18,pm.y-pm.ty*.45+pm.tx*.18,z-.06],[pm.x+pm.tx*.45-pm.ty*.18,pm.y+pm.ty*.45+pm.tx*.18,z-.06],[pm.x+pm.tx*.45+pm.ty*.18,pm.y+pm.ty*.45-pm.tx*.18,z-.06],[pm.x-pm.tx*.45+pm.ty*.18,pm.y-pm.ty*.45-pm.tx*.18,z-.06]],255,244,214,5)}
+function glamp(a,b,kq){const f=(kq-a.q)/((b.q-a.q)||1),cxw=a.x+(b.x-a.x)*f,cyw=a.y+(b.y-a.y)*f,czw=a.z+(b.z-a.z)*f,R=a.ring,n=R.length,tx=a.tx,ty=a.ty,nx=a.nx,ny=a.ny;if(n<6)return;
+ for(const k of [n>>1,Math.round(n*.27),Math.round(n*.73)]){const p=R[k],w=k===(n>>1)?.2:.14,x0=cxw+nx*p[0],y0=cyw+ny*p[0],z=czw+p[1]-.07;
+  bpolyC([[x0-tx*.5-nx*w,y0-ty*.5-ny*w,z],[x0+tx*.5-nx*w,y0+ty*.5-ny*w,z],[x0+tx*.5+nx*w,y0+ty*.5+ny*w,z],[x0-tx*.5+nx*w,y0-ty*.5+ny*w,z]],255,244,214,5)}}
 function gApron(a,b){GOFF=100;const tun=a.kind==="tunel"&&a.hl&&b.hl,Fa=tun?a.hl:a.F,Fb=tun?b.hl:b.F;if(!Fa.length||!Fb.length)return;
  for(const sd of [-1,1]){const ia=sd>0?Fa.length-1:0,ib=sd>0?Fb.length-1:0,oa=Fa[ia][0],ob=Fb[ib][0],za=Fa[ia][1],zb=Fb[ib][1];
   const sa=Math.max(-.25,Math.min(.4,(za-zp(Fa,oa-sd*12))/12)),sb=Math.max(-.25,Math.min(.4,(zb-zp(Fb,ob-sd*12))/12)),D=[0,60,240,900,3000];
@@ -241,7 +247,7 @@ function gWalls(a,b){const R1=a.ring,R2=b.ring;if(!R1.length||R1.length!==R2.len
   bpoly([W(a,eA,za),W(a,xa,za),W(b,xb,zb),W(b,eB,zb)],'rgb(110,110,106)')}}
 function buildGL(){const t0=performance.now();BUILD=true;camTun=false;GBUF.n=0;GBUF.chunks=[];const n=SEC.length;GBUF.o=[SEC[0].x,SEC[0].y,SEC[0].z];const CH=24;let cur=null;
  for(let i=0;i<n-1;i++){if(i%CH===0){if(cur){cur.n=GBUF.n-cur.v0;cur.q1=SEC[i].q;GBUF.chunks.push(cur)}cur={v0:GBUF.n,q0:SEC[i].q,q1:0,n:0}}
-  const A=SEC[i],B=SEC[i+1];if(A.jn)continue;GCUR_Q=A.q;BLIT=A.kind==="tunel"?1:0;strip(A,B,0);if(BLIT)gWalls(A,B);BLIT=0;if(A.kind==="tunel"&&A.hl&&B.hl&&A.hl.length===B.hl.length)hill(A,B,0);gApron(A,B)}
+  const A=SEC[i],B=SEC[i+1];if(A.jn)continue;GSEC=A;GCUR_Q=A.q;BLIT=A.kind==="tunel"?1:0;strip(A,B,0);if(BLIT)gWalls(A,B);BLIT=0;if(A.kind==="tunel"&&A.hl&&B.hl&&A.hl.length===B.hl.length)hill(A,B,0);gApron(A,B)}
  if(cur){cur.n=GBUF.n-cur.v0;cur.q1=SEC[n-1].q;GBUF.chunks.push(cur)}BUILD=false;
  // glatke normale terena
  const P=GBUF.p,Nn=GBUF.nr,Cc=GBUF.c,M=new Map(),key=i=>Math.round(P[i*3]*40)+","+Math.round(P[i*3+1]*40)+","+Math.round(P[i*3+2]*40);
@@ -249,9 +255,9 @@ function buildGL(){const t0=performance.now();BUILD=true;camTun=false;GBUF.n=0;G
  for(let i=0;i<GBUF.n;i++){if(Cc[i*4+3]!==80)continue;if(Nn[i*4+2]/127<.35)continue;const e=M.get(key(i)),l=Math.hypot(e[0],e[1],e[2])||1;Nn[i*4]=e[0]/l*127;Nn[i*4+1]=e[1]/l*127;Nn[i*4+2]=e[2]/l*127}
  console.log("GL build",GBUF.n/3|0,"tri",(performance.now()-t0)|0,"ms");return true}
 const VS=`#version 300 es
-precision highp float;layout(location=0)in vec3 aP;layout(location=1)in vec4 aN;layout(location=2)in vec4 aC;layout(location=3)in vec4 aM;
-uniform mat4 uVP;uniform mat4 uLS;out vec3 vP;out vec3 vN;out vec4 vC;out float vLit;out vec4 vSh;out float vOff;
-void main(){vOff=aM.r*102.;vP=aP;vN=aN.xyz;vC=aC;vLit=aM.a;vSh=uLS*vec4(aP,1.);gl_Position=uVP*vec4(aP,1.);}`;
+precision highp float;layout(location=0)in vec3 aP;layout(location=1)in vec4 aN;layout(location=2)in vec4 aC;layout(location=3)in vec4 aM;layout(location=4)in float aQ;
+uniform mat4 uVP;uniform mat4 uLS;out float vQ;out vec3 vP;out vec3 vN;out vec4 vC;out float vLit;out vec4 vSh;out float vOff;
+void main(){vQ=aQ;vOff=aM.r*102.;vP=aP;vN=aN.xyz;vC=aC;vLit=aM.a;vSh=uLS*vec4(aP,1.);gl_Position=uVP*vec4(aP,1.);}`;
 const VSD=`#version 300 es
 precision highp float;layout(location=0)in vec3 aP;uniform mat4 uLS;void main(){gl_Position=uLS*vec4(aP,1.);}`;
 const FSD=`#version 300 es
@@ -263,7 +269,7 @@ float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<5;i++){s+=a*vn(p);p=p*2.03+vec2(
 const vec3 HZ=vec3(.30,.43,.62);`;
 const FS=`#version 300 es
 precision highp float;precision highp sampler2DShadow;
-in vec3 vP;in vec3 vN;in vec4 vC;in float vLit;in vec4 vSh;in float vOff;
+in vec3 vP;in vec3 vN;in vec4 vC;in float vLit;in vec4 vSh;in float vOff;in float vQ;
 uniform vec3 uCam;uniform vec3 uSun;uniform vec3 uSunCol;uniform float uExp;uniform sampler2DShadow uSM;uniform float uShTex;uniform float uFogD;uniform float uTun;
 out vec4 o;`+GLSL_COMMON+`
 vec3 aces(vec3 x){return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),0.,1.);}
@@ -282,11 +288,11 @@ void main(){
  float ndl=max(dot(N,uSun),0.);vec3 sc=vSh.xyz/vSh.w*.5+.5;float sh=1.;
  if(max(abs(sc.x-.5),abs(sc.y-.5))<.5&&sc.z<1.){float bias=.0009+.0016*(1.-ndl);sh=0.;for(int i=-1;i<=1;i++)for(int j=-1;j<=1;j++)sh+=texture(uSM,vec3(sc.xy+vec2(float(i),float(j))*uShTex*1.2,sc.z-bias));sh/=9.;sh=mix(sh,1.,smoothstep(.40,.5,max(abs(sc.x-.5),abs(sc.y-.5))));}
  vec3 hemi=mix(vec3(.10,.09,.075),vec3(.24,.32,.46),N.z*.5+.5);
- vec3 col=alb*(uSunCol*ndl*sh+hemi);
+ vec3 fl=normalize(vec3(-uSun.x*.8,-uSun.y*.8,.35));vec3 col=alb*(uSunCol*ndl*sh+hemi+vec3(.30,.34,.42)*max(dot(N,fl),0.)*.55);
  vec3 Hh=normalize(V+uSun);col+=uSunCol*spec*pow(max(dot(N,Hh),0.),gl)*sh*ndl;
  col+=spec*.12*HZ*pow(1.-max(dot(N,V),0.),4.);
  vec3 fogc=HZ;float fd=uFogD;
- if(vLit>.5){float fall=1./(1.+d*d/260.);col=alb*(vec3(1.,.88,.7)*(.55*fall+.14)+hemi*.2);col+=vec3(1.,.9,.7)*spec*.6*pow(max(dot(N,normalize(V+vec3(0.,0.,0.))),0.),gl)*fall;fogc=vec3(.012,.012,.014);fd=.0035;}
+ if(vLit>.5){float fall=1./(1.+d*d/400.);float ph=fract(vQ/12.);float dl=min(ph,1.-ph)*12.;float pool=.22+.78*exp(-dl*dl/(2.*3.4*3.4));col=alb*(vec3(1.,.88,.7)*(.95*pool+.5*fall*.35+.10)+hemi*.12);col+=vec3(1.,.9,.7)*spec*.7*pow(max(dot(N,V),0.),gl)*pool;fogc=vec3(.012,.012,.014);fd=.0030;}
  col+=emi;float f=1.-exp(-d*fd);col=mix(col,fogc,f);
  col*=uExp;col=aces(col);col=mix(vec3(dot(col,vec3(.299,.587,.114))),col,.9);col=mix(col,col*col*(3.-2.*col),.3);col=pow(col,vec3(1./2.2));o=vec4(col,1.);}`;
 const VSS=`#version 300 es
@@ -309,9 +315,9 @@ function glInit(){try{const c=document.getElementById('gl');const g=c.getContext
  const u=(p,n)=>g.getUniformLocation(p,n);S.u={};for(const n of["uVP","uLS","uCam","uSun","uSunCol","uExp","uSM","uShTex","uFogD","uTun"])S.u[n]=u(S.pm,n);S.ud={uLS:u(S.pd,"uLS")};S.us={};for(const n of["uF","uR","uU","uSun","uRes","uFoc","uHy","uTime","uExp"])S.us[n]=u(S.ps,n);
  S.SZ=/[?&]sm=2048/.test(location.search)?2048:4096;S.tex=g.createTexture();g.bindTexture(g.TEXTURE_2D,S.tex);g.texStorage2D(g.TEXTURE_2D,1,g.DEPTH_COMPONENT24,S.SZ,S.SZ);g.texParameteri(g.TEXTURE_2D,g.TEXTURE_MIN_FILTER,g.LINEAR);g.texParameteri(g.TEXTURE_2D,g.TEXTURE_MAG_FILTER,g.LINEAR);g.texParameteri(g.TEXTURE_2D,g.TEXTURE_COMPARE_MODE,g.COMPARE_REF_TO_TEXTURE);g.texParameteri(g.TEXTURE_2D,g.TEXTURE_COMPARE_FUNC,g.LEQUAL);g.texParameteri(g.TEXTURE_2D,g.TEXTURE_WRAP_S,g.CLAMP_TO_EDGE);g.texParameteri(g.TEXTURE_2D,g.TEXTURE_WRAP_T,g.CLAMP_TO_EDGE);
  S.fb=g.createFramebuffer();g.bindFramebuffer(g.FRAMEBUFFER,S.fb);g.framebufferTexture2D(g.FRAMEBUFFER,g.DEPTH_ATTACHMENT,g.TEXTURE_2D,S.tex,0);g.drawBuffers([g.NONE]);g.readBuffer(g.NONE);g.bindFramebuffer(g.FRAMEBUFFER,null);
- S.vao=g.createVertexArray();S.vb=[g.createBuffer(),g.createBuffer(),g.createBuffer(),g.createBuffer()];S.ev=g.createVertexArray();S.exp=1;GLs=S;return true}catch(e){console.error(e);return false}}
-function glUpload(){const g=GLs.g;g.bindVertexArray(GLs.vao);const specs=[[0,GBUF.p,3,g.FLOAT,false],[1,GBUF.nr,4,g.BYTE,true],[2,GBUF.c,4,g.UNSIGNED_BYTE,true],[3,GBUF.m,4,g.UNSIGNED_BYTE,true]];
- specs.forEach((s,i)=>{g.bindBuffer(g.ARRAY_BUFFER,GLs.vb[i]);g.bufferData(g.ARRAY_BUFFER,s[1].subarray(0,GBUF.n*(i?4:3)),g.STATIC_DRAW);g.enableVertexAttribArray(s[0]);g.vertexAttribPointer(s[0],s[2],s[3],s[4],0,0)});g.bindVertexArray(null)}
+ S.vao=g.createVertexArray();S.vb=[g.createBuffer(),g.createBuffer(),g.createBuffer(),g.createBuffer(),g.createBuffer()];S.ev=g.createVertexArray();S.exp=1;GLs=S;return true}catch(e){console.error(e);return false}}
+function glUpload(){const g=GLs.g;g.bindVertexArray(GLs.vao);const specs=[[0,GBUF.p,3,g.FLOAT,false],[1,GBUF.nr,4,g.BYTE,true],[2,GBUF.c,4,g.UNSIGNED_BYTE,true],[3,GBUF.m,4,g.UNSIGNED_BYTE,true],[4,GBUF.q,1,g.FLOAT,false]];
+ specs.forEach((s,i)=>{g.bindBuffer(g.ARRAY_BUFFER,GLs.vb[i]);g.bufferData(g.ARRAY_BUFFER,s[1].subarray(0,GBUF.n*[3,4,4,4,1][i]),g.STATIC_DRAW);g.enableVertexAttribArray(s[0]);g.vertexAttribPointer(s[0],s[2],s[3],s[4],0,0)});g.bindVertexArray(null)}
 const SUN=(()=>{const az=2.35,el=.72;return[Math.cos(az)*Math.cos(el),Math.sin(az)*Math.cos(el),Math.sin(el)]})();
 function glDraw(tun){const S=GLs,g=S.g;if(GLC.route!==key){GLC.route=key;buildGL();glUpload()}
  const o=GBUF.o,ex=CAM.ex-o[0],ey=CAM.ey-o[1],ez=CAM.ez-o[2],fw=[CAM.cy*CAM.cp,CAM.sy*CAM.cp,CAM.sp],rt=[CAM.sy,-CAM.cy,0],up=[-CAM.cy*CAM.sp,-CAM.sy*CAM.sp,CAM.cp];
