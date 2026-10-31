@@ -862,6 +862,8 @@
 "Vizualizacija vožnje (HTML): {0}": "Drive-through visualisation (HTML): {0}",
 "LandXML (Civil 3D): {0} ({1} osovina)": "LandXML (Civil 3D): {0} ({1} alignments)",
 "ručni unos": "manual input",
+"Koridor: nazivi elemenata presjeka: {0}": "Corridor: cross-section element names: {0}",
+"Koridor: nijedan element nije prepoznat kao most ili tunel (ako ih ima, zadajte nazive u koridor → nazivi).": "Corridor: no element was recognised as bridge or tunnel (if there are any, set the names in corridor → nazivi).",
 "Koridor (ručni unos): scena izrađena ({0} presjeka).": "Corridor (manual input): scene built ({0} sections).",
 "Koridor: nema proračuna preglednosti za ovu osovinu (uključite preglednost).": "Corridor: no sight-distance calculation for this alignment (enable sight distance).",
 "Vožnja kroz koridor (ručni unos dionica) …": "Corridor drive-through (manually entered sections) …",

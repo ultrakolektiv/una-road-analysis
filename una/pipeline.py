@@ -72,7 +72,7 @@ def generate(cfg, outdir, log=print, word=True, excel=True, sight=None):
     if kor_on:
         if not os.path.isfile(kor["datoteka"]): raise ValueError(_TF("Koridor: datoteka ne postoji: {0}", kor["datoteka"]))
         from . import corridor
-        KR = corridor.load_landxml(kor["datoteka"], *corridor.kor_range(cfg), log=log)
+        KR = corridor.load_landxml(kor["datoteka"], *corridor.kor_range(cfg), log=log, nazivi=kor.get("nazivi"))
         corridor.harmonize(cfg, KR, log=log)
     errs = validate(cfg)
     if errs: raise ValueError("\n".join(errs))
@@ -164,6 +164,8 @@ def load_cfg(path):
     tp = cfg.get("template")
     if isinstance(tp, dict) and tp.get("file") and not os.path.isabs(tp["file"]): tp["file"] = os.path.normpath(os.path.join(base, tp["file"]))
     kc = cfg.get("koridor")
+    from . import lx_axis as _lxa, corridor as _cor
+    _lxa.RULES = _cor.naziv_pravila(kc.get("nazivi")) if isinstance(kc, dict) else {}
     if isinstance(kc, dict) and kc.get("datoteka") and not os.path.isabs(kc["datoteka"]): kc["datoteka"] = os.path.normpath(os.path.join(base, kc["datoteka"]))
     if cfg.get("izlaz") and not os.path.isabs(cfg["izlaz"]): cfg["izlaz"] = os.path.normpath(os.path.join(base, cfg["izlaz"]))
     return cfg

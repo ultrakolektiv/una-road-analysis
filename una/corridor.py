@@ -143,9 +143,40 @@ def kor_range(cfg):
     return a, b
 
 
-def load_landxml(path, s_from, s_to, log=print, margin=60.0):
+# Prepoznavanje elemenata presjeka po nazivu. Ključevi pravila (cfg["koridor"]["nazivi"]) -> interni naziv.
+NAZIV_KLJUC = {"kolovoz": "Pave1", "most": "Ploca_mosta", "vijenac": "Vijenac", "tunel": "Sekundarna_obloga", "humus": "Humus_skarpa", "ivicnjak": "Curb"}
+NAZIV_ZADANO = {"Ploca_mosta": ("deck", "bridge_deck", "bridgedeck", "slab", "bridge_slab"), "Vijenac": ("parapet", "barrier", "bridge_barrier", "njb", "new_jersey"),
+                "Sekundarna_obloga": ("lining", "tunnel_lining", "inner_lining", "secondary_lining"), "Pave1": ("pave", "pavement", "asphalt", "wearing", "wearing_course", "carriageway"),
+                "Humus_skarpa": ("topsoil", "humus", "top_soil"), "Curb": ("kerb", "curb", "kerb_stone")}
+
+
+def naziv_pravila(cfg_naz):
+    """Pravila iz konfiguracije: {'most': 'Deck, Slab', 'tunel': ['Lining']} -> {interni_naziv: [dijelovi naziva (mala slova)]}."""
+    r = {}
+    for k, v in (cfg_naz or {}).items():
+        t = NAZIV_KLJUC.get(str(k).strip().lower())
+        if not t: continue
+        L = v if isinstance(v, (list, tuple)) else str(v or "").split(",")
+        L = [str(x).strip().lower() for x in L if str(x).strip()]
+        if L: r[t] = L
+    return r
+
+
+def canon_name(name, rules):
+    """Vraća interni naziv elementa (kao u Civil 3D koridoru iz primjera) ili izvorni naziv ako nijedno pravilo ne pogađa."""
+    if not name: return name
+    n = name.strip().lower()
+    if name in NAZIV_ZADANO or name in ("Top", "Bankina", "Sloj1", "Sloj1_vrh", "Humus_dno", "Ivicnjak", "Ivicnjak_sa_procjepom", "Gutter", "Rigol"): return name
+    for t, L in (rules or {}).items():
+        if any(x in n for x in L): return t
+    for t, L in NAZIV_ZADANO.items():
+        if n in L: return t
+    return name
+
+
+def load_landxml(path, s_from, s_to, log=print, margin=60.0, nazivi=None):
     """Jedan prolaz kroz datoteku. Vraća dict: aligns{name: Align}, sect{name: [(sta, [(ime, strana, [(ofs, z, kod),…]),…]),…]}, tin (Nx3 sjever/istok/z), faces (Mx3)."""
-    key = hashlib.md5(f"v2|{os.path.abspath(path)}|{os.path.getsize(path)}|{os.path.getmtime(path)}|{s_from}|{s_to}".encode()).hexdigest()
+    key = hashlib.md5(f"v3|{os.path.abspath(path)}|{os.path.getsize(path)}|{os.path.getmtime(path)}|{s_from}|{s_to}|{sorted(naziv_pravila(nazivi).items())}".encode()).hexdigest()
     cache = os.path.join(tempfile.gettempdir(), f"una_koridor_{key}.pkl")
     if os.path.isfile(cache):
         try:
@@ -153,6 +184,7 @@ def load_landxml(path, s_from, s_to, log=print, margin=60.0):
         except Exception: pass
     log(_TF("Koridor: čitam {0} ({1:.0f} MB) – može potrajati nekoliko minuta …", os.path.basename(path), os.path.getsize(path) / 1e6))
     aligns = {}; sect = {}; al_name = None; stack = []; pts = []; ids = {}; faces = []; pcount = 0
+    rules = naziv_pravila(nazivi); vidjeni = {}
     for ev, el in ET.iterparse(path, events=("start", "end")):
         t = _tag(el)
         if ev == "start":
@@ -175,7 +207,8 @@ def load_landxml(path, s_from, s_to, log=print, margin=60.0):
                     for g in ch:
                         a = (g.text or "").split()
                         if len(a) >= 2: pp.append((float(a[0]), float(a[1]), g.get("code")))
-                    secs.append((ch.get("name"), ch.get("side"), pp))
+                    cn = canon_name(ch.get("name"), rules); vidjeni[ch.get("name")] = cn
+                    secs.append((cn, ch.get("side"), pp))
                 sect.setdefault(al_name, []).append((sta, secs))
             el.clear()
         elif t == "P" and stack[-1] == "Pnts":
@@ -185,6 +218,10 @@ def load_landxml(path, s_from, s_to, log=print, margin=60.0):
                 a = el.text.split()
                 if len(a) == 3: faces.append((a[0], a[1], a[2]))
             el.clear()
+    prep = sorted(f"{a} → {b}" if a != b else a for a, b in vidjeni.items() if a)
+    if prep: log(_TF("Koridor: nazivi elemenata presjeka: {0}", "; ".join(prep)))
+    if vidjeni and not any(b in ("Ploca_mosta", "Vijenac", "Sekundarna_obloga") for b in vidjeni.values()):
+        log(_T("Koridor: nijedan element nije prepoznat kao most ili tunel (ako ih ima, zadajte nazive u koridor → nazivi)."))
     for k, v in aligns.items():
         if not v["elems"]: raise ValueError(_TF("Koridor: osovina '{0}' nema geometriju (CoordGeom).", k))
     A = {}
@@ -558,7 +595,7 @@ def write_html(path, R_or_path, P, par, out, cfg, log=print):
         from .corridor_rucno import build_scene_manual
         scene = build_scene_manual(P, par, out, cfg, log=log)
     else:
-        R = R_or_path if isinstance(R_or_path, dict) else load_landxml(R_or_path, s_from, s_to, log=log)
+        R = R_or_path if isinstance(R_or_path, dict) else load_landxml(R_or_path, s_from, s_to, log=log, nazivi=kc.get("nazivi"))
         scene = build_scene(R, s_from, s_to, out, par, cfg, log=log)
     from .i18n import get_lang
     scene["lang"] = get_lang(); scene["Vr"] = float(P.Vr)

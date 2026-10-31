@@ -231,6 +231,10 @@ def api_run(b):
     cfg["ifc"] = bool(o.get("ifc")); cfg["dwg"] = bool(o.get("dwg")); cfg["landxml"] = bool(o.get("landxml"))
     if isinstance(cfg.get("koridor"), dict): cfg["koridor"]["ukljuci"] = bool(o.get("koridor"))
     elif o.get("koridor"): cfg["koridor"] = {"ukljuci": True}
+    try:
+        from .. import lx_axis as _lxa, corridor as _cor
+        _lxa.RULES = _cor.naziv_pravila((cfg.get("koridor") or {}).get("nazivi"))
+    except Exception: pass
     cfg["optika"] = dict(cfg.get("optika") or {}, ukljuci=bool(o.get("optika")))
     if sight and not cfg.get("preglednost"): cfg["preglednost"] = {"ukljuci": True}
     def log(s): run["lines"].append(str(s))

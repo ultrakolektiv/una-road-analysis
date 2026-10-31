@@ -198,6 +198,14 @@ def test_koridor_rucno():
         F = data["routes"]["F"]; assert len(F["q"]) > 100 and set(F["kind"]) >= {"otvorena", "most", "tunel"}
 
 
+def test_koridor_nazivi():
+    """Prepoznavanje elemenata presjeka po nazivima koje zada korisnik."""
+    from una import corridor as C
+    r = C.naziv_pravila({"most": "Deck, Bridge_Slab", "tunel": ["TunLin"], "humus": "Soil"})
+    assert C.canon_name("My_Deck_01", r) == "Ploca_mosta" and C.canon_name("tunlin2", r) == "Sekundarna_obloga" and C.canon_name("Soil", r) == "Humus_skarpa"
+    assert C.canon_name("Ploca_mosta", r) == "Ploca_mosta" and C.canon_name("Parapet", {}) == "Vijenac" and C.canon_name("Nesto", {}) == "Nesto"
+
+
 def test_osovine_iz_landxml(tmp_path):
     """Osovine (horizontala, niveleta, poprečni nagib) čitaju se iz LandXML-a umjesto iz ispisa projektanta."""
     from una import parse, lx_axis

@@ -33,9 +33,12 @@ def _lane_slopes(secs, w):
     return None
 
 
+RULES = {}                    # pravila naziva elemenata (cfg["koridor"]["nazivi"]), postavlja ih pipeline.load_cfg
+
+
 def load_axes(path, log=print, w=3.5):
     """Čita sve osovine iz LandXML-a: {ime: dict(sta0, elems, pvi, cs_s, cs_l, cs_d)}. Rezultat se kešira."""
-    key = hashlib.md5(f"lxaxes2|{os.path.abspath(path)}|{os.path.getsize(path)}|{os.path.getmtime(path)}|{w}".encode()).hexdigest()
+    key = hashlib.md5(f"lxaxes3|{sorted(RULES.items())}|{os.path.abspath(path)}|{os.path.getsize(path)}|{os.path.getmtime(path)}|{w}".encode()).hexdigest()
     cache = os.path.join(tempfile.gettempdir(), f"una_lxosa_{key}.pkl")
     if os.path.isfile(cache):
         try: return pickle.load(open(cache, "rb"))
@@ -56,12 +59,12 @@ def load_axes(path, log=print, w=3.5):
         elif t == "CrossSect" and cur in al:
             secs = []
             for ch in el:
-                if C._tag(ch) != "DesignCrossSectSurf" or ch.get("name") not in SURF_PRIO: continue
+                if C._tag(ch) != "DesignCrossSectSurf" or C.canon_name(ch.get("name"), RULES) not in SURF_PRIO: continue
                 pp = []
                 for g in ch:
                     a = (g.text or "").split()
                     if len(a) >= 2: pp.append((float(a[0]), float(a[1]), g.get("code")))
-                secs.append((ch.get("name"), ch.get("side"), pp))
+                secs.append((C.canon_name(ch.get("name"), RULES), ch.get("side"), pp))
             r = _lane_slopes(secs, w)
             if r: al[cur]["cs"].append((C._f(el.get("sta")), r[0], r[1])); al[cur].setdefault("geo", []).append((r[2], r[3]))
             el.clear()
