@@ -76,15 +76,15 @@ const W=(s,o,dz)=>[s.x+s.nx*o,s.y+s.ny*o,s.z+dz];
 const hs=(n)=>{n=Math.sin(n*12.9898)*43758.5453;return n-Math.floor(n)};const sc=(c,f)=>[Math.min(255,c[0]*f),Math.min(255,c[1]*f),Math.min(255,c[2]*f)];
 function ringTop(R,x){let zt=null;for(let j=0;j<R.length-1;j++){const x1=R[j][0],x2=R[j+1][0];if((x-x1)*(x-x2)<=0&&x1!==x2){const z=R[j][1]+(R[j+1][1]-R[j][1])*(x-x1)/(x2-x1);if(zt===null||z>zt)zt=z}}return zt}
 const Wq=(s,o,dz,d)=>[s.x+s.nx*o-s.tx*d,s.y+s.ny*o-s.ty*d,s.z+dz];
-function portal(a,fog){const P=a.pt,R=a.ring,cz=2.4,TH=.9,BW=1.2;
+function portal(a,fog){const P=a.pt,R=a.ring,cz=2.4,TH=1.8,BW=1.3,TS=TH*((SEC[a.i-1]&&SEC[a.i-1].kind==="otvorena")?1:-1);
  for(let k=0;k<P.length-1;k++){const x1=P[k][0],x2=P[k+1][0],r1=ringTop(R,x1),r2=ringTop(R,x2),b1=r1===null?0:r1,b2=r2===null?0:r2;const t1=Math.max(b1+.6,P[k][1]),t2=Math.max(b2+.6,P[k+1][1]);
   const nz=hs(k*3.7+Math.floor(a.q/11)),col=sc(C.rock,.85+.15*nz);poly([W(a,x1,b1),W(a,x1,t1),W(a,x2,t2),W(a,x2,b2)],fog(col))}
  // okvir portala (debljina): čeona ploča oko otvora, unutrašnje i spoljašnje strane ispusta
  const Q=R.map(p=>{const dx=p[0],dz=p[1]-cz,l=Math.hypot(dx,dz)||1;return [p[0]+dx/l*BW,p[1]+dz/l*BW]});
  for(let j=0;j<R.length-1;j++){
-  poly([Wq(a,R[j][0],R[j][1],TH),Wq(a,R[j+1][0],R[j+1][1],TH),Wq(a,R[j+1][0],R[j+1][1],0),Wq(a,R[j][0],R[j][1],0)],fog([120,120,116]));        // unutrašnji ispust
-  poly([Wq(a,Q[j][0],Q[j][1],TH),Wq(a,Q[j+1][0],Q[j+1][1],TH),Wq(a,Q[j+1][0],Q[j+1][1],0),Wq(a,Q[j][0],Q[j][1],0)],fog([168,167,160]));        // gornja ploha ispusta
-  poly([Wq(a,R[j][0],R[j][1],TH),Wq(a,R[j+1][0],R[j+1][1],TH),Wq(a,Q[j+1][0],Q[j+1][1],TH),Wq(a,Q[j][0],Q[j][1],TH)],fog([196,195,188]))}       // čeona ploča
+  poly([Wq(a,R[j][0],R[j][1],TS),Wq(a,R[j+1][0],R[j+1][1],TS),Wq(a,R[j+1][0],R[j+1][1],0),Wq(a,R[j][0],R[j][1],0)],fog([120,120,116]));        // unutrašnji ispust
+  poly([Wq(a,Q[j][0],Q[j][1],TS),Wq(a,Q[j+1][0],Q[j+1][1],TS),Wq(a,Q[j+1][0],Q[j+1][1],0),Wq(a,Q[j][0],Q[j][1],0)],fog([168,167,160]));        // gornja ploha ispusta
+  poly([Wq(a,R[j][0],R[j][1],TS),Wq(a,R[j+1][0],R[j+1][1],TS),Wq(a,Q[j+1][0],Q[j+1][1],TS),Wq(a,Q[j][0],Q[j][1],TS)],fog([196,195,188]))}       // čeona ploča
 }
 function hill(a,b,fa){GOFF=100;const fg=1-Math.exp(-fa/420),H=a.hl,Hb=b.hl,sm=(x0,x1,v)=>{const u=Math.min(1,Math.max(0,(v-x0)/(x1-x0)));return u*u*(3-2*u)};
  for(let k=0;k<H.length-1;k++){const o1=H[k][0],o2=H[k+1][0],z1=H[k][1],z2=H[k+1][1],zb1=Hb[k][1],zb2=Hb[k+1][1],om=(o1+o2)/2;
@@ -93,6 +93,7 @@ function hill(a,b,fa){GOFF=100;const fg=1-Math.exp(-fa/420),H=a.hl,Hb=b.hl,sm=(x
    st=(Math.floor(hg*1.1)&1)?.9:1.04,g=[C.grass2[0]+(C.grass[0]-C.grass2[0])*cn2,C.grass2[1]+(C.grass[1]-C.grass2[1])*cn2,C.grass2[2]+(C.grass[2]-C.grass2[2])*cn2],
    rk=[C.rock[0]*st*(.94+.1*cn),C.rock[1]*st*(.94+.1*cn),C.rock[2]*st*(.94+.1*cn)],col=sc([g[0]+(rk[0]-g[0])*rf,g[1]+(rk[1]-g[1])*rf,g[2]+(rk[2]-g[2])*rf],lit*(1-Math.min(.2,sl*.1)));
   const fc=(c)=>mix(c,C.haze,Math.min(.92,fg*1.05));poly([W(a,o1,z1),W(a,o2,z2),W(b,o2,zb2),W(b,o1,zb1)],fc(col));}}
+function obv(s,i){const v=s.ob[i];if(v!=null)return v;const o=s.ob[1-i];if(o==null)return null;const ed=o>0?s.E.shL:s.E.shR,v2=o>0?ed-.78:ed+.78;if(Math.abs(zp(s.F,v2)-zp(s.F,ed))>.8)return null;return v2}
 function strip(a,b,fa){
  const tun=a.kind==="tunel",fogT=1-Math.exp(-fa/420);const fog=(c)=>tun?mix(c,C.dark,Math.min(1,fa/110)):mix(c,C.haze,Math.min(.92,fogT*1.05));
  const ea=a.E,eb=b.E,e=ea.e;
@@ -122,12 +123,13 @@ function strip(a,b,fa){
  for(const r of PVL){ln(r[0]+.15,.15,C.line);ln(r[1]-.15,.15,C.line);const nl=Math.max(1,Math.round((r[1]-r[0])/3.85));if(dash)for(let j=1;j<nl;j++)ln(r[0]+j*(r[1]-r[0])/nl,.14,C.line)};
  if(ea.oe>0&&a.kind==="otvorena"){const c=ea.ot,w=ea.oe;ln(c-(w-.15),.15,C.line);ln(c+(w-.15),.15,C.line);if(dash)ln(c,.14,C.line)}
  // ograde, parapeti, svod
- for(let i=0;i<a.box.length;i++){const A=a.box[i],B=b.box[i];if(!B||A[0]!==B[0])continue;if(A[0]===10&&A[4]&&B[4]&&A[4].length===B[4].length){const PA=A[4],PB=B[4];for(let m=0;m<PA.length-1;m++){const dx=PA[m+1][0]-PA[m][0],dzz=PA[m+1][1]-PA[m][1],ang=Math.atan2(Math.abs(dzz),Math.abs(dx)+1e-6)*57.3;const sh=ang<25?[232,231,224]:(dx*dzz>0?[184,183,176]:[212,211,204]);poly([W(a,PA[m][0],PA[m][1]),W(a,PA[m+1][0],PA[m+1][1]),W(b,PB[m+1][0],PB[m+1][1]),W(b,PB[m][0],PB[m][1])],fog(sc(sh,m===0?.8:1)))}continue}
+ for(let i=0;i<a.box.length;i++){const A=a.box[i],B=b.box[i];if(!B||A[0]!==B[0])continue;if(A[0]===10&&A[4]&&B[4]&&A[4].length===B[4].length){const PA=A[4],PB=B[4];for(let m=0;m<PA.length-1;m++){const dx=PA[m+1][0]-PA[m][0],dzz=PA[m+1][1]-PA[m][1],ang=Math.atan2(Math.abs(dzz),Math.abs(dx)+1e-6)*57.3;const sh=ang<25?[232,231,224]:(dx*dzz>0?[184,183,176]:[212,211,204]);poly([W(a,PA[m][0],PA[m][1]),W(a,PA[m+1][0],PA[m+1][1]),W(b,PB[m+1][0],PB[m+1][1]),W(b,PB[m][0],PB[m][1])],fog(sc(sh,m===0?.8:1)))}if(BUILD){const L=PA.length-1,cc=fog([200,199,192]);for(const k of [0,L])poly([W(a,PA[k][0],PA[k][1]),W(a,PA[k][0],PA[0][1]-1.4),W(b,PB[k][0],PB[0][1]-1.4),W(b,PB[k][0],PB[k][1])],cc)}continue}
   if(A[0]===10){const cc=[196,195,188];for(const [xa_,xb_] of [[A[1],B[1]],[A[2],B[2]]]){const za_=zp(a.F,xa_),zb_=zp(b.F,xb_);poly([W(a,xa_,za_),W(a,xa_,A[3]),W(b,xb_,B[3]),W(b,xb_,zb_)],fog(cc))}poly([W(a,A[1],A[3]),W(a,A[2],A[3]),W(b,B[2],B[3]),W(b,B[1],B[3])],fog([222,221,214]));continue}const inn=Math.abs(A[1])<Math.abs(A[2])?A[1]:A[2],inb=Math.abs(B[1])<Math.abs(B[2])?B[1]:B[2],ouA=inn===A[1]?A[2]:A[1],ouB=inb===B[1]?B[2]:B[1];
   const ta=A[3],tb=B[3],za=BUILD&&a.kind==="tunel"?ta-.3:zp(a.F,inn),zb=BUILD&&a.kind==="tunel"?tb-.3:zp(b.F,inb),col=A[0]===3?C.conc:[165,165,160];
   if(A[0]===3&&A[4]&&B[4]&&A[4].length===B[4].length){const dr=inn>=0?1:-1,drb=inb>=0?1:-1,PA=A[4],PB=B[4];
    for(let m=0;m<PA.length-1;m++){const dx=Math.abs(PA[m+1][0]-PA[m][0]),dzz=PA[m+1][1]-PA[m][1],ang=Math.atan2(Math.abs(dzz),dx+1e-6)*57.3;const sh=ang>55?[196,195,188]:(ang>20?[212,211,204]:[228,227,220]),base=m===0?.82:1;
     const o0=inn+dr*PA[m][0],o1=inn+dr*PA[m+1][0],q0=inb+drb*PB[m][0],q1=inb+drb*PB[m+1][0];poly([W(a,o0,PA[m][1]),W(a,o1,PA[m+1][1]),W(b,q1,PB[m+1][1]),W(b,q0,PB[m][1])],fog(sc(sh,base)))}
+   if(BUILD){const L=PA.length-1,oF=inn+dr*PA[0][0],oL=inn+dr*PA[L][0],qF=inb+drb*PB[0][0],qL=inb+drb*PB[L][0],cc=fog([170,169,163]);poly([W(a,oF,PA[0][1]),W(a,oF,PA[0][1]-1.4),W(b,qF,PB[0][1]-1.4),W(b,qF,PB[0][1])],cc);poly([W(a,oL,PA[L][1]),W(a,oL,PA[0][1]-1.4),W(b,qL,PB[0][1]-1.4),W(b,qL,PB[L][1])],cc)}
    const kq=Math.ceil(a.q/6)*6;if(kq<b.q){const f=(kq-a.q)/((b.q-a.q)||1),o=inn+(inb-inn)*f,z=za+(zb-za)*f,px=a.x+(b.x-a.x)*f+(a.nx+(b.nx-a.nx)*f)*o,py=a.y+(b.y-a.y)*f+(a.ny+(b.ny-a.ny)*f)*o,pz=a.z+(b.z-a.z)*f;const s1=proj([px,py,pz+PA[0][1]]),s2=proj([px,py,pz+ta]);if(s1&&s2){cx.strokeStyle=fog([120,119,114]);cx.lineWidth=Math.max(1,foc*0.05/s1[2]);cx.beginPath();cx.moveTo(s1[0],s1[1]);cx.lineTo(s2[0],s2[1]);cx.stroke()}}}
   else if(A[0]===3){const dr=inn>=0?1:-1,drb=inb>=0?1:-1,hA=Math.max(.5,ta-za),hB=Math.max(.5,tb-zb),sa=hA/.81,sb=hB/.81;
    const NJ=[[0,0],[0,.08],[.18,.33],[.26,.81],[.41,.81]],cl=[[196,195,188],[170,169,163],[208,207,200],[222,221,214]];
@@ -140,7 +142,7 @@ function strip(a,b,fa){
  if(tun&&a.ring.length&&a.ring.length===b.ring.length){const A=a.ring,B=b.ring;for(let j=0;j<A.length-1;j++){const sh=(j<4||j>A.length-5)?C.tun:C.tunC;poly([W(a,A[j][0],A[j][1]),W(a,A[j+1][0],A[j+1][1]),W(b,B[j+1][0],B[j+1][1]),W(b,B[j][0],B[j][1])],fog(sh))}
   const kq=Math.ceil(a.q/12)*12;if(kq<b.q){const pm=smp(kq),mid=A[(A.length>>1)];if(BUILD)glamp(pm,mid,a);const s1=proj([pm.x+pm.ty*0,pm.y,pm.z+mid[1]+(a.z-pm.z)]);if(s1){const gl=mix([255,244,200],C.dark,Math.min(1,fa/280));lampGlow(s1,fa,pm,a)}}}
  const PVx=a.E.pv||[[-a.E.e,a.E.e]],gh=PVx.length>1?Math.abs(PVx[1][0]):0;const rails=[];
- for(let i=0;i<2;i++){const oa=a.ob[i],ob=b.ob[i];if(oa==null||ob==null)continue;const med=gh>0&&Math.abs(oa)<gh-.05;rails.push([oa,ob,med?(oa>=0?-1:1):(oa>=a.ec?1:-1)]);
+ for(let i=0;i<2;i++){const oa=obv(a,i),ob=obv(b,i);if(oa==null||ob==null)continue;const med=gh>0&&Math.abs(oa)<gh-.05;rails.push([oa,ob,med?(oa>=0?-1:1):(oa>=a.ec?1:-1)]);
   if(med&&a.kind==="otvorena")rails.push([-oa,-ob,oa>=0?1:-1])}                       // razdjelni pojas: čelična ograda uz svaki kolovoz, stubovi sa strane razdjelnog pojasa (iza plašta)
  for(const [oa,ob,out] of rails){const mr=gh>0&&Math.abs(oa)<gh-.05,za=mr?zp(a.F,oa>=0?gh:-gh):zp(a.F,oa),zb=mr?zp(b.F,ob>=0?gh:-gh):zp(b.F,ob),fogr=(c)=>fog(c);
   if(a.kind==="otvorena"){
