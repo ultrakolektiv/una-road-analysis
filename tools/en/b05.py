@@ -3,7 +3,7 @@ T = {
 561: "The template has no example table caption (style Caption).",
 562: "Graphical Appendices – Driving Dynamics Analysis",
 563: "Numerical Calculation of Speed Profiles",
-564: "Driving Dynamics Analyses (Study 3)",
+564: "Driving Dynamics Analyses ",
 565: "Table",
 566: "^Table (\\d+) – (.+)$",
 567: "^Figure (\\d+) – (.+)$",

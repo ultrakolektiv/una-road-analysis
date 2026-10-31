@@ -227,8 +227,8 @@ def api_run(b):
     run = S.run
     cfg = b["cfg"]; o = b.get("options", {})
     word, excel = bool(o.get("word", True)), bool(o.get("excel", True))
-    sight = bool(o.get("preglednost")) or bool(o.get("optika")) or bool(o.get("dwg")) or bool(o.get("vizura")) or bool(o.get("koridor"))
-    cfg["ifc"] = bool(o.get("ifc")); cfg["dwg"] = bool(o.get("dwg")); cfg["vizura"] = bool(o.get("vizura")); cfg["landxml"] = bool(o.get("landxml"))
+    sight = bool(o.get("preglednost")) or bool(o.get("optika")) or bool(o.get("dwg")) or bool(o.get("koridor"))
+    cfg["ifc"] = bool(o.get("ifc")); cfg["dwg"] = bool(o.get("dwg")); cfg["landxml"] = bool(o.get("landxml"))
     if isinstance(cfg.get("koridor"), dict): cfg["koridor"]["ukljuci"] = bool(o.get("koridor"))
     cfg["optika"] = dict(cfg.get("optika") or {}, ukljuci=bool(o.get("optika")))
     if sight and not cfg.get("preglednost"): cfg["preglednost"] = {"ukljuci": True}
@@ -280,12 +280,7 @@ def api_quit(_):
     threading.Timer(0.3, lambda: os._exit(0)).start(); return {"ok": True}
 
 
-def api_npp(_):
-    from .. import npp
-    return npp.defaults()
-
-
-API = {"npp": api_npp, "state": api_state, "ui": api_ui, "pick": api_pick, "ls": api_ls, "lx_import": api_lx_import, "detect": api_detect, "axisrange": api_axisrange, "elements": api_elements, "load": api_load, "save": api_save,
+API = {"state": api_state, "ui": api_ui, "pick": api_pick, "ls": api_ls, "lx_import": api_lx_import, "detect": api_detect, "axisrange": api_axisrange, "elements": api_elements, "load": api_load, "save": api_save,
        "readjson": api_readjson, "validate": api_validate, "run": api_run, "log": api_log, "open": api_open, "license": api_license, "ping": api_ping, "quit": api_quit}
 
 

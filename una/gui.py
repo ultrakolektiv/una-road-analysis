@@ -535,7 +535,7 @@ class PregDialog(tk.Toplevel):
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("UNA - ROAD ENGINEERING ANALYSIS – Elaborat 3 i 4 (vozno-dinamičke i optičke analize)"); self.geometry("980x720")
+        self.title("UNA - ROAD ENGINEERING ANALYSIS – vozno-dinamičke i optičke analize"); self.geometry("980x720")
         self.cfg = {"projekat": "", "Vr": 100, "sekcije": []}; self.path = None; self.q = queue.Queue(); self.busy = False
         try:
             self._ico = tk.PhotoImage(file=os.path.join(os.path.dirname(__file__), "webui", "static", "logo_icon.png")); self.iconphoto(True, self._ico)      # ikona prozora (logo)

@@ -1,4 +1,4 @@
-"""Elaborat 4 – optičke analize: zahtijevana, raspoloživa (rezultujuća) i preticajna preglednost, sadržaj grafičkih priloga."""
+"""Optičke analize: zahtijevana, raspoloživa (rezultujuća) i preticajna preglednost, sadržaj grafičkih priloga."""
 from .i18n import _T, _TF, TrDict, tr_obj, cell as _cell, dec as _dec
 import math, os, re, shutil, tempfile
 import numpy as np
@@ -106,7 +106,7 @@ def make_png(P, par, out, pp, o, outdir, name, log=print):
         nrow = 3 if ra is not None else 2
         fig, axs = plt.subplots(nrow, 1, figsize=(15, 10.5 if nrow == 3 else 7.5), sharex=True, gridspec_kw=dict(height_ratios=[0.8, 1.1, 1.1][:nrow], hspace=0.1))
         a1, a2 = axs[0], axs[1]; a3 = axs[2] if nrow == 3 else None
-        a1.plot(s1, V, color="#1f4e9c", lw=1.4, label=_T('projektna brzina Vp (Elaborat 3)')); a1.axhline(P.Vr, color="k", ls="--", lw=0.8, label=f"Vr = {P.Vr:g} km/h")
+        a1.plot(s1, V, color="#1f4e9c", lw=1.4, label=_T('projektna brzina Vp')); a1.axhline(P.Vr, color="k", ls="--", lw=0.8, label=f"Vr = {P.Vr:g} km/h")
         a1.set_ylabel("V [km/h]"); a1.legend(loc="lower right", fontsize=8); a1.grid(alpha=.3)
         a2.plot(s1, Lz, color="#2a8a3a", lw=1.2, label=_T('zahtijevana preglednost Pzp = f(Vp, nagib)')); a2.plot(s1, D, color="#c0392b", lw=1.2, label=_T('raspoloživa preglednost Pr'))
         a2.fill_between(s1, D, Lz, where=np.nan_to_num(D, nan=1e9) < Lz, color="#c0392b", alpha=.25, label="nedovoljno (Pr < Pzp)")
@@ -179,7 +179,7 @@ def build_md(P, par, out, pp, o, cfg, figs, att, name, template_mode=False):
     proj = cfg.get("projekat", _T('Dionica'))
     if not template_mode: A(_TF('---\ntitle: "ELABORAT OPTIČKIH ANALIZA"\nsubtitle: "{0}"\n---\n', proj))
     A("# Uvod\n")
-    A(_TF('Optičke analize sprovedene su za usvojeno rješenje trase. Vozač svoje manevre podešava prema sadržaju u vidnom polju, pa je za svaku traku i svaki smjer vožnje numerički modelom trase (plan, niveleta, poprečni profil, prepreke uz kolovoz) određena raspoloživa preglednost. Proračun je urađen programom {0}; ulazna projektna brzina Vp preuzeta je iz Elaborata 3 (vozno-dinamičke analize, rezultirajući profil projektne brzine).\n', APP_NAME))
+    A(_TF('Optičke analize sprovedene su za usvojeno rješenje trase. Vozač svoje manevre podešava prema sadržaju u vidnom polju, pa je za svaku traku i svaki smjer vožnje numerički modelom trase (plan, niveleta, poprečni profil, prepreke uz kolovoz) određena raspoloživa preglednost. Proračun je urađen programom {0}; ulazna projektna brzina Vp preuzeta je iz vozno-dinamičke analize ( rezultirajući profil projektne brzine).\n', APP_NAME))
     A(_TF('Oko vozača je {0} m iznad nivelete, a visina predmeta {1} (za zaustavnu preglednost i preticanje{2}). Zrake preglednosti polaze od ose oka vozača, na rastojanju od ose kolovoza prema usvojenom ofsetu.\n', fm(par['h_oka'],2), _T('h2 prema Tabeli 29 Smjernica (0–0,15 m, zavisi od brzine Vp)') if par['h_auto'] else fm(par['h_prepreke'],2) + ' m', _T('; za preticanje zadato ') + fm(o['h_predmeta_preticanje'],2) + ' m' if o['h_predmeta_preticanje'] is not None else ''))
     A(_T('# Zahtijevana preglednost, Pzp = f(Vp)\n'))
     RS = False   # Pzp/Pz uvijek po Crtežu 52 BiH Smjernica
@@ -310,7 +310,7 @@ def make(P, cases, par, out, cfg, outdir, name, files, log=print):
         md = re.sub(r"\]\(([^)/]+\.png)\)", r"](fig/\1)", md)
         mdp = os.path.join(td, "doc.md"); open(mdp, "w", encoding="utf-8").write(md)
         raw = os.path.join(td, "raw.docx"); report.run_pandoc(mdp, raw, td, os.path.join(report.HERE, "data", "ref.docx"))
-        report.postprocess(raw, docx, _TF('Elaborat 4 – Optičke analize | {0}', cfg.get('projekat', '')))
+        report.postprocess(raw, docx, _TF('Optičke analize | {0}', cfg.get('projekat', '')))
     log(_TF("Word: {0}", docx)); outs.append(docx)
     tp = cfg.get("template") or {}
     if tp.get("file"):
@@ -328,7 +328,7 @@ def make(P, cases, par, out, cfg, outdir, name, files, log=print):
             cmd = [find_pandoc(), mdp, "-f", "markdown+pipe_tables+tex_math_dollars+subscript+raw_attribute", "-o", raw, f"--reference-doc={os.path.join(report.HERE, 'data', 'ref.docx')}", "--number-sections", f"--resource-path={td}"]
             rr = subprocess.run(cmd, capture_output=True, text=True, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
             if rr.returncode != 0: raise RuntimeError(_T('Pandoc greška: ') + rr.stderr[:2000])
-            t2 = dict(tp); t2["naslov_izvjestaj"] = _T('Optičke analize (Elaborat 4) / Optical Analyses (Elaborate 4)'); t2["naslov_numericki"] = _T('Numerički proračun preglednosti / Numerical Calculation of Sight Distances'); t2["naslov_graficki"] = _T('Grafički prilozi – optičke analize / Graphical Appendices – Optical Analyses')
+            t2 = dict(tp); t2["naslov_izvjestaj"] = _T('Optičke analize / Optical Analyses'); t2["naslov_numericki"] = _T('Numerički proračun preglednosti / Numerical Calculation of Sight Distances'); t2["naslov_graficki"] = _T('Grafički prilozi – optičke analize / Graphical Appendices – Optical Analyses')
             if tp.get("folder_sr_optika"): t2["folder_sr"] = tp["folder_sr_optika"]
             if tp.get("folder_en_optika"): t2["folder_en"] = tp["folder_en_optika"]
             template_export.export(raw, t2, d2, log)

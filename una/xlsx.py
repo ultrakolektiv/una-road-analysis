@@ -34,8 +34,8 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
     nveh = len(P.vozila)
     # ------------------------------------------------------------ Pretpostavke
     ws = wb.active; ws.title = "Pretpostavke"
-    lines = [_TF('VOZNO-DINAMIČKA ANALIZA – {0} – radna knjiga uz Elaborat 3', P.projekat),
-        "Sekcije: " + "; ".join(f"{s['no']}. {_T(TIPOVI[s['tip']])}, st. {s['od']}–{s['do']}" for s in sections) + _T('. Preglednost (Elaborat 4) NIJE obuhvaćena.'), "",
+    lines = [_TF('VOZNO-DINAMIČKA ANALIZA – {0} – radna knjiga uz vozno-dinamičku analizu', P.projekat),
+        "Sekcije: " + "; ".join(f"{s['no']}. {_T(TIPOVI[s['tip']])}, st. {s['od']}–{s['do']}" for s in sections) + _T('. Preglednost (optička analiza) NIJE obuhvaćena.'), "",
         "KAKO SE KORISTI:",
         _T(' 1. Na listovima Ulaz_* zamijenite plave podatke ispisima projektanta: elementi horizontalne osovine (A–H), prelomne tačke nivelete (O–U), poprečni nagibi (AC i dalje). Dodajete li redove, UMETNITE ih unutar tablice (iznad zadnjeg reda).'),
         _T(' 2. Na listovima Profil_* podesite početnu/krajnju stacionažu i korak (plava polja u redu 3).'),

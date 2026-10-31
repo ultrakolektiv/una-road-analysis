@@ -312,7 +312,7 @@ def export(raw_path, t, out_path, log=print):
     tfirst = els[i_tr]
     for e in els[i_tr + 1: i_sec1]:
         body.remove(e)
-    retitle(tfirst, t.get("naslov_izvjestaj", _T('Vozno-dinamičke analize (Elaborat 3) / Driving Dynamics Analyses (Elaborate 3)')))
+    retitle(tfirst, t.get("naslov_izvjestaj", _T('Vozno-dinamičke analize / Driving Dynamics Analyses')))
     insert_after(tfirst, segs["M"] + segs["C"])
     # zadnji tekstualni element ne smije završiti tabelom neposredno ispred sectPr paragrafa – dodaj prazan paragraf
     # ažuriranje polja pri otvaranju

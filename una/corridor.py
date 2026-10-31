@@ -723,8 +723,7 @@ def harmonize(cfg, R, log=print):
     e = max((v["e"] for v in geo.values() if not v["central"]), default=3.85)
     pc = cfg.setdefault("preglednost", {"ukljuci": True})
     tip = dict(pc.get("tipovi_prepreka") or {})
-    if cfg.get("npp"):
-        cfg.pop("npp"); log(_T("Koridor: prepreke preuzima koridor – NPP se ne primjenjuje na preglednost."))
+    cfg.pop("npp", None)
     tip["otvorena trasa"] = off; pc["zadani_tip"] = "otvorena trasa"
     log(_TF("Koridor → proračun: prepreka na otvorenoj trasi {0:.2f} m od ivice kolovoza.", off))
     pc["tipovi_prepreka"] = tip

@@ -91,10 +91,10 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
 
     # =========================================================== naslovna
     desc = "; ".join(f"{('st. %s – %s' % (fm(s['od'], 0), fm(s['do'], 3).rstrip('0').rstrip(','))) }: {_T(TIPOVI[s['tip']])}" for s in sections)
-    if not template_mode: A(_TF('---\ntoc-title: "Sadržaj"\ntitle: "ELABORAT 3 – VOZNO-DINAMIČKE ANALIZE"\nsubtitle: "{0} – računska brzina V~r~ = {1:.0f} km/h"\nauthor: "Rezultirajući profil projektne brzine, usklađenost elemenata trase, vrijeme putovanja i potrošnja goriva"\ndate: "{2}"\n---\n\n', proj, Vr, cfg.get('datum', '')))
+    if not template_mode: A(_TF('---\ntoc-title: "Sadržaj"\ntitle: "VOZNO-DINAMIČKE ANALIZE"\nsubtitle: "{0} – računska brzina V~r~ = {1:.0f} km/h"\nauthor: "Rezultirajući profil projektne brzine, usklađenost elemenata trase, vrijeme putovanja i potrošnja goriva"\ndate: "{2}"\n---\n\n', proj, Vr, cfg.get('datum', '')))
     # =========================================================== 1 Uvod
     A("# Uvod\n")
-    A(_TF('U sklopu Glavnog projekta – {0} – za usvojenu trasu urađene su vozno-dinamičke analize u skladu sa Projektnim zadatkom (Elaborat 3). Cilj analize je da se definišu mjerodavni parametri za dimenzionisanje konstruktivnih elemenata plana i profila, da se utvrde eksploatacioni efekti (brzine, vrijeme putovanja, potrošnja goriva) i da se provjeri usklađenost i homogenost primijenjenih elemenata projektne geometrije.\n', proj))
+    A(_TF('U sklopu Glavnog projekta – {0} – za usvojenu trasu urađene su vozno-dinamičke analize u skladu sa Projektnim zadatkom. Cilj analize je da se definišu mjerodavni parametri za dimenzionisanje konstruktivnih elemenata plana i profila, da se utvrde eksploatacioni efekti (brzine, vrijeme putovanja, potrošnja goriva) i da se provjeri usklađenost i homogenost primijenjenih elemenata projektne geometrije.\n', proj))
     A(_TF('Analizirani raspon trase je st. {0} – {1} m. Trasa se sastoji od {2}:\n', fm(s_lo, 3), fm(s_hi, 3), _T('sljedećih sekcija') if len(sections) > 1 else _T('jedne sekcije')))
     for sec in sections:
         i = sec["no"]; od, do = sec["od"], sec["do"]; tip = sec["tip"]
@@ -112,7 +112,7 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
     zv = sorted({z for c in cases for z in c.zvr})
     if zv: A(_TF('Računska brzina je promijenjena na zonama: {0}; izvan zona važi V~r~ = {1:.0f} km/h. U zonama se max V~r~ = V~r~ + {2} km/h, R~min~(V~r~), granica V~p,R~ i provjere lukova računaju za računsku brzinu zone, a prijelazi brzine između zona izvode se ubrzanjem a i usporenjem d.\n', "; ".join(_TF('V~r~ = {0} km/h na st. {1} – {2}', fm(z[2], 0), fm(z[0], 3), fm(z[1], 3)) for z in zv), Vr, fm(P.dodatak_maxVr, 0)))
     A(_TF('Sa osnovnom računskom brzinom **V~r~ = {0:.0f} km/h** analiza obuhvata:\n', Vr))
-    A(_TF('- rezultirajući profil projektne brzine V~p~ (V85) za putničko vozilo i teška vozila ({0}) u uslovima slobodnog saobraćajnog toka, za sve smjerove vožnje na cijeloj trasi;\n- usklađivanje (harmonizaciju) elemenata trase i statističke pokazatelje dinamičke homogenosti: srednju vrijednost projektne brzine, srednje kvadratno odstupanje i koeficijent dinamičke homogenosti;\n- profil brzina, vrijeme putovanja i potrošnju goriva teških vozila;\n- provjeru poprečnih nagiba kolovoza na kružnim lukovima za dobijene projektne brzine{1}.\n\n**Zahtijevana preglednost i optičke analize (Elaborat 4) nisu predmet ovog elaborata.** Rezultirajući profili projektne brzine iz poglavlja 4 su ulazni podatak za te analize (P~zp~ = f(V~p~)).\n\nNumerički proračun dat je tabelarno u ovom elaboratu (prilozi A) i u pratećoj radnoj knjizi (Excel), u kojoj su svi koraci urađeni formulama, a svi dijagrami iz ovog elaborata izrađeni su kao Excel dijagrami koji se automatski preračunavaju kada se u listove *Ulaz_n* ubace novi ispisi (ulazni podaci su označeni plavom bojom).\n', ', '.join(v['kratko'].lower() for v in P.vozila), ''))
+    A(_TF('- rezultirajući profil projektne brzine V~p~ (V85) za putničko vozilo i teška vozila ({0}) u uslovima slobodnog saobraćajnog toka, za sve smjerove vožnje na cijeloj trasi;\n- usklađivanje (harmonizaciju) elemenata trase i statističke pokazatelje dinamičke homogenosti: srednju vrijednost projektne brzine, srednje kvadratno odstupanje i koeficijent dinamičke homogenosti;\n- profil brzina, vrijeme putovanja i potrošnju goriva teških vozila;\n- provjeru poprečnih nagiba kolovoza na kružnim lukovima za dobijene projektne brzine{1}.\n\n**Zahtijevana preglednost i optičke analize nisu predmet ovog elaborata.** Rezultirajući profili projektne brzine iz poglavlja 4 su ulazni podatak za te analize (P~zp~ = f(V~p~)).\n\nNumerički proračun dat je tabelarno u ovom elaboratu (prilozi A) i u pratećoj radnoj knjizi (Excel), u kojoj su svi koraci urađeni formulama, a svi dijagrami iz ovog elaborata izrađeni su kao Excel dijagrami koji se automatski preračunavaju kada se u listove *Ulaz_n* ubace novi ispisi (ulazni podaci su označeni plavom bojom).\n', ', '.join(v['kratko'].lower() for v in P.vozila), ''))
     A(_T("\n# Oznake i simboli {.unnumbered}\n"))
     A(_T('Brojevi u uglastim zagradama [n] u tekstu odnose se na popis literature na kraju elaborata. Indeksi slučajeva (smjerova vožnje): ') + "; ".join(f"**{c.key}** – {c.label}" for c in cases) + _T('.\n\n**Tabela O1 – Značenje oznaka**\n\n'))
     A(tbl(["Oznaka", _T('Značenje'), "Jedinica", "Izvor vrijednosti", "Gdje se koristi"], [list(r) for r in tr_obj(SYM)], ["l", "l", "c", "l", "l"]))
@@ -393,7 +393,7 @@ $$\Delta B = <<b>> \cdot \frac{<<Fu>> \cdot <<vav>>}{<<eta>> \cdot 1000} \cdot \
         z.append(f"**{c.key} ({c.label}):** V~p~ = {fm(x['vmin'], 1)} – {fm(x['vmax'], 1)} km/h, V~p,sr~ = {fm(x['mean'], 1)} km/h, σ = {fm(x['sd'], 2)} km/h, D~h~ = {fm(x['Dh'], 2)} %, vrijeme putovanja {fm(x['time'] / 60, 2)} min.")
     zk = [_T('Rezultirajuća projektna brzina (V85) i statistika po dionicama: ') + " ".join(z)]
     if any(x[1]["V"] > Vr + 0.05 for x in [(c, ar) for c in cases for ar in ARC[c.key]]) or any(c.V.max() > Vr for c in cases):
-        zk.append(_TF('Na dionicama sa povoljnim elementima dobijena V~p~ prelazi računsku brzinu V~r~ = {0} km/h (do {1} km/h). Preglednost u Elaboratu 4 treba provjeriti za V~p~, a ne samo za V~r~.', fm(Vr, 0), fm(maxVr, 0)))
+        zk.append(_TF('Na dionicama sa povoljnim elementima dobijena V~p~ prelazi računsku brzinu V~r~ = {0} km/h (do {1} km/h). Preglednost u optičkoj analizi treba provjeriti za V~p~, a ne samo za V~r~.', fm(Vr, 0), fm(maxVr, 0)))
     if bad_dv: zk.append(_T('Dinamička usklađenost susjednih elemenata nije dobra na: ') + "; ".join(_TF("{0} (elementi {1}–{2}, ΔV~cilj~ = {3} km/h – {4})", c.key, i + 1, i + 2, fm(d, 1), ocj(d)) for c, i, u, d, r in bad_dv) + _T('. Preporučuje se ujednačiti radijuse susjednih elemenata ili obezbijediti odgovarajuću signalizaciju.'))
     else: zk.append(_T('Dinamička usklađenost susjednih elemenata je ocijenjena kao dobra (ΔV~cilj~ ≤ 10 km/h) na svim dionicama.'))
     if bad3: zk.append(_TF('Radijus manji od R~min~(V~r~) = {0} m imaju: ', fm(Rmin_Vr, 0)) + "; ".join(_TF('{0}, luk br. {1} (R = {2} m)', c.key, ar['no'], fm(ar['R'], 2)) for c, ar in bad3) + _T('. Preporučuje se povećati radijus ili obrazložiti odstupanje (preporučena brzina, signalizacija).'))
@@ -441,7 +441,7 @@ $$\Delta B = <<b>> \cdot \frac{<<Fu>> \cdot <<vav>>}{<<eta>> \cdot 1000} \cdot \
         _T('**Granice dionica**: lukovi koji prelaze granicu sekcije ocjenjuju se samo u dijelu unutar sekcije.'),
         _T('**Poprečni nagib** primijenjenog luka = nagib vanjske trake kolovoza lijeve strane (desna je jednaka sa suprotnim predznakom); nagib se koristi samo u provjerama (tabele poprečnih nagiba), ne i u profilu brzine, vremenu i gorivu.'),
         _T('**Kriterij ΔV** (10 / 20 km/h) preuzet je iz literature (Lamm i dr.) [5] i primijenjen na razliku ciljnih brzina elemenata; ako Priručnik ima drugačije granice, uskladiti.'),
-        _T('**Preglednost** (Elaborat 4) nije obrađena.'),
+        _T('**Preglednost** (optička analiza) nije obrađena.'),
     ]
     pre.append(_TF('**Referentni najveći podužni nagib** za V~r~ = {0} km/h uzet je {1} % (potvrditi).', fm(Vr, 0), fm(P.max_nagib, 1)))
     for i, t in enumerate(pre, 1): A(f"{i}. {t}")
@@ -560,7 +560,7 @@ def write_docx(P, sections, cases, axes, fw, bw, has_caps, F, cfg, out_docx, log
         open(os.path.join(os.path.dirname(out_docx), "elaborat3_izvor.md"), "w", encoding="utf-8").write(txt) if cfg.get("zadrzi_md") else None
         raw = os.path.join(td, "raw.docx")
         run_pandoc(mdp, raw, td, os.path.join(HERE, "data", "ref.docx"))
-        postprocess(raw, out_docx, _TF('Elaborat 3 – Vozno-dinamičke analize | {0}', cfg.get('projekat', '')))
+        postprocess(raw, out_docx, _TF('Vozno-dinamičke analize | {0}', cfg.get('projekat', '')))
     log(_TF("Word: {0}", out_docx))
 
 

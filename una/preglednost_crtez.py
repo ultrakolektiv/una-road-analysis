@@ -159,7 +159,7 @@ def draw(P, cases, par, res, cfg, path, mode="vp", log=print, preview_png=None, 
         for q, w_ in enumerate(textwrap.wrap(t, max(20, int((W - (ind + 6) * u) / (0.75 * h))))): items.append(("t", w_, ind if q == 0 else ind + 3, h, gap))
     ttl = (title or TITLES[mode]) + ((f" – L = {par['L_zahtijevano']:.0f} m" if par["L_zahtijevano"] else " – Pzp") if mode == "zaht" else "")
     items.append(("t", "LEGENDA – " + ttl, 4, 3.5 * u, 8))
-    T_(_TF('Dionica: {0}   |   Računska brzina Vr = {1:g} km/h; Vp = V85 iz Elaborata 3 (a = d = {2:g} m/s²)', proj, P.Vr, P.a), gap=7)
+    T_(_TF('Dionica: {0}   |   Računska brzina Vr = {1:g} km/h; Vp = V85 iz vozno-dinamičke analize (a = d = {2:g} m/s²)', proj, P.Vr, P.a), gap=7)
     items.append(("sep",))
     ent = [(_T('OSOVINA_PUTA'), _T('Osovina puta (stacionaže svakih 100 m, oznaka na 500 m)'))]
     if par["ivice"]: ent.append(("IVICA_KOLOVOZA", _TF('Ivica kolovoza (crvena linija debljine {0:g} mm na papiru; širine traka zadaje korisnik)', par['ivica_debljina'])))
@@ -180,7 +180,7 @@ def draw(P, cases, par, res, cfg, path, mode="vp", log=print, preview_png=None, 
         T_((_TF('Pz = skraćena zaustavna preglednost (Crtež 52, fT50 %) za računsku brzinu Vr = {0:g} km/h (projektni zadatak) i podužni nagib u smjeru vožnje.', par['Vr'])) if mode == "vr" else _T('Lz = skraćena zaustavna preglednost (Smjernice BiH, Crtež 52, fT50 %) u funkciji Vp (V85) i podužnog nagiba u smjeru vožnje; vrijednosti očitane iz dijagrama.') + (_TF(' Na očitanu vrijednost dodato je {0:g} m (dodatak zadao projektant).', par['dodatak_L']) if par["dodatak_L"] else ""))
     elif mode == "zaht":
         if par["L_zahtijevano"]: T_(_TF('Zahtijevana dužina zrake L = {0:.0f} m zadana je od strane projektanta (ne zavisi od Vp ni od nagiba).', par['L_zahtijevano']))
-        else: T_(_T('Zahtijevana preglednost Pzp = Lz(Vp) očitana iz Crteža 52 (fT50 %) za projektnu brzinu Vp iz Elaborata 3 u tom presjeku i stvarni podužni nagib niveleta') + (f"; dodato {par['dodatak_L']:g} m." if par["dodatak_L"] else "."))
+        else: T_(_T('Zahtijevana preglednost Pzp = Lz(Vp) očitana iz Crteža 52 (fT50 %) za projektnu brzinu Vp iz vozno-dinamičke analize u tom presjeku i stvarni podužni nagib niveleta') + (f"; dodato {par['dodatak_L']:g} m." if par["dodatak_L"] else "."))
     else:
         Lt = _TF('zadana dužina L = {0:.0f} m', par['L_zahtijevano']) if par["L_zahtijevano"] else _T('Pzp = Lz(Vp, nagib) (Crtež 52, fT50 %)')
         T_(_TF('Očekivana preglednost = najduža zraka od oka vozača koju dopuštaju prepreka (linija na unesenom ofsetu od krajnje ivice kolovoza, po elementima trase: pravac, prijelaznica, kružni luk) i niveleta. Poređenje sa potrebnom dužinom: {0}.', Lt))

@@ -1,7 +1,7 @@
-LICENCNI UGOVOR ZA KRAJNJEG KORISNIKA (EULA) – Elaborat 3
+LICENCNI UGOVOR ZA KRAJNJEG KORISNIKA (EULA) – UNA - ROAD ENGINEERING ANALYSIS
 *** NACRT – obavezno ga pregleda pravnik i prilagodi propisima Vaše države prije distribucije ***
 
-1. Autorska prava. Softver "Elaborat 3" je vlasništvo [VAŠA FIRMA / autor]. Prodajom se ne prenosi vlasništvo, već pravo korištenja.
+1. Autorska prava. Softver "UNA - ROAD ENGINEERING ANALYSIS" je vlasništvo [VAŠA FIRMA / autor]. Prodajom se ne prenosi vlasništvo, već pravo korištenja.
 2. Licenca. Dobijate neekskluzivno, neprenosivo pravo korištenja softvera na broju računara i u roku navedenom u licenci.
    Licenca je vezana za ID računara i/ili rok važenja.
 3. Zabrane. Nije dozvoljeno: kopiranje i distribucija softvera ili licence; dekompilacija, rastavljanje ili zaobilaženje zaštite

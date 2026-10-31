@@ -270,7 +270,7 @@
 "optika.py:178",
 "report.py:45"
 ],
-"Optičke analize sprovedene su za usvojeno rješenje trase. Vozač svoje manevre podešava prema sadržaju u vidnom polju, pa je za svaku traku i svaki smjer vožnje numerički modelom trase (plan, niveleta, poprečni profil, prepreke uz kolovoz) određena raspoloživa preglednost. Proračun je urađen programom {0}; ulazna projektna brzina Vp preuzeta je iz Elaborata 3 (vozno-dinamičke analize, rezultirajući profil projektne brzine).\n": [
+"Optičke analize sprovedene su za usvojeno rješenje trase. Vozač svoje manevre podešava prema sadržaju u vidnom polju, pa je za svaku traku i svaki smjer vožnje numerički modelom trase (plan, niveleta, poprečni profil, prepreke uz kolovoz) određena raspoloživa preglednost. Proračun je urađen programom {0}; ulazna projektna brzina Vp preuzeta je iz vozno-dinamičke analize ( rezultirajući profil projektne brzine).\n": [
 "optika.py:181"
 ],
 "Oko vozača je {0} m iznad nivelete, a visina predmeta {1} (za zaustavnu preglednost i preticanje{2}). Zrake preglednosti polaze od ose oka vozača, na rastojanju od ose kolovoza prema usvojenom ofsetu.\n": [
@@ -371,10 +371,10 @@
 "Tip puta za preticanje: {0}": [
 "optika.py:295"
 ],
-"Elaborat 4 – Optičke analize | {0}": [
+"Optičke analize | {0}": [
 "optika.py:314"
 ],
-"Optičke analize (Elaborat 4) / Optical Analyses (Elaborate 4)": [
+"Optičke analize / Optical Analyses": [
 "optika.py:332"
 ],
 "Numerički proračun preglednosti / Numerical Calculation of Sight Distances": [
@@ -383,7 +383,7 @@
 "Grafički prilozi – optičke analize / Graphical Appendices – Optical Analyses": [
 "optika.py:332"
 ],
-"projektna brzina Vp (Elaborat 3)": [
+"projektna brzina Vp": [
 "optika.py:108"
 ],
 "zahtijevana preglednost Pzp = f(Vp, nagib)": [
@@ -897,7 +897,7 @@
 "Preglednost_Vr": [
 "preglednost_crtez.py:12:MODUL"
 ],
-"Dionica: {0}   |   Računska brzina Vr = {1:g} km/h; Vp = V85 iz Elaborata 3 (a = d = {2:g} m/s²)": [
+"Dionica: {0}   |   Računska brzina Vr = {1:g} km/h; Vp = V85 iz vozno-dinamičke analize (a = d = {2:g} m/s²)": [
 "preglednost_crtez.py:161"
 ],
 "Zraka = tetiva od oka vozača (osovina vozne trake) do tačke ispred, mjereno duž osovine vozne trake. Oko {0:.2f} m i predmet {1} iznad nivelete (vertikalna provjera).": [
@@ -981,7 +981,7 @@
 " Na očitanu vrijednost dodato je {0:g} m (dodatak zadao projektant).": [
 "preglednost_crtez.py:179"
 ],
-"Zahtijevana preglednost Pzp = Lz(Vp) očitana iz Crteža 52 (fT50 %) za projektnu brzinu Vp iz Elaborata 3 u tom presjeku i stvarni podužni nagib niveleta": [
+"Zahtijevana preglednost Pzp = Lz(Vp) očitana iz Crteža 52 (fT50 %) za projektnu brzinu Vp iz vozno-dinamičke analize u tom presjeku i stvarni podužni nagib niveleta": [
 "preglednost_crtez.py:182"
 ],
 "Zadovoljava na cijeloj dužini.": [
@@ -1131,7 +1131,7 @@
 "Br. – redni broj elementa u ispisu; Element – pravac / kružni luk / prijelaznica; Smjer – smjer krivine; St. početka i kraja; L – dužina; R – radijus (za prijelaznicu: od → do, ∞ = pravac); A – parametar klotoide.": [
 "report.py:260"
 ],
-"U sklopu Glavnog projekta – {0} – za usvojenu trasu urađene su vozno-dinamičke analize u skladu sa Projektnim zadatkom (Elaborat 3). Cilj analize je da se definišu mjerodavni parametri za dimenzionisanje konstruktivnih elemenata plana i profila, da se utvrde eksploatacioni efekti (brzine, vrijeme putovanja, potrošnja goriva) i da se provjeri usklađenost i homogenost primijenjenih elemenata projektne geometrije.\n": [
+"U sklopu Glavnog projekta – {0} – za usvojenu trasu urađene su vozno-dinamičke analize u skladu sa Projektnim zadatkom. Cilj analize je da se definišu mjerodavni parametri za dimenzionisanje konstruktivnih elemenata plana i profila, da se utvrde eksploatacioni efekti (brzine, vrijeme putovanja, potrošnja goriva) i da se provjeri usklađenost i homogenost primijenjenih elemenata projektne geometrije.\n": [
 "report.py:108"
 ],
 "Analizirani raspon trase je st. {0} – {1} m. Trasa se sastoji od {2}:\n": [
@@ -1140,7 +1140,7 @@
 "Sa računskom brzinom **V~r~ = {0:.0f} km/h** analiza obuhvata:\n": [
 "report.py:123"
 ],
-"- rezultirajući profil projektne brzine V~p~ (V85) za putničko vozilo i teška vozila ({0}) u uslovima slobodnog saobraćajnog toka, za sve smjerove vožnje na cijeloj trasi;\n- usklađivanje (harmonizaciju) elemenata trase i statističke pokazatelje dinamičke homogenosti: srednju vrijednost projektne brzine, srednje kvadratno odstupanje i koeficijent dinamičke homogenosti;\n- profil brzina, vrijeme putovanja i potrošnju goriva teških vozila;\n- provjeru poprečnih nagiba kolovoza na kružnim lukovima za dobijene projektne brzine{1}.\n\n**Zahtijevana preglednost i optičke analize (Elaborat 4) nisu predmet ovog elaborata.** Rezultirajući profili projektne brzine iz poglavlja 4 su ulazni podatak za te analize (P~zp~ = f(V~p~)).\n\nNumerički proračun dat je tabelarno u ovom elaboratu (prilozi A) i u pratećoj radnoj knjizi (Excel), u kojoj su svi koraci urađeni formulama, a svi dijagrami iz ovog elaborata izrađeni su kao Excel dijagrami koji se automatski preračunavaju kada se u listove *Ulaz_n* ubace novi ispisi (ulazni podaci su označeni plavom bojom).\n": [
+"- rezultirajući profil projektne brzine V~p~ (V85) za putničko vozilo i teška vozila ({0}) u uslovima slobodnog saobraćajnog toka, za sve smjerove vožnje na cijeloj trasi;\n- usklađivanje (harmonizaciju) elemenata trase i statističke pokazatelje dinamičke homogenosti: srednju vrijednost projektne brzine, srednje kvadratno odstupanje i koeficijent dinamičke homogenosti;\n- profil brzina, vrijeme putovanja i potrošnju goriva teških vozila;\n- provjeru poprečnih nagiba kolovoza na kružnim lukovima za dobijene projektne brzine{1}.\n\n**Zahtijevana preglednost i optičke analize nisu predmet ovog elaborata.** Rezultirajući profili projektne brzine iz poglavlja 4 su ulazni podatak za te analize (P~zp~ = f(V~p~)).\n\nNumerički proračun dat je tabelarno u ovom elaboratu (prilozi A) i u pratećoj radnoj knjizi (Excel), u kojoj su svi koraci urađeni formulama, a svi dijagrami iz ovog elaborata izrađeni su kao Excel dijagrami koji se automatski preračunavaju kada se u listove *Ulaz_n* ubace novi ispisi (ulazni podaci su označeni plavom bojom).\n": [
 "report.py:124"
 ],
 "Korišteni su ispisi projektanta, po tri datoteke za svaku osovinu (horizontalna osovina, uzdužni profil, poprečni nagibi):\n": [
@@ -1260,7 +1260,7 @@
 "**Kriterij ΔV** (10 / 20 km/h) preuzet je iz literature (Lamm i dr.) [5] i primijenjen na razliku ciljnih brzina elemenata; ako Priručnik ima drugačije granice, uskladiti.": [
 "report.py:627"
 ],
-"**Preglednost** (Elaborat 4) nije obrađena.": [
+"**Preglednost** (optička analiza) nije obrađena.": [
 "report.py:628"
 ],
 "**Referentni najveći podužni nagib** za V~r~ = {0} km/h uzet je {1} % (potvrditi).": [
@@ -1269,7 +1269,7 @@
 "**Tabela O2 – Objašnjenje kolona u tabelama**\n\n": [
 "report.py:640"
 ],
-"---\ntoc-title: \"Sadržaj\"\ntitle: \"ELABORAT 3 – VOZNO-DINAMIČKE ANALIZE\"\nsubtitle: \"{0} – računska brzina V~r~ = {1:.0f} km/h\"\nauthor: \"Rezultirajući profil projektne brzine, usklađenost elemenata trase, vrijeme putovanja i potrošnja goriva\"\ndate: \"{2}\"\n---\n\n": [
+"---\ntoc-title: \"Sadržaj\"\ntitle: \"VOZNO-DINAMIČKE ANALIZE\"\nsubtitle: \"{0} – računska brzina V~r~ = {1:.0f} km/h\"\nauthor: \"Rezultirajući profil projektne brzine, usklađenost elemenata trase, vrijeme putovanja i potrošnja goriva\"\ndate: \"{2}\"\n---\n\n": [
 "report.py:97"
 ],
 ".\n\n**Tabela O1 – Značenje oznaka**\n\n": [
@@ -1368,7 +1368,7 @@
 "## Polazište\n": [
 "report.py:514"
 ],
-"Pored osnovnog proračuna (poglavlja 2 – 5), u kojem brzina V85 proizlazi **samo iz geometrije**, urađen je scenarij sa dodatnim ograničenjem brzine: {0}. Ograničenje djeluje kao dodatna ciljna brzina T = min(V~p,R~; V~p~(i~N~); v~ogr~), a prije njega vozilo se usporava sa d = {1} m/s², a poslije njega ubrzava sa a = {2} m/s². Ograničenje brzine snižava stvarnu brzinu V85 samo ako se vozači pridržavaju ograničenja; zato ovaj scenarij vrijedi uz odgovarajuću signalizaciju i, po potrebi, fizičke mjere usporavanja, a za preglednost (Elaborat 4) treba provjeriti i rezultat iz geometrije.\n": [
+"Pored osnovnog proračuna (poglavlja 2 – 5), u kojem brzina V85 proizlazi **samo iz geometrije**, urađen je scenarij sa dodatnim ograničenjem brzine: {0}. Ograničenje djeluje kao dodatna ciljna brzina T = min(V~p,R~; V~p~(i~N~); v~ogr~), a prije njega vozilo se usporava sa d = {1} m/s², a poslije njega ubrzava sa a = {2} m/s². Ograničenje brzine snižava stvarnu brzinu V85 samo ako se vozači pridržavaju ograničenja; zato ovaj scenarij vrijedi uz odgovarajuću signalizaciju i, po potrebi, fizičke mjere usporavanja, a za preglednost treba provjeriti i rezultat iz geometrije.\n": [
 "report.py:516"
 ],
 "![]({0}){{width=16cm}}\n\n*Slika 7 – Putničko vozilo: geometrija (V85) i scenarij sa ograničenjem brzine*\n": [
@@ -1386,7 +1386,7 @@
 "Rezultirajuća projektna brzina (V85) i statistika po dionicama: ": [
 "report.py:576"
 ],
-"Na dionicama sa povoljnim elementima dobijena V~p~ prelazi računsku brzinu V~r~ = {0} km/h (do {1} km/h). Preglednost u Elaboratu 4 treba provjeriti za V~p~, a ne samo za V~r~.": [
+"Na dionicama sa povoljnim elementima dobijena V~p~ prelazi računsku brzinu V~r~ = {0} km/h (do {1} km/h). Preglednost u optičkoj analizi treba provjeriti za V~p~, a ne samo za V~r~.": [
 "report.py:578"
 ],
 "Dinamička usklađenost susjednih elemenata je ocijenjena kao dobra (ΔV~cilj~ ≤ 10 km/h) na svim dionicama.": [
@@ -1413,7 +1413,7 @@
 " km/h. Pretpostavlja se da se vozilo na granici sekcija kreće bez zaustavljanja, a stacionaže osovina u susjednim sekcijama uzimaju se kao nominalno jednake.": [
 "report.py:624"
 ],
-"Elaborat 3 – Vozno-dinamičke analize | {0}": [
+"Vozno-dinamičke analize | {0}": [
 "report.py:748"
 ],
 "zadovoljavajuće": [
@@ -1840,7 +1840,7 @@
 "Numerički proračun profila brzina / Numerical Calculation of Speed Profiles": [
 "template_export.py:308"
 ],
-"Vozno-dinamičke analize (Elaborat 3) / Driving Dynamics Analyses (Elaborate 3)": [
+"Vozno-dinamičke analize / Driving Dynamics Analyses": [
 "template_export.py:314"
 ],
 "Tabela/Table": [
@@ -2059,7 +2059,7 @@
 "Otpori vožnji i potrošnja goriva (5.1).": [
 "texts.py:50:MODUL"
 ],
-"VOZNO-DINAMIČKA ANALIZA – {0} – radna knjiga uz Elaborat 3": [
+"VOZNO-DINAMIČKA ANALIZA – {0} – radna knjiga uz vozno-dinamičku analizu": [
 "xlsx.py:36"
 ],
 " 1. Na listovima Ulaz_* zamijenite plave podatke ispisima projektanta: elementi horizontalne osovine (A–H), prelomne tačke nivelete (O–U), poprečni nagibi (AC i dalje). Dodajete li redove, UMETNITE ih unutar tablice (iznad zadnjeg reda).": [
@@ -2131,7 +2131,7 @@
 "Excel sačuvan: {0} ({1} listova)": [
 "xlsx.py:436"
 ],
-". Preglednost (Elaborat 4) NIJE obuhvaćena.": [
+". Preglednost (optička analiza) NIJE obuhvaćena.": [
 "xlsx.py:37"
 ],
 "PRETPOSTAVKE (provjeriti!): 1) Vp–R = interpolacija tablice Rmin(Vr) sastavljene na osnovu dijagrama (slika 3-07, Prilog 2 pravilnika); 2) Vp–iN = tablica sastavljena na osnovu dijagrama (slika 3-08, Prilog 2 pravilnika); 3) teška vozila: parametri pretpostavljeni (list Parametri); 4) mreža ": [

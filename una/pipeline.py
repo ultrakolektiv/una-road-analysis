@@ -73,9 +73,6 @@ def generate(cfg, outdir, log=print, word=True, excel=True, sight=None):
         from . import corridor
         KR = corridor.load_landxml(kor["datoteka"], *corridor.kor_range(cfg), log=log)
         corridor.harmonize(cfg, KR, log=log)
-    if cfg.get("npp"):
-        from . import npp as _npp
-        _npp.apply_to_sight(cfg)
     errs = validate(cfg)
     if errs: raise ValueError("\n".join(errs))
     os.makedirs(outdir, exist_ok=True)
@@ -109,8 +106,7 @@ def generate(cfg, outdir, log=print, word=True, excel=True, sight=None):
         log(_T('4/4 Izrada Excel radne knjige sa formulama i dijagramima (može potrajati) …'))
         p = os.path.join(outdir, _TF("Proracun_vozno-dinamicke_analize_{0}.xlsx", name))
         xlsx.build_xlsx(p, P, sections, cases, axes, tr_obj(SYM), report.LAST_REG, has_caps, log=log, stamp=licenca.stamp(lic)); outs.append(p)
-    viz_on = bool(cfg.get("vizura") or (cfg.get("gui_opcije") or {}).get("vizura"))
-    sg_on = (sight if sight is not None else bool((cfg.get("preglednost") or {}).get("ukljuci") or (cfg.get("optika") or {}).get("ukljuci"))) or viz_on or kor_on
+    sg_on = (sight if sight is not None else bool((cfg.get("preglednost") or {}).get("ukljuci") or (cfg.get("optika") or {}).get("ukljuci"))) or kor_on
     if sg_on:
         log(_T('5/5 Preglednost: zrake, omotač i DXF crtež …'))
         from . import preglednost as pgm, preglednost_crtez as pgc
@@ -131,10 +127,6 @@ def generate(cfg, outdir, log=print, word=True, excel=True, sight=None):
         outs += pgd.make(P, par, out_, outdir, name, log=log)
         outs += pgd.make_vr(P, par, out_, outdir, name, log=log)
         px = os.path.join(outdir, _TF('Preglednost_rezultati_{0}.xlsx', name)); pgm.write_xlsx(px, P, par, out_, cases); log(_TF('Excel (preglednost): {0}', px)); outs.append(px)
-        if viz_on:
-            log(_T('Vizualizacija vožnje (oko vozača) …'))
-            from . import vizura
-            outs.append(vizura.write_html(os.path.join(outdir, _TF('Vozacka_vizura_{0}.html', name)), P, par, out_, cfg, log=log))
         if kor_on:
             log(_T('Vožnja kroz koridor (Civil 3D LandXML) …'))
             outs.append(corridor.write_html(os.path.join(outdir, _TF('Koridor_vizura_{0}.html', name)), KR, P, par, out_, cfg, log=log))

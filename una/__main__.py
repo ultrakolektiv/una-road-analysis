@@ -3,7 +3,7 @@ import sys, os, argparse
 from . import pipeline
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="una", description="UNA - ROAD ENGINEERING ANALYSIS – elaborati 3 i 4 (Word + Excel + DXF)")
+    ap = argparse.ArgumentParser(prog="una", description="UNA - ROAD ENGINEERING ANALYSIS – vozno-dinamičke i optičke analize (Word + Excel + DXF)")
     ap.add_argument("config", nargs="?", help=_T('JSON datoteka projekta (ako se izostavi, otvara se prozor)'))
     ap.add_argument("-o", "--out", default=None, help=_T("izlazni folder (default: folder 'izlaz' pored projekta)"))
     ap.add_argument("--bez-worda", action="store_true"); ap.add_argument("--bez-excela", action="store_true")

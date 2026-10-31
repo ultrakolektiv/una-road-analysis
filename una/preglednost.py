@@ -137,7 +137,7 @@ def obstacle_offsets(c, par, s, median=False):
         if en.get("tip") not in (None, ""):
             v = tipovi.get(en["tip"]); return None if v in (None, "") else (v if isinstance(v, dict) else float(v))
         return None if en.get("ofset") in (None, "") else float(en["ofset"])
-    def sides(v):                                          # NPP: ofset po strani; 'vani' = vanjska ivica, 'razdjelni' = strana razdjelnog pojasa (u smjeru STACIONAŽE)
+    def sides(v):                                          # ofset po strani; 'vani' = vanjska ivica, 'razdjelni' = strana razdjelnog pojasa (u smjeru STACIONAŽE)
         vani = v.get("vani"); raz = v.get("razdjelni", vani)
         if c.role == "desna": return (vani, raz)
         if c.role == "lijeva": return (raz, vani)

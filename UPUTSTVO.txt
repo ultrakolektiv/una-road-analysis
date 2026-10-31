@@ -1,4 +1,4 @@
-ELABORAT 3 – GENERATOR VOZNO-DINAMIČKIH ANALIZA (uputstvo)
+UNA - ROAD ENGINEERING ANALYSIS – GENERATOR VOZNO-DINAMIČKIH ANALIZA (uputstvo)
 ==========================================================
 
 ČEMU SLUŽI
@@ -6,7 +6,7 @@ Iz ispisa geometrije (horizontalna osovina, uzdužni profil, poprečni nagibi) p
 pravi dva fajla:
   1) Elaborat_3_...docx  – kompletan Word elaborat (poglavlja, tabele, jednačine, slike, prilozi A/B/C)
   2) Proracun_...xlsx    – Excel radna knjiga sa FORMULAMA i dijagramima (svi koraci proračuna)
-Preglednost (Elaborat 4) nije obuhvaćena.
+Preglednost (optička analiza) nije obuhvaćena.
 
 
 JEDNOKRATNA PRIPREMA (samo prvi put)
@@ -156,7 +156,7 @@ PROBLEMI
 • Ako se prozor ne otvara ("No module named tkinter"): ponovo instalirajte Python sa uključenim tcl/tk.
 
 
-=== UNA - ROAD ENGINEERING ANALYSIS: ELABORAT OPTIČKIH ANALIZA (Elaborat 4) ===
+=== UNA - ROAD ENGINEERING ANALYSIS: OPTIČKE ANALIZE ===
 Uključite "Elaborat optičkih analiza (Word)" (ili u JSON-u "optika": {"ukljuci": true}). Program tada (uz Preglednost) pravi:
  - Elaborat_4_Opticke_analize_<projekat>.docx: 1 Uvod, 2 Zahtijevana preglednost Pzp=f(Vp), 3 Raspoloživa i preticajna preglednost
    (tabele i dijagram za oba smjera, %Pp prema minimumu), 4 Model trase, 5 Vizuelizacija, 6 Sadržaj i Sadržaj grafičkih priloga;
@@ -172,9 +172,9 @@ Tip puta za preticanje ("optika": {"tip_puta": "auto" | "dvosmjerni" | "razdvoje
 preticajna preglednost se NE računa (vozna + preticajna traka; Tabela 30 vrijedi za dvosmjerne puteve sa jednim kolovozom) i elaborat to obrazlaže;
 za dvosmjerni put sa jednim kolovozom (sekcija "osovina") računa se Pp (Tabela 30), %Pp i poredi sa minimumom (25 % grupa A, 15 % B/C).
 
-Elaborat 4 po templateu: ako je zadan Word template (isti kao za Elaborat 3, dugme "Word template…"), uz standardni Word pravi se i
+Optička analiza po templateu: ako je zadan Word template (isti kao za vozno-dinamičku analizu, dugme "Word template…"), uz standardni Word pravi se i
 Elaborat_4_Opticke_analize_<projekat>_po_templateu.docx (tekstualni dio, numerička i grafička dokumentacija u templateu). Na naslovnoj strani
-možete zadati drugi folder za Elaborat 4: "template": {"folder_sr_optika": "...", "folder_en_optika": "..."}.
+možete zadati drugi folder za optičku analizu: "template": {"folder_sr_optika": "...", "folder_en_optika": "..."}.
 
 NOVO – postavke, više elemenata odjednom, izuzeci
 - Meni Projekat: „Spremi projekat (Ctrl+S)“ sprema ispise i SVE postavke (uključujući kvačice Word/Excel/Preglednost/Optika). Program pri pokretanju nudi učitavanje posljednjeg projekta.
@@ -183,13 +183,13 @@ NOVO – postavke, više elemenata odjednom, izuzeci
 - Preglednost… → „Izuzeci po stacionaži“: „Dodaj izuzetak…“ otvara prozor s OD, DO, tipom/ofsetom prepreke, stranom (npr. most koji zahvata samo dio prijelaznice).
 - Automatsko prepoznavanje ispisa: uzdužni profil se sada ispravno prepoznaje i kad sadrži tabelu poprečnih nagiba.
 
-NOVO – usklađivanje s Prilogom 2 Pravilnika (Elaborat 3 i 4)
+NOVO – usklađivanje s Prilogom 2 Pravilnika (vozno-dinamička i optička analiza)
 - Vp–R: Rmin(Vr) se računa obrascem sa slike 3-07 (Vri² / (127·(fR + ipk,max)), ipk,max = 7 %); Vp–iN je očitano sa slike 3-08 (tačnost ≈ ±5 km/h). Ako je projekat ranije spremljen s vlastitim tablicama, u „Naprednim parametrima" kliknite „Vrati podrazumijevano".
 - maxVr: novo polje „max Vr prema tabeli 3-04"; max Vr = manja od vrijednosti Vr + dodatak i unesene vrijednosti (prazno = samo Vr + dodatak).
 - Put ubrzanja/usporenja po obrascu sa slike 3-09 (L = 0,1·Vsr·ΔV ⇒ a = d = 0,7716 m/s²); isključuje se poljem „obrazac_puta" = 0.
-- Upozorenje o uslovu Vri ≤ Vp u poglavlju 4 Elaborata 3 (Vp se ne podiže na Vr, nego se element označava).
+- Upozorenje o uslovu Vri ≤ Vp u poglavlju 4 vozno-dinamičke analize (Vp se ne podiže na Vr, nego se element označava).
 - Poglavlje 5: „Tegljač (Pravilnik)" koristi krivu sile vuče izvedenu iz dijagrama 3-10 (ravnotežne brzine 68…15 km/h pri 2…7 %); „Tegljač (savremeni)", autovoz i putničko vozilo računaju se konstantnom snagom (pretpostavke). Potrošnja i prazan hod su po vozilu.
-- Elaborat 4: provjera Pr (Pzp) ≥ Xd (Xd = 0,1·Vsr·ΔV) na zonama usporenja profila Vp.
+- Optička analiza: provjera Pr (Pzp) ≥ Xd (Xd = 0,1·Vsr·ΔV) na zonama usporenja profila Vp.
 
 
 NOVO U VERZIJI 1.2 – MODERAN PROZOR I ENGLESKA VERZIJA
@@ -199,7 +199,7 @@ NOVO U VERZIJI 1.2 – MODERAN PROZOR I ENGLESKA VERZIJA
   Stari prozor je dostupan sa:  UNA.exe --classic
 * Jezik sučelja: dugmad SR / EN (lijevo dolje). Jezik dokumenata (Word, Excel, DXF, slike) bira se u koraku "Projekat"
   (polje "Jezik dokumenata") ili iz komandne linije:  UNA.exe projekat.json --lang en
-* Engleski izlaz: Elaborat 3 i 4, Excel radna knjiga, DXF slojevi i natpisi, dijagrami i nazivi datoteka.
+* Engleski izlaz: vozno-dinamička i optička analiza, Excel radna knjiga, DXF slojevi i natpisi, dijagrami i nazivi datoteka.
   Decimalni separator je tačka. Nazivi listova u Excelu ostaju isti u oba jezika (zbog formula).
 * Greške pri pokretanju upisuju se u  %LOCALAPPDATA%\UNA\error.log
 
@@ -210,15 +210,9 @@ IFC I DWG IZLAZ (verzija 1.3)
 - Jezik izvještaja se zove "Bosanski" (ranije "Srpski").
 
 
-NPP, VOŽNJA IZ OKA VOZAČA I LANDXML (verzija 1.4)
-- Stranica "NPP": uključite "Koristi NPP u proračunu i vizualizaciji". Zadani profili su očitani iz crteža NPP_BC_Budva (brza cesta na nasipu i u usjeku), NPP_Mostovi (viadukti V1–V4, cut&cover) i NPP_Tuneli (TIP 1/2/3). Mjere možete mijenjati.
-  Zatim zadajte zadani profil za cijelu trasu i dionice po stacionaži (npr. most 7700–7800, tunel 1500–2300). Prepreke iz NPP-a ulaze u proračun preglednosti:
-  otvorena trasa/most – odbojna ili betonska ograda, usjek – kosina, tunel – zid tunela. Ofset prepreke mjeri se od ivice vozne trake (ivična traka je uključena).
-- Izrada → "Vožnja – oko vozača (HTML)": jedna samostalna datoteka koju otvarate u pregledniku (radi i bez interneta). Pokazuje vožnju brzinom Vp iz oka vozača (visina oka iz parametara preglednosti)
-  sa HUD-om: stacionaža, brzina, radijus, poprečni i uzdužni nagib, element trase, profil (otvorena trasa/most/tunel), raspoloživa i zahtijevana preglednost. Crvena traka u dijagramu i na mini-karti
-  označava dijelove gdje preglednost nije zadovoljena. Tipke: razmak = pauza, strelice = ±40 m; klik na dijagram = skok na stacionažu.
+VOŽNJA KROZ KORIDOR I LANDXML
+- Izrada → "Vožnja kroz koridor (HTML)": učitajte LandXML koridora iz Civil 3D-a; prepreke i profili se čitaju iz koridora. Samostalna HTML datoteka (radi i bez interneta) pokazuje vožnju iz oka vozača sa HUD-om, laserskom zrakom vizure i dijagramom. Tipke: razmak = pauza, strelice = ±40 m; klik na dijagram = skok na stacionažu.
 - Izrada → "LandXML (Civil 3D)": osovine (pravci, kružni lukovi, klotoide) i nivelete sa vertikalnim krivinama. U Civil 3D-u: Insert → Import LandXML → Alignments + Profiles, pa corridor sa vašim assembly-jem.
-- Mjere u NPP-u koje nisu bile kotirane u crtežima (npr. visina odbojne ograde 0.80 m, visina svoda tunela) su procjene označene u datoteci una/data/npp_default.json; provjerite ih prije upotrebe.
 
 VOŽNJA KROZ CIVIL 3D KORIDOR (verzija 1.5)
 - Izrada → "Vožnja kroz Civil 3D koridor (HTML)": uključite karticu, odaberite LandXML koji ste izvezli iz Civil 3D-a (osovine, nivelete, poprečni presjeci koridora i površina terena) i zadajte raspon stacionaže (npr. 80 – 1580 m).
@@ -235,6 +229,6 @@ VOŽNJA KROZ CIVIL 3D KORIDOR (verzija 1.5)
 
 OSOVINE IZ LANDXML-A (bez ispisa projektanta)
 Na koraku "Sekcije trase" dugme "Uvezi osovine iz LandXML-a" čita iz Civil 3D LandXML-a horizontalu (pravci, krivine, prijelaznice), nivelete
-(PVI i parabole) i poprečne nagibe (iz površi kolovoza u presjecima) i pravi sekciju trase. Dalje se sve radi kao i sa ispisima: Elaborat 3, Excel,
-preglednost (DXF), Elaborat 4, IFC... Reference u projektu su oblika "datoteka.xml#IME_OSOVINE". Poprečni nagib se računa na ±3,5 m od osovine;
+(PVI i parabole) i poprečne nagibe (iz površi kolovoza u presjecima) i pravi sekciju trase. Dalje se sve radi kao i sa ispisima: vozno-dinamička analiza, Excel,
+preglednost (DXF), optička analiza, IFC... Reference u projektu su oblika "datoteka.xml#IME_OSOVINE". Poprečni nagib se računa na ±3,5 m od osovine;
 širina trake je zadano 3,5 m (mijenja se u sekciji). Stacionaže su iste kao u LandXML-u; presjeci obično pokrivaju kraći dio od osovine.
