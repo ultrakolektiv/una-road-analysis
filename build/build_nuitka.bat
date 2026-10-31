@@ -15,7 +15,7 @@ pip install -r requirements.txt nuitka ordered-set zstandard
 if exist dist rmdir /s /q dist
 python -m nuitka --standalone --assume-yes-for-downloads ^
   --enable-plugin=tk-inter ^
-  --windows-console-mode=disable ^
+  --windows-console-mode=disable --windows-icon-from-ico=build\assets\una.ico ^
   --include-package=una --include-data-dir=una\data=una\data ^
   --include-package=docx --include-package-data=docx ^
   --nofollow-import-to=pytest,IPython,scipy.tests,numpy.tests ^

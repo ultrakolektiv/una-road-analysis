@@ -16,6 +16,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 #app{display:grid;grid-template-columns:248px 1fr;height:100vh}
 #side{background:var(--side);color:var(--side-text);display:flex;flex-direction:column;padding:18px 12px;gap:14px;overflow:auto}
 .brand{display:flex;gap:10px;align-items:center;padding:4px 8px 10px}
+.brandlogo{width:100%;max-width:210px;height:auto;background:#fff;border-radius:12px;padding:6px 8px;box-shadow:0 1px 6px rgba(0,0,0,.25)}
 .brand b{display:block;font-size:20px;letter-spacing:.5px;color:#fff;line-height:1}
 .brand span{font-size:11px;opacity:.75}
 #nav{display:flex;flex-direction:column;gap:3px}

@@ -537,6 +537,9 @@ class App(tk.Tk):
         super().__init__()
         self.title("UNA - ROAD ENGINEERING ANALYSIS – Elaborat 3 i 4 (vozno-dinamičke i optičke analize)"); self.geometry("980x720")
         self.cfg = {"projekat": "", "Vr": 100, "sekcije": []}; self.path = None; self.q = queue.Queue(); self.busy = False
+        try:
+            self._ico = tk.PhotoImage(file=os.path.join(os.path.dirname(__file__), "webui", "static", "logo_icon.png")); self.iconphoto(True, self._ico)      # ikona prozora (logo)
+        except Exception: pass
         m = tk.Menu(self); fm_ = tk.Menu(m, tearoff=0)
         fm_.add_command(label="Novi projekat", command=self.new); fm_.add_command(label="Učitaj projekat…", command=self.load); fm_.add_command(label="Spremi projekat (Ctrl+S)", command=self.save_quick); fm_.add_command(label="Spremi projekat kao…", command=self.save); fm_.add_separator(); fm_.add_command(label="Spremi postavke (bez ispisa)…", command=self.save_settings); fm_.add_command(label="Učitaj postavke…", command=self.load_settings); fm_.add_separator(); fm_.add_command(label="Izlaz", command=self.destroy)
         m.add_cascade(label="Projekat", menu=fm_); self.config(menu=m)

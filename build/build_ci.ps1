@@ -30,7 +30,7 @@ python -m nuitka --standalone --assume-yes-for-downloads --msvc=latest `
   --include-package=una --include-data-dir=una\data=una\data --include-data-dir=una\webui\static=una\webui\static --include-package=docx --include-package-data=docx `
   --nofollow-import-to=pytest,IPython,scipy.tests,numpy.tests `
   --product-name="UNA - ROAD ENGINEERING ANALYSIS" --company-name="VAŠA FIRMA" --product-version=$fv --file-version=$fv `
-  --output-dir=dist --output-filename=UNA.exe UNA.py
+  --windows-icon-from-ico=build\assets\una.ico --output-dir=dist --output-filename=UNA.exe UNA.py
 if ($LASTEXITCODE -ne 0) { throw "Nuitka build nije uspio" }
 
 Copy-Item $pd dist\UNA.dist\pandoc -Recurse -Force

@@ -23,9 +23,17 @@ button{cursor:pointer}button:hover{background:#26304a}
 #pf small{display:block;color:var(--mu);font-weight:500}
 @media(max-width:820px){#ctl{max-width:100%;top:auto;bottom:170px;right:14px}#hud{min-width:0}#pf{display:none}}
 #rt{max-width:300px}
+#splash{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(8,12,20,.62);backdrop-filter:blur(4px);cursor:pointer}
+#splash .spl{position:relative;width:min(560px,86vw);background:#fff;border-radius:22px;padding:22px 26px;box-shadow:0 18px 60px rgba(0,0,0,.5)}
+#splash img{display:block;width:100%;height:auto}
+#spgo{position:absolute;left:25%;top:50%;transform:translate(-50%,-50%);width:78px;height:78px;border-radius:50%;border:0;background:rgba(11,35,80,.86);color:#fff;font-size:36px;line-height:1;padding:0 0 0 7px;box-shadow:0 6px 26px rgba(0,0,0,.45);transition:transform .15s,background .15s}
+#splash:hover #spgo{transform:translate(-50%,-50%) scale(1.08);background:rgba(15,108,189,.95)}
+#hlogo{position:absolute;right:10px;top:9px;height:30px;background:#fff;border-radius:7px;padding:2px 5px}
 </style></head><body>
 <canvas id="cv"></canvas>
-<div class="pn" id="hud"><h1 id="t_proj"></h1><div id="big"><span id="v">0</span> <small>km/h</small></div>
+<div id="splash"><div class="spl"><img src="/*__LOGO__*/" alt="UNA – Road Engineering Analysis"><button id="spgo" aria-label="Play">▶</button></div></div>
+
+<div class="pn" id="hud"><img id="hlogo" src="/*__LOGO__*/" alt=""><h1 id="t_proj"></h1><div id="big"><span id="v">0</span> <small>km/h</small></div>
 <table id="tb"></table><div id="st"></div></div>
 <div class="pn" id="pf"><span id="pfn"></span><small id="pfo"></small></div>
 <div class="pn" id="ctl"><select id="rt"></select><button id="pl">⏸</button><select id="sp"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
@@ -39,7 +47,7 @@ en:{title:"Drive-through – driver's eye view",st:"Chainage",sp:"Speed Vp",rad:
 let lang=DATA.lang==="en"?"en":"bs";const T=()=>L[lang];
 const cv=document.getElementById('cv'),cx=cv.getContext('2d'),mm=document.getElementById('mm'),mx=mm.getContext('2d'),ch=document.getElementById('ch'),chx=ch.getContext('2d');
 const rtSel=document.getElementById('rt');Object.keys(DATA.routes).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=DATA.routes[k].naziv;rtSel.appendChild(o)});
-let R=null,key=null,q=0,playing=true,speedF=1,eyeH=DATA.h,last=0,yawS=null,pitS=0;
+let R=null,key=null,q=0,playing=false,speedF=1,eyeH=DATA.h,last=0,yawS=null,pitS=0;
 function setRoute(k){key=k;R=DATA.routes[k];q=R.q[0];R.tx=[];R.ty=[];for(let i=0;i<R.n;i++){const a=Math.max(0,i-1),b=Math.min(R.n-1,i+1);let dx=R.x[b]-R.x[a],dy=R.y[b]-R.y[a];const l=Math.hypot(dx,dy)||1;R.tx.push(dx/l);R.ty.push(dy/l)}
  const sl=document.getElementById('sl');sl.max=R.q[R.n-1]-R.q[0];yawS=null;buildMini();buildChart()}
 const bs=(arr,v)=>{let lo=0,hi=arr.length-1;while(hi-lo>1){const m=(lo+hi)>>1;if(arr[m]<=v)lo=m;else hi=m}return lo};
@@ -167,6 +175,7 @@ function chart(){const w=ch.width,h=ch.height;chx.clearRect(0,0,w,h);const q0=R.
 ch.addEventListener('click',e=>{const r=ch.getBoundingClientRect(),f=(e.clientX-r.left)/r.width;q=R.q[0]+f*(R.q[R.n-1]-R.q[0]);yawS=null});
 document.getElementById('sl').addEventListener('input',e=>{q=R.q[0]+(+e.target.value);yawS=null});
 document.getElementById('pl').onclick=()=>{playing=!playing;document.getElementById('pl').textContent=playing?'⏸':'▶'};
+document.getElementById('splash').onclick=()=>{document.getElementById('splash').style.display='none';playing=true;document.getElementById('pl').textContent='⏸'};
 document.getElementById('sp').onchange=e=>speedF=+e.target.value;rtSel.onchange=e=>setRoute(e.target.value);
 const eh=document.getElementById('eh');eh.value=eyeH;eh.onchange=()=>{eyeH=Math.min(3,Math.max(.5,+eh.value||1))};
 document.getElementById('lg').onclick=()=>{lang=lang==='en'?'bs':'en';document.getElementById('lg').textContent=lang==='en'?'BS':'EN';stat()};
@@ -175,6 +184,6 @@ window.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();do
 function loop(t){const dt=Math.min(.1,(t-last)/1000||0);last=t;if(playing){const e=smp(q);q+=Math.max(5,e.v)/3.6*dt*speedF;if(q>=R.q[R.n-1]-2)q=R.q[0]}
  q=Math.min(Math.max(q,R.q[0]),R.q[R.n-1]-2);frame();requestAnimationFrame(loop)}
 document.getElementById('lg').textContent=lang==='en'?'BS':'EN';stat();
-window.UNA={set:(v,p)=>{q=R.q[0]+v;playing=p===undefined?false:p;yawS=null;document.getElementById('pl').textContent=playing?'⏸':'▶'},route:setRoute,R:()=>R};
+window.UNA={set:(v,p)=>{document.getElementById('splash').style.display='none';q=R.q[0]+v;playing=p===undefined?false:p;yawS=null;document.getElementById('pl').textContent=playing?'⏸':'▶'},route:setRoute,R:()=>R};
 setRoute(Object.keys(DATA.routes)[0]);requestAnimationFrame(loop);
 </script></body></html>

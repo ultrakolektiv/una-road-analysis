@@ -16,6 +16,10 @@ Compression=lzma2/max
 SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64compatible
 LicenseFile=EULA.txt
+SetupIconFile=assets\una.ico
+WizardImageFile=assets\wizard_big.bmp
+WizardSmallImageFile=assets\wizard_small.bmp
+UninstallDisplayIcon={app}\UNA.exe
 PrivilegesRequired=admin
 UninstallDisplayName={#AppName}
 [Languages]

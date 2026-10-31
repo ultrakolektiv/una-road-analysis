@@ -560,7 +560,8 @@ def write_html(path, R_or_path, P, par, out, cfg, log=print):
     scene["lang"] = get_lang(); scene["Vr"] = float(P.Vr)
     tpl = open(os.path.join(os.path.dirname(__file__), "data", "koridor.html"), encoding="utf-8").read()
     js = json.dumps(scene, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-    open(path, "w", encoding="utf-8").write(tpl.replace("/*__DATA__*/null", js))
+    from .branding import logo_uri
+    open(path, "w", encoding="utf-8").write(tpl.replace("/*__DATA__*/null", js).replace("/*__LOGO__*/", logo_uri()))
     log(_TF("Vožnja kroz koridor (HTML): {0}", path))
     return path
 
