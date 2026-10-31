@@ -84,7 +84,7 @@ function hill(a,b,fa){const fg=1-Math.exp(-fa/420),H=a.hl,Hb=b.hl,sm=(x0,x1,v)=>
    cn=hs(Math.floor(a.q/7)*2.3+Math.floor(om/9)*5.1),cn2=hs(Math.floor(a.q/19)*1.7+Math.floor(om/23)*3.3),lit=.80+.20*Math.max(-1,Math.min(1,(dz>0?.55:-.35)-lon*1.4)),rf=sm(.5,.95,sl+(cn-.5)*.22),
    st=(Math.floor(hg*1.1)&1)?.9:1.04,g=[C.grass2[0]+(C.grass[0]-C.grass2[0])*cn2,C.grass2[1]+(C.grass[1]-C.grass2[1])*cn2,C.grass2[2]+(C.grass[2]-C.grass2[2])*cn2],
    rk=[C.rock[0]*st*(.94+.1*cn),C.rock[1]*st*(.94+.1*cn),C.rock[2]*st*(.94+.1*cn)],col=sc([g[0]+(rk[0]-g[0])*rf,g[1]+(rk[1]-g[1])*rf,g[2]+(rk[2]-g[2])*rf],lit*(1-Math.min(.2,sl*.1)));
-  poly([W(a,o1,z1),W(a,o2,z2),W(b,o2,zb2),W(b,o1,zb1)],mix(col,C.haze,Math.min(.92,fg*1.05)))}}
+  const fc=(c)=>mix(c,C.haze,Math.min(.92,fg*1.05));poly([W(a,o1,z1),W(a,o2,z2),W(b,o2,zb2),W(b,o1,zb1)],fc(col));}}
 function strip(a,b,fa){
  const tun=a.kind==="tunel",fogT=1-Math.exp(-fa/420);const fog=(c)=>tun?mix(c,C.dark,Math.min(1,fa/110)):mix(c,C.haze,Math.min(.92,fogT*1.05));
  const ea=a.E,eb=b.E,e=ea.e;
@@ -92,19 +92,20 @@ function strip(a,b,fa){
  const os=new Set();for(const p of a.F)os.add(p[0]);for(const p of b.F)os.add(p[0]);const O=[...os].sort((u,v)=>u-v);
  const PV=ea.pv||[[-e,e]],PVL=PV.map(r=>{const u=ea.ug||0;return u>0?(r[1]<0?[r[0],-u]:[u,r[1]]):r}),pave=(om)=>PV.some(r=>om>=r[0]-.001&&om<=r[1]+.001), oth=(om)=>ea.oe>0&&Math.abs(om-ea.ot)<=ea.oe+.001;
  for(let k=0;k<O.length-1;k++){const o1=O[k],o2=O[k+1],om=(o1+o2)/2;if(o2-o1<1e-4)continue;
-  let col,al;const med=ea.med&&om>ea.med[0]&&om<ea.med[2];
+  let col,al,terr=false;const med=ea.med&&om>ea.med[0]&&om<ea.med[2];
   if(a.kind==="tunel"){col=pave(om)?C.road:C.concD}
   else if(a.kind==="most"){col=pave(om)?C.road:C.conc}
   else if(pave(om))col=C.road;else if(oth(om))col=C.road2;else if(med)col=C.med;
   else if(om>=ea.shL&&om<=ea.shR)col=C.shoulder;
-  else{const dz=(zp(a.F,o2)-zp(a.F,o1))/(o2-o1),sl=Math.min(1.6,Math.abs(dz)),lon=(zp(b.F,om)-zp(a.F,om))/Math.max(.5,b.q-a.q),
+  else{terr=true;const dz=(zp(a.F,o2)-zp(a.F,o1))/(o2-o1),sl=Math.min(1.6,Math.abs(dz)),lon=(zp(b.F,om)-zp(a.F,om))/Math.max(.5,b.q-a.q),
     sm=(x0,x1,v)=>{const u=Math.min(1,Math.max(0,(v-x0)/(x1-x0)));return u*u*(3-2*u)},hgt=a.z+zp(a.F,om),
     cn=hs(Math.floor(a.q/7)*2.3+Math.floor(om/9)*5.1),cn2=hs(Math.floor(a.q/19)*1.7+Math.floor(om/23)*3.3),
     lit=.80+.20*Math.max(-1,Math.min(1,(dz>0?.55:-.35)-lon*1.4)),rf=sm(.5,.95,sl+(a.gr?-.18:0)+(cn-.5)*.22);
    const gcol=[C.grass2[0]+(C.grass[0]-C.grass2[0])*cn2,C.grass2[1]+(C.grass[1]-C.grass2[1])*cn2,C.grass2[2]+(C.grass[2]-C.grass2[2])*cn2];
    const strata=(Math.floor(hgt*1.1)&1)?.9:1.04,rcol=[C.rock[0]*strata*(.94+.1*cn),C.rock[1]*strata*(.94+.1*cn),C.rock[2]*strata*(.94+.1*cn)];
    const dry=sm(60,260,om<0?-om:om)*.35;col=sc([gcol[0]+(rcol[0]-gcol[0])*Math.max(rf,dry*.5),gcol[1]+(rcol[1]-gcol[1])*Math.max(rf,dry*.5),gcol[2]+(rcol[2]-gcol[2])*Math.max(rf,dry*.5)],lit*(1-Math.min(.2,sl*.1)))}
-  poly([W(a,o1,zp(a.F,o1)),W(a,o2,zp(a.F,o2)),W(b,o2,zp(b.F,o2)),W(b,o1,zp(b.F,o1))],fog(col))}
+  poly([W(a,o1,zp(a.F,o1)),W(a,o2,zp(a.F,o2)),W(b,o2,zp(b.F,o2)),W(b,o1,zp(b.F,o1))],fog(col));
+  if(terr)poly([W(a,o1,zp(a.F,o1)),W(a,o2,zp(a.F,o2)),W(a,o2,-60-a.z),W(a,o1,-60-a.z)],fog(sc(col,.78)))}   // teren kao zapreminsko tijelo: zavjesa od ivice do dna (nema providnosti)
  // kolotrazi (blago potamnjenje po trakama)
  if(a.kind!=="tunel"||true){const LC=[];for(const r of PVL){const nl=Math.max(1,Math.round((r[1]-r[0])/3.85));for(let j=0;j<nl;j++)LC.push(r[0]+(j+.5)*(r[1]-r[0])/nl)}for(const c0 of LC)for(const w of [-.9,.9]){const o=c0+w;poly([W(a,o-.35,zp(a.F,o-.35)+.006),W(a,o+.35,zp(a.F,o+.35)+.006),W(b,o+.35,zp(b.F,o+.35)+.006),W(b,o-.35,zp(b.F,o-.35)+.006)],fog(C.road2),.45)}}
  // oznake
