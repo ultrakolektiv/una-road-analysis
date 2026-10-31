@@ -178,6 +178,26 @@ def test_koridor_vizura():
     assert F["ray"][3][3] != 0 and F["lim"][3] != ""
 
 
+def test_koridor_rucno():
+    """Vožnja bez LandXML-a: scena iz ručno unesenih dionica (most NJ, tunel, otvorena trasa čelična/NJ)."""
+    import os, json, tempfile
+    from una import pipeline, licenca
+    licenca.require = lambda *a, **k: {}; licenca.describe = lambda *a, **k: "test"; licenca.stamp = lambda *a, **k: {"id": "TEST"}
+    for og in ("celicna", "nj"):
+        d = tempfile.mkdtemp()
+        cfg = pipeline.load_cfg(os.path.join(os.path.dirname(__file__), "..", "primjer", "primjer_projekat.json"))
+        pc = cfg["preglednost"]
+        pc["prepreke"] = list(pc.get("prepreke", [])) + [{"sekcija": 1, "osovina": "desna", "od": 100, "do": 400, "tip": "most"}, {"sekcija": 1, "osovina": "desna", "od": 1300, "do": 2950, "tip": "tunel"}]
+        pc["tipovi_prepreka"] = {"otvorena trasa": 0.78, "most": 1.17, "tunel": 1.7}
+        cfg["koridor"] = {"datoteka": "", "ukljuci": True, "ograda_otvorena": og}; cfg["jezik"] = "en"
+        outs, _ = pipeline.generate(cfg, d, log=lambda *a: None, word=False, excel=False, sight=True)
+        h = [o for o in outs if os.path.basename(o).startswith("Corridor_drive")]
+        assert h, outs
+        t = open(h[0], encoding="utf-8").read()
+        data = json.loads(t.split("const DATA=")[1].split(";\nconst L=")[0])
+        F = data["routes"]["F"]; assert len(F["q"]) > 100 and set(F["kind"]) >= {"otvorena", "most", "tunel"}
+
+
 def test_osovine_iz_landxml(tmp_path):
     """Osovine (horizontala, niveleta, poprečni nagib) čitaju se iz LandXML-a umjesto iz ispisa projektanta."""
     from una import parse, lx_axis

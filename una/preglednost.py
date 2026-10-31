@@ -351,7 +351,7 @@ def intervals(rows, key="ok", bad=False, dkey="Dv"):
 def make_par(cfg):
     par = dict(DEFAULTS)
     pc = cfg.get("preglednost") or {}
-    par.update({k: v for k, v in pc.items() if k in DEFAULTS or k in ("grupa", "norma", "prepreke", "prepreke_zadano", "strane", "tipovi_prepreka", "zadani_tip")})
+    par.update({k: v for k, v in pc.items() if k in DEFAULTS or k in ("grupa", "norma", "prepreke", "prepreke_zadano", "strane", "tipovi_prepreka", "zadani_tip", "ograda_otvorena")})
     on = (cfg.get("optika") or {}).get("norma") or pc.get("norma") or "BiH"; par["norma"] = "RS" if str(on).upper().startswith("RS") else "BiH"
     if par.get("h_oka") in (None, "", "auto"): par["h_oka"] = 1.10 if par["norma"] == "RS" else 1.0        # Pravilnik RS: h_oka = 1,10 m, nepokretna smetnja 0,10 m
     if par["norma"] == "RS" and str(par.get("h_prepreke")).strip().lower() in ("", "none", "auto", "tabela"): par["h_prepreke"] = 0.10

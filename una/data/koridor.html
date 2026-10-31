@@ -44,6 +44,7 @@ button{cursor:pointer}button:hover{background:#26304a}
 const DATA=/*__DATA__*/null;
 const L={bs:{title:"Vožnja kroz koridor (Civil 3D) – oko vozača",st:"Stacionaža",vr:"Računska brzina Vr",sp:"Brzina Vp",rad:"Radijus",str:"pravac",cs:"Poprečni nagib",gr:"Uzdužni nagib",el:"Element",e0:"pravac",e1:"prijelaznica",e2:"kružni luk",sd:"Raspoloživa preglednost",rq:"Zahtijevana preglednost",oko:"Oko od ose kolovoza",pre:"Prepreka od ivice kolovoza",ob:"Prepreka (zraka)",nop:"nema",okt:"PREGLEDNOST ZADOVOLJAVA",bh:"NEDOVOLJNO – horizontalna (prepreka)",bv:"NEDOVOLJNO – vertikalna (niveleta)",eye:"Oko [m]",left:"lijevo",right:"desno",t:{otvorena:"Otvorena trasa",most:"Most / vijadukt",tunel:"Tunel"},ln:"Raspoloživa",lr:"Zahtijevana",spd:"Brzina",pr:"Profil",rail:"Čelična ograda",rl:"na"},
 en:{title:"Corridor drive-through (Civil 3D) – driver's eye",st:"Chainage",vr:"Design speed Vr",sp:"Speed Vp",rad:"Radius",str:"tangent",cs:"Cross slope",gr:"Grade",el:"Element",e0:"tangent",e1:"transition",e2:"circular arc",sd:"Available sight distance",rq:"Required sight distance",oko:"Eye from carriageway axis",pre:"Obstacle from carriageway edge",ob:"Obstacle (ray)",nop:"none",okt:"SIGHT DISTANCE OK",bh:"INSUFFICIENT – horizontal (obstacle)",bv:"INSUFFICIENT – vertical (grade line)",eye:"Eye [m]",left:"left",right:"right",t:{otvorena:"Open road",most:"Bridge / viaduct",tunel:"Tunnel"},ln:"Available",lr:"Required",spd:"Speed",pr:"Section",rail:"Steel barrier",rl:"at"}};
+if(Object.values(DATA.routes).some(r=>/ručni unos|manual input/i.test(r.naziv||"")))for(const k in L)L[k].title=L[k].title.replace(" (Civil 3D)","");
 let lang=DATA.lang==="en"?"en":"bs";const T=()=>L[lang];
 const cv=document.getElementById('cv'),cx=cv.getContext('2d'),mm=document.getElementById('mm'),mx=mm.getContext('2d'),ch=document.getElementById('ch'),chx=ch.getContext('2d');
 const rtSel=document.getElementById('rt');Object.keys(DATA.routes).forEach(k=>{const o=document.createElement('option');o.value=k;o.dataset.k=k;o.textContent=DATA.routes[k].naziv;rtSel.appendChild(o)});function rtLab(){[...rtSel.options].forEach(o=>{const r=DATA.routes[o.dataset.k];o.textContent=(lang==='en'?r.naziv_en:r.naziv_bs)||r.naziv})};
@@ -52,7 +53,7 @@ const bs=(arr,v)=>{let lo=0,hi=arr.length-1;while(hi-lo>1){const m=(lo+hi)>>1;if
 function zp(F,o){const n=F.length;if(!n)return 0;if(o<=F[0][0])return F[0][1];if(o>=F[n-1][0])return F[n-1][1];let lo=0,hi=n-1;while(hi-lo>1){const m=(lo+hi)>>1;if(F[m][0]<=o)lo=m;else hi=m}const f=(o-F[lo][0])/((F[hi][0]-F[lo][0])||1);return F[lo][1]+(F[hi][1]-F[lo][1])*f}
 function setRoute(k){key=k;rtSel.value=k;SEC=[];const n=R_len(k);R=DATA.routes[k];
  for(let i=0;i<n;i++){const a=Math.max(0,i-1),b=Math.min(n-1,i+1);let tx=R.x[b]-R.x[a],ty=R.y[b]-R.y[a];const l=Math.hypot(tx,ty)||1;tx/=l;ty/=l;const e=R.e[i],F=R.F[i];
-  SEC.push({i,q:R.q[i],s:R.s[i],x:R.x[i],y:R.y[i],z:R.z[i],tx,ty,nx:ty,ny:-tx,F,E:e,kind:R.kind[i],vr:R.vr?R.vr[i]:null,jn:R.jn?R.jn[i]:0,pt:R.pt?R.pt[i]:null,hl:R.hl?R.hl[i]:null,gr:R.gr[i],ob:R.ob[i],box:R.box[i],ring:R.ring[i],v:R.v[i],g:R.g[i],k:R.k[i],el:R.el[i],D:R.D[i],Lz:R.Lz[i],ok:R.ok[i],ray:R.ray[i],lim:R.lim[i],hp:R.hp[i],ln:R.ln[i],ec:0,zl:0,lat:0})}
+  SEC.push({i,q:R.q[i],s:R.s[i],x:R.x[i],y:R.y[i],z:R.z[i],tx,ty,nx:ty,ny:-tx,F,E:e,kind:R.kind[i],vr:R.vr?R.vr[i]:null,jn:R.jn?R.jn[i]:0,pt:R.pt?R.pt[i]:null,hl:R.hl?R.hl[i]:null,gr:R.gr[i],ob:R.ob[i],bf:R.bf?R.bf[i]:null,box:R.box[i],ring:R.ring[i],v:R.v[i],g:R.g[i],k:R.k[i],el:R.el[i],D:R.D[i],Lz:R.Lz[i],ok:R.ok[i],ray:R.ray[i],lim:R.lim[i],hp:R.hp[i],ln:R.ln[i],ec:0,zl:0,lat:0})}
  for(let i=0;i<n;i++){let a=0,c=0;for(let j=Math.max(0,i-18);j<=Math.min(n-1,i+18);j++){a+=SEC[j].ln;c++}const w=(a/c+1)/2;SEC[i].ec=R.latL[i]+(R.latD[i]-R.latL[i])*w;SEC[i].zl=R.zeL[i]+(R.zeD[i]-R.zeL[i])*w}
  PTI=[];for(let i=0;i<n;i++)if(SEC[i].pt)PTI.push(i);
  q=R.q[0];const sl=document.getElementById('sl');sl.max=R.q[n-1]-R.q[0];yawS=null;buildMini()}
@@ -97,7 +98,7 @@ function hill(a,b,fa){GOFF=100;const fg=1-Math.exp(-fa/420),H=a.hl,Hb=b.hl,sm=(x
    st=(Math.floor(hg*1.1)&1)?.9:1.04,g=[C.grass2[0]+(C.grass[0]-C.grass2[0])*cn2,C.grass2[1]+(C.grass[1]-C.grass2[1])*cn2,C.grass2[2]+(C.grass[2]-C.grass2[2])*cn2],
    rk=[C.rock[0]*st*(.94+.1*cn),C.rock[1]*st*(.94+.1*cn),C.rock[2]*st*(.94+.1*cn)],col=sc([g[0]+(rk[0]-g[0])*rf,g[1]+(rk[1]-g[1])*rf,g[2]+(rk[2]-g[2])*rf],lit*(1-Math.min(.2,sl*.1)));
   const fc=(c)=>mix(c,C.haze,Math.min(.92,fg*1.05));poly([W(a,o1,z1),W(a,o2,z2),W(b,o2,zb2),W(b,o1,zb1)],fc(col));}}
-function obv(s,i){const v=s.ob[i];if(v!=null)return v;const o=s.ob[1-i];if(o==null)return null;const ed=o>0?s.E.shL:s.E.shR,v2=o>0?ed-.78:ed+.78;if(Math.abs(zp(s.F,v2)-zp(s.F,ed))>.8)return null;return v2}
+function obv(s,i){if(s.bf&&s.bf[i]!=null)return s.bf[i];const v=s.ob[i];if(v!=null)return v;const o=s.ob[1-i];if(o==null)return null;const ed=o>0?s.E.shL:s.E.shR,v2=o>0?ed-.78:ed+.78;if(Math.abs(zp(s.F,v2)-zp(s.F,ed))>.8)return null;return v2}
 function strip(a,b,fa){
  const tun=a.kind==="tunel",fogT=1-Math.exp(-fa/420);const fog=(c)=>tun?mix(c,C.dark,Math.min(1,fa/110)):mix(c,C.haze,Math.min(.92,fogT*1.05));
  const ea=a.E,eb=b.E,e=ea.e;
@@ -106,8 +107,9 @@ function strip(a,b,fa){
  const PV=ea.pv||[[-e,e]],PVL=PV.map(r=>{const u=ea.ug||0;return u>0?(r[1]<0?[r[0],-u]:[u,r[1]]):r}),pave=(om)=>PV.some(r=>om>=r[0]-.001&&om<=r[1]+.001), oth=(om)=>ea.oe>0&&Math.abs(om-ea.ot)<=ea.oe+.001;
  for(let k=0;k<O.length-1;k++){const o1=O[k],o2=O[k+1],om=(o1+o2)/2;if(o2-o1<1e-4)continue;GOFF=BUILD?Math.max(0,Math.abs(om)-(om>0?ea.shR:-ea.shL)):0;
   let col,al,terr=false;const med=ea.med&&om>ea.med[0]&&om<ea.med[2];
-  if(a.kind==="tunel"){col=pave(om)?C.road:C.concD}
-  else if(a.kind==="most"){col=pave(om)?C.road:C.conc}
+  const isT=ea.tR!=null&&(om>ea.tR||om<ea.tL);
+  if(a.kind==="tunel"&&!isT){col=pave(om)?C.road:C.concD}
+  else if(a.kind==="most"&&!isT){col=pave(om)?C.road:C.conc}
   else if(pave(om))col=C.road;else if(oth(om))col=C.road2;else if(med)col=C.med;
   else if(om>=ea.shL&&om<=ea.shR)col=C.shoulder;
   else{terr=true;const dz=(zp(a.F,o2)-zp(a.F,o1))/(o2-o1),sl=Math.min(1.6,Math.abs(dz)),lon=(zp(b.F,om)-zp(a.F,om))/Math.max(.5,b.q-a.q),
@@ -146,7 +148,7 @@ function strip(a,b,fa){
  if(tun&&a.ring.length&&a.ring.length===b.ring.length){const A=a.ring,B=b.ring;for(let j=0;j<A.length-1;j++){const sh=(j<4||j>A.length-5)?C.tun:C.tunC;poly([W(a,A[j][0],A[j][1]),W(a,A[j+1][0],A[j+1][1]),W(b,B[j+1][0],B[j+1][1]),W(b,B[j][0],B[j][1])],fog(sh))}
   const kq=Math.ceil(a.q/12)*12;if(kq<b.q){const pm=smp(kq),mid=A[(A.length>>1)];if(BUILD)glamp(a,b,kq);const s1=proj([pm.x+pm.ty*0,pm.y,pm.z+mid[1]+(a.z-pm.z)]);if(s1){const gl=mix([255,244,200],C.dark,Math.min(1,fa/280));lampGlow(s1,fa,pm,a)}}}
  const PVx=a.E.pv||[[-a.E.e,a.E.e]],gh=PVx.length>1?Math.abs(PVx[1][0]):0;const rails=[];
- for(let i=0;i<2;i++){const oa=obv(a,i),ob=obv(b,i);if(oa==null||ob==null)continue;const med=gh>0&&Math.abs(oa)<gh-.05;rails.push([oa,ob,med?(oa>=0?-1:1):(oa>=a.ec?1:-1)]);
+ for(let i=0;i<2;i++){const oa=obv(a,i),ob=obv(b,i);if(oa==null||ob==null||ea.nj)continue;const med=gh>0&&Math.abs(oa)<gh-.05;rails.push([oa,ob,med?(oa>=0?-1:1):(oa>=a.ec?1:-1)]);
   if(med&&a.kind==="otvorena")rails.push([-oa,-ob,oa>=0?1:-1])}                       // razdjelni pojas: čelična ograda uz svaki kolovoz, stubovi sa strane razdjelnog pojasa (iza plašta)
  for(const [oa,ob,out] of rails){const mr=gh>0&&Math.abs(oa)<gh-.05,za=mr?zp(a.F,oa>=0?gh:-gh):zp(a.F,oa),zb=mr?zp(b.F,ob>=0?gh:-gh):zp(b.F,ob),fogr=(c)=>fog(c);
   if(a.kind==="otvorena"){

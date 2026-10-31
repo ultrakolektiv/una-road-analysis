@@ -68,6 +68,7 @@ def generate(cfg, outdir, log=print, word=True, excel=True, sight=None):
     i18n.set_lang(cfg.get("jezik", "sr"))
     lic = licenca.require(); log(licenca.describe(lic))
     kor = cfg.get("koridor") or {}; kor_on = bool(kor.get("datoteka")) and kor.get("ukljuci", True); KR = None
+    kor_man = (not kor.get("datoteka")) and bool(kor.get("ukljuci", False) or kor.get("rucno"))            # vožnja bez LandXML-a (ručni unos dionica)
     if kor_on:
         if not os.path.isfile(kor["datoteka"]): raise ValueError(_TF("Koridor: datoteka ne postoji: {0}", kor["datoteka"]))
         from . import corridor
@@ -106,7 +107,7 @@ def generate(cfg, outdir, log=print, word=True, excel=True, sight=None):
         log(_T('4/4 Izrada Excel radne knjige sa formulama i dijagramima (može potrajati) …'))
         p = os.path.join(outdir, _TF("Proracun_vozno-dinamicke_analize_{0}.xlsx", name))
         xlsx.build_xlsx(p, P, sections, cases, axes, tr_obj(SYM), report.LAST_REG, has_caps, log=log, stamp=licenca.stamp(lic)); outs.append(p)
-    sg_on = (sight if sight is not None else bool((cfg.get("preglednost") or {}).get("ukljuci") or (cfg.get("optika") or {}).get("ukljuci"))) or kor_on
+    sg_on = (sight if sight is not None else bool((cfg.get("preglednost") or {}).get("ukljuci") or (cfg.get("optika") or {}).get("ukljuci"))) or kor_on or kor_man
     if sg_on:
         log(_T('5/5 Preglednost: zrake, omotač i DXF crtež …'))
         from . import preglednost as pgm, preglednost_crtez as pgc
@@ -130,6 +131,10 @@ def generate(cfg, outdir, log=print, word=True, excel=True, sight=None):
         if kor_on:
             log(_T('Vožnja kroz koridor (Civil 3D LandXML) …'))
             outs.append(corridor.write_html(os.path.join(outdir, _TF('Koridor_vizura_{0}.html', name)), KR, P, par, out_, cfg, log=log))
+        if kor_man:
+            from . import corridor as _co
+            log(_T('Vožnja kroz koridor (ručni unos dionica) …'))
+            outs.append(_co.write_html(os.path.join(outdir, _TF('Koridor_vizura_{0}.html', name)), None, P, par, out_, cfg, log=log))
         if (cfg.get("optika") or {}).get("ukljuci"):
             log(_T('6/6 Elaborat optičkih analiza (preticajna preglednost, sadržaj grafičkih priloga) …'))
             from . import optika

@@ -222,6 +222,12 @@ VOŽNJA KROZ CIVIL 3D KORIDOR (verzija 1.5)
 - HUD prikazuje stacionažu, brzinu Vp, radijus, poprečni i uzdužni nagib, element trase, tip profila te raspoloživu i zahtijevanu preglednost iz UNA proračuna. Prva metoda (vožnja po NPP-u) ostaje kao zasebna opcija.
 - U komandnoj liniji: u projektnom JSON-u dodajte "koridor": {"datoteka": "Koridor.xml", "od": 80, "do": 1580, "ograda_ofset": 0.78}.
 - Stacionaže u koridoru moraju odgovarati stacionažama UNA projekta (isti smjer i početak); koordinate osovina se čitaju iz koridora.
+
+VOŽNJA BEZ LANDXML-a (RUČNI UNOS DIONICA)
+- LandXML nije obavezan. Ako ga ne zadate, vožnja se gradi iz ručno unesenih stacionaža otvorene trase, mostova i tunela (korak Preglednost → "Izuzeci prepreka": tip "most" / "tunel"; ostalo je otvorena trasa).
+- Širina (ofset) prepreke zadaje se za svaku vrstu u tabeli "Vrste prepreka" (otvorena trasa, most, tunel). Ista vrijednost ide u proračun preglednosti i u sliku.
+- Ograda: most je uvijek New Jersey; na otvorenoj trasi birate čeličnu ogradu ili New Jersey (kartica koridora, u JSON-u "koridor": {"ograda_otvorena": "celicna" ili "nj"}); tunel ima standardni profil sa hodnikom.
+- Teren, brdo iznad tunela, dolina ispod mosta i portali su sintetički (idealizovani); mjerodavan je proračun preglednosti.
 - Slika prati proračun (verzija 1.5.1): oko vozača (ofset trake), prepreke, zrake, raspoloživa i zahtijevana preglednost, brzina i nagib uzimaju se iz UNA proračuna, ne iz koridora. Zraka se crta od oka do čvora u kojem je preglednost ograničena
   (plava/crvena = raspoloživa, narandžasta = zahtijevana), a crveni krug je dodirna tačka s preprekom. Prepreke se crtaju na ofsetu koji proračun stvarno koristi (HUD: "Prepreka od ivice kolovoza").
   Opcija "Uskladi proračun s koridorom" (zadano uključeno) prije proračuna preuzima iz koridora širinu trake (u sekcijama koje obuhvataju zadani raspon – važi za cijelu sekciju!), prepreku na otvorenoj trasi na zadanom ofsetu od ivice kolovoza

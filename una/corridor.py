@@ -554,8 +554,12 @@ def write_html(path, R_or_path, P, par, out, cfg, log=print):
     import json
     kc = cfg.get("koridor") or {}
     s_from, s_to = kor_range(cfg)
-    R = R_or_path if isinstance(R_or_path, dict) else load_landxml(R_or_path, s_from, s_to, log=log)
-    scene = build_scene(R, s_from, s_to, out, par, cfg, log=log)
+    if R_or_path is None:                                   # bez LandXML-a: scena iz UNA proračuna i ručno unesenih dionica
+        from .corridor_rucno import build_scene_manual
+        scene = build_scene_manual(P, par, out, cfg, log=log)
+    else:
+        R = R_or_path if isinstance(R_or_path, dict) else load_landxml(R_or_path, s_from, s_to, log=log)
+        scene = build_scene(R, s_from, s_to, out, par, cfg, log=log)
     from .i18n import get_lang
     scene["lang"] = get_lang(); scene["Vr"] = float(P.Vr)
     tpl = open(os.path.join(os.path.dirname(__file__), "data", "koridor.html"), encoding="utf-8").read()
