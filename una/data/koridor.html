@@ -27,8 +27,8 @@ button{cursor:pointer}button:hover{background:#26304a}
 #splash{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(8,12,20,.5);backdrop-filter:blur(3px);cursor:pointer}
 #splash .spl{position:relative;width:min(640px,88vw)}
 #splash img{display:block;width:100%;height:auto;filter:drop-shadow(0 3px 14px rgba(0,0,0,.65))}
-#spgo{position:absolute;left:25%;top:50%;transform:translate(-50%,-50%);width:78px;height:78px;border-radius:50%;border:0;background:rgba(11,35,80,.86);color:#fff;font-size:36px;line-height:1;padding:0 0 0 7px;box-shadow:0 6px 26px rgba(0,0,0,.45);transition:transform .15s,background .15s}
-#splash:hover #spgo{transform:translate(-50%,-50%) scale(1.08);background:rgba(15,108,189,.95)}
+#spgo{position:absolute;left:50%;top:-18px;transform:translate(-50%,-100%);width:78px;height:78px;border-radius:50%;border:0;background:rgba(11,35,80,.86);color:#fff;font-size:36px;line-height:1;padding:0 0 0 7px;box-shadow:0 6px 26px rgba(0,0,0,.45);transition:transform .15s,background .15s}
+#splash:hover #spgo{transform:translate(-50%,-100%) scale(1.08);background:rgba(15,108,189,.95)}
 </style></head><body>
 <canvas id="gl"></canvas><canvas id="cv"></canvas>
 <div id="splash"><div class="spl"><img src="/*__LOGOA__*/" alt="UNA – Road Engineering Analysis"><button id="spgo" aria-label="Play">▶</button></div></div>
@@ -124,7 +124,7 @@ function strip(a,b,fa){
  // ograde, parapeti, svod
  for(let i=0;i<a.box.length;i++){const A=a.box[i],B=b.box[i];if(!B||A[0]!==B[0])continue;if(A[0]===10&&A[4]&&B[4]&&A[4].length===B[4].length){const PA=A[4],PB=B[4];for(let m=0;m<PA.length-1;m++){const dx=PA[m+1][0]-PA[m][0],dzz=PA[m+1][1]-PA[m][1],ang=Math.atan2(Math.abs(dzz),Math.abs(dx)+1e-6)*57.3;const sh=ang<25?[232,231,224]:(dx*dzz>0?[184,183,176]:[212,211,204]);poly([W(a,PA[m][0],PA[m][1]),W(a,PA[m+1][0],PA[m+1][1]),W(b,PB[m+1][0],PB[m+1][1]),W(b,PB[m][0],PB[m][1])],fog(sc(sh,m===0?.8:1)))}continue}
   if(A[0]===10){const cc=[196,195,188];for(const [xa_,xb_] of [[A[1],B[1]],[A[2],B[2]]]){const za_=zp(a.F,xa_),zb_=zp(b.F,xb_);poly([W(a,xa_,za_),W(a,xa_,A[3]),W(b,xb_,B[3]),W(b,xb_,zb_)],fog(cc))}poly([W(a,A[1],A[3]),W(a,A[2],A[3]),W(b,B[2],B[3]),W(b,B[1],B[3])],fog([222,221,214]));continue}const inn=Math.abs(A[1])<Math.abs(A[2])?A[1]:A[2],inb=Math.abs(B[1])<Math.abs(B[2])?B[1]:B[2],ouA=inn===A[1]?A[2]:A[1],ouB=inb===B[1]?B[2]:B[1];
-  const za=zp(a.F,inn),zb=zp(b.F,inb),ta=A[3],tb=B[3],col=A[0]===3?C.conc:[165,165,160];
+  const ta=A[3],tb=B[3],za=BUILD&&a.kind==="tunel"?ta-.3:zp(a.F,inn),zb=BUILD&&a.kind==="tunel"?tb-.3:zp(b.F,inb),col=A[0]===3?C.conc:[165,165,160];
   if(A[0]===3&&A[4]&&B[4]&&A[4].length===B[4].length){const dr=inn>=0?1:-1,drb=inb>=0?1:-1,PA=A[4],PB=B[4];
    for(let m=0;m<PA.length-1;m++){const dx=Math.abs(PA[m+1][0]-PA[m][0]),dzz=PA[m+1][1]-PA[m][1],ang=Math.atan2(Math.abs(dzz),dx+1e-6)*57.3;const sh=ang>55?[196,195,188]:(ang>20?[212,211,204]:[228,227,220]),base=m===0?.82:1;
     const o0=inn+dr*PA[m][0],o1=inn+dr*PA[m+1][0],q0=inb+drb*PB[m][0],q1=inb+drb*PB[m+1][0];poly([W(a,o0,PA[m][1]),W(a,o1,PA[m+1][1]),W(b,q1,PB[m+1][1]),W(b,q0,PB[m][1])],fog(sc(sh,base)))}
@@ -132,6 +132,7 @@ function strip(a,b,fa){
   else if(A[0]===3){const dr=inn>=0?1:-1,drb=inb>=0?1:-1,hA=Math.max(.5,ta-za),hB=Math.max(.5,tb-zb),sa=hA/.81,sb=hB/.81;
    const NJ=[[0,0],[0,.08],[.18,.33],[.26,.81],[.41,.81]],cl=[[196,195,188],[170,169,163],[208,207,200],[222,221,214]];
    for(let m=0;m<NJ.length-1;m++){const p0=NJ[m],p1=NJ[m+1];poly([W(a,inn+dr*p0[0],za+p0[1]*sa),W(a,inn+dr*p1[0],za+p1[1]*sa),W(b,inb+drb*p1[0],zb+p1[1]*sb),W(b,inb+drb*p0[0],zb+p0[1]*sb)],fog(cl[m]))}
+   if(BUILD){poly([W(a,inn,za-.9),W(a,inn,za),W(b,inb,zb),W(b,inb,zb-.9)],fog(cl[1]));poly([W(a,inn+dr*.41,za+.81*sa),W(a,inn+dr*.41,za-.9),W(b,inb+drb*.41,zb-.9),W(b,inb+drb*.41,zb+.81*sb)],fog(cl[0]))}
    const kq=Math.ceil(a.q/6)*6;if(kq<b.q){const f=(kq-a.q)/((b.q-a.q)||1),o=inn+(inb-inn)*f,z=za+(zb-za)*f,px=a.x+(b.x-a.x)*f+(a.nx+(b.nx-a.nx)*f)*o,py=a.y+(b.y-a.y)*f+(a.ny+(b.ny-a.ny)*f)*o,pz=a.z+(b.z-a.z)*f+z;const s1=proj([px,py,pz+.02]),s2=proj([px,py,pz+.8*sa]);if(s1&&s2){cx.strokeStyle=fog([120,119,114]);cx.lineWidth=Math.max(1,foc*.012/s1[2]);cx.beginPath();cx.moveTo(s1[0],s1[1]);cx.lineTo(s2[0],s2[1]);cx.stroke()}}}
   else{poly([W(a,inn,za),W(a,inn,ta),W(b,inb,tb),W(b,inb,zb)],fog(col));poly([W(a,inn,ta),W(a,ouA,ta),W(b,ouB,tb),W(b,inb,tb)],fog([col[0]*.88,col[1]*.88,col[2]*.88]))}}
  if(!BUILD&&!tun&&a.kind==='otvorena'&&fa<420)trees(a,b,fa,fog);
@@ -208,11 +209,6 @@ function flare(P,c,big){const s=proj(P);if(!s)return;const R=Math.max(big?24:16,
  const ph=(TT*1.1)%1;cx.strokeStyle=`rgba(${c[0]},${c[1]},${c[2]},${.7*(1-ph)})`;cx.lineWidth=2;cx.beginPath();cx.arc(s[0],s[1],R*(.35+1.1*ph),0,7);cx.stroke();cx.restore()}
 function rays(sec,bad){const r=sec.ray;if(!r)return;const t=T();
  const req=smooth('r',[r[6],r[7],r[8]]),av=smooth('a',[r[3],r[4],r[5]]);
- const fw=[CAM.cy*CAM.cp,CAM.sy*CAM.cp,CAM.sp],up=[-CAM.cy*CAM.sp,-CAM.sy*CAM.sp,CAM.cp],P0=[CAM.ex+fw[0]*1.7-up[0]*.38,CAM.ey+fw[1]*1.7-up[1]*.38,CAM.ez+fw[2]*1.7-up[2]*.38];
- const ca=bad?LZ.avbad:LZ.av,pul=.85+.15*Math.sin(TT*14);
- beam(P0,req,LZ.rq,.032,.75*pul);beam(P0,av,ca,.04,pul);
- flare(req,LZ.rq,false);flare(av,ca,true);
- if(r[9]){const o=r[9],g0=proj([o[0],o[1],o[2]-.2]),g1=proj([o[0],o[1],o[2]+3]);if(g0&&g1){cx.save();cx.globalCompositeOperation="lighter";const gr=cx.createLinearGradient(0,g0[1],0,g1[1]);gr.addColorStop(0,"rgba(255,90,70,.95)");gr.addColorStop(1,"rgba(255,90,70,0)");cx.strokeStyle=gr;cx.lineWidth=Math.max(2,foc*.07/g0[2]);cx.beginPath();cx.moveTo(g0[0],g0[1]);cx.lineTo(g1[0],g1[1]);cx.stroke();cx.restore()}}
  tag(req,"#ffb020","#ffd27a",t.lr+" "+sec.Lz.toFixed(0)+" m",4,true);
  tag(av,bad?"#ff5a4f":"#38bdf8",bad?"#ffb4ae":"#bfeaff",t.ln+" "+Math.min(sec.D,900).toFixed(0)+" m",4,false)}
 function bloom(tun){if(!('filter' in cx))return;const w=Math.max(8,Wd>>2),h=Math.max(8,Hd>>2);if(!bc||bc.width!==w||bc.height!==h){bc=document.createElement('canvas');bc.width=w;bc.height=h;bx=bc.getContext('2d')}
@@ -238,9 +234,9 @@ function gApron(a,b){GOFF=100;const tun=a.kind==="tunel"&&a.hl&&b.hl,Fa=tun?a.hl
   const f=(s,z,d)=>z+s*(Math.min(d,80)+Math.max(0,Math.min(d,300)-80)*.25);let prev=null;
   for(let k=0;k<D.length;k++){const d=D[k];const pa=W(a,oa+sd*d,f(sa,za,d)),pb=W(b,ob+sd*d,f(sb,zb,d));if(prev){const cn=hs(Math.floor(a.q/9)*3.1+k),g=[C.grass2[0]*(.92+.1*cn),C.grass2[1]*(.92+.1*cn),C.grass2[2]*(.92+.1*cn)];bpoly([prev[0],pa,pb,prev[1]],`rgb(${g[0]|0},${g[1]|0},${g[2]|0})`)}prev=[pa,pb]}}}
 function gWalls(a,b){const R1=a.ring,R2=b.ring;if(!R1.length||R1.length!==R2.length)return;const F=a.F,Fb=b.F;
- for(const [ia,sd] of [[0,-1],[R1.length-1,1]]){const xa=R1[ia][0],xb=R2[ia][0],eA=sd>0?F[F.length-1][0]:F[0][0],eB=sd>0?Fb[Fb.length-1][0]:Fb[0][0],za=zp(F,eA),zb=zp(Fb,eB);
-  bpoly([W(a,eA,za),W(a,xa,za),W(a,xa,R1[ia][1]),W(b,xb,R2[ia][1]),W(b,xb,zb),W(b,eB,zb)],'rgb(120,120,116)');
-  bpoly([W(a,eA,za),W(b,eB,zb),W(b,xb,zb),W(a,xa,za)],'rgb(110,110,106)')}}
+ for(const [ia,sd] of [[0,-1],[R1.length-1,1]]){const xa=R1[ia][0],xb=R2[ia][0],eA=sd>0?F[F.length-1][0]:F[0][0],eB=sd>0?Fb[Fb.length-1][0]:Fb[0][0],za=zp(F,sd*3.5)-.05,zb=zp(Fb,sd*3.5)-.05;
+  bpoly([W(a,xa,za),W(a,xa,R1[ia][1]),W(b,xb,R2[ia][1]),W(b,xb,zb)],'rgb(120,120,116)');
+  bpoly([W(a,eA,za),W(a,xa,za),W(b,xb,zb),W(b,eB,zb)],'rgb(110,110,106)')}}
 function buildGL(){const t0=performance.now();BUILD=true;camTun=false;GBUF.n=0;GBUF.chunks=[];const n=SEC.length;GBUF.o=[SEC[0].x,SEC[0].y,SEC[0].z];const CH=24;let cur=null;
  for(let i=0;i<n-1;i++){if(i%CH===0){if(cur){cur.n=GBUF.n-cur.v0;cur.q1=SEC[i].q;GBUF.chunks.push(cur)}cur={v0:GBUF.n,q0:SEC[i].q,q1:0,n:0}}
   const A=SEC[i],B=SEC[i+1];if(A.jn)continue;GCUR_Q=A.q;BLIT=A.kind==="tunel"?1:0;strip(A,B,0);if(BLIT)gWalls(A,B);BLIT=0;if(A.kind==="tunel"&&A.hl&&B.hl&&A.hl.length===B.hl.length)hill(A,B,0);gApron(A,B)}
