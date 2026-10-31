@@ -90,7 +90,7 @@ def write_html(path, P, par, out, cfg, log=print):
     data = build_data(P, par, out, cfg, log)
     tpl = open(os.path.join(os.path.dirname(__file__), "data", "vizura.html"), encoding="utf-8").read()
     js = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-    from .branding import logo_uri
-    open(path, "w", encoding="utf-8").write(tpl.replace("/*__DATA__*/null", js).replace("/*__LOGO__*/", logo_uri()))
+    from .branding import logo_alpha_uri
+    open(path, "w", encoding="utf-8").write(tpl.replace("/*__DATA__*/null", js).replace("/*__LOGOA__*/", logo_alpha_uri()))
     log(_TF("Vizualizacija vožnje (HTML): {0}", path))
     return path
