@@ -130,7 +130,7 @@ function strip(a,b,fa){
  const PVx=a.E.pv||[[-a.E.e,a.E.e]],gh=PVx.length>1?Math.abs(PVx[1][0]):0;const rails=[];
  for(let i=0;i<2;i++){const oa=a.ob[i],ob=b.ob[i];if(oa==null||ob==null)continue;const med=gh>0&&Math.abs(oa)<gh-.05;rails.push([oa,ob,med?(oa>=0?-1:1):(oa>=a.ec?1:-1)]);
   if(med&&a.kind==="otvorena")rails.push([-oa,-ob,oa>=0?1:-1])}                       // razdjelni pojas: čelična ograda uz svaki kolovoz, stubovi sa strane razdjelnog pojasa (iza plašta)
- for(const [oa,ob,out] of rails){const za=zp(a.F,oa),zb=zp(b.F,ob),fogr=(c)=>fog(c);
+ for(const [oa,ob,out] of rails){const mr=gh>0&&Math.abs(oa)<gh-.05,za=mr?zp(a.F,oa>=0?gh:-gh):zp(a.F,oa),zb=mr?zp(b.F,ob>=0?gh:-gh):zp(b.F,ob),fogr=(c)=>fog(c);
   if(a.kind==="otvorena"){
    poly([W(a,oa+out*.30,za+.02),W(a,oa+out*.55,za+.02),W(b,ob+out*.55,zb+.02),W(b,ob+out*.30,zb+.02)],fog([40,50,35]),.28);
    const kq=Math.ceil(a.q/4)*4;if(kq<b.q){const f=(kq-a.q)/((b.q-a.q)||1),o=oa+(ob-oa)*f,z=za+(zb-za)*f;const px=a.x+(b.x-a.x)*f+(a.nx+(b.nx-a.nx)*f)*(o+out*.16),py=a.y+(b.y-a.y)*f+(a.ny+(b.ny-a.ny)*f)*(o+out*.16),pz=a.z+(b.z-a.z)*f+z;const s1=proj([px,py,pz]),s2=proj([px,py,pz+.77]);if(s1&&s2){cx.strokeStyle=fogr([88,92,98]);cx.lineWidth=Math.max(1.5,foc*0.16/s1[2]);cx.beginPath();cx.moveTo(s1[0],s1[1]);cx.lineTo(s2[0],s2[1]);cx.stroke()}}

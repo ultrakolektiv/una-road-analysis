@@ -523,6 +523,18 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
             o_["v"].append(round(v_, 1)); o_["g"].append(round(g_, 2)); o_["D"].append(round(D, 1)); o_["Lz"].append(round(Lz, 1)); o_["ok"].append(okc)
         zs = np.array(o_["z"]) - np.array(z0cs)
         if len(zs) and abs(zs).max() > 0.01: log(_TF("Koridor: niveleta u UNA proračunu se razlikuje od Civil 3D niveleta za {0:.3f} m (osovina {1}); slika prati UNA.", float(np.median(zs)), nm))
+        for kk in (0, 1):                                                    # ograda se crta kao glatka linija (bez "talasanja" od čvorova lanca u krivini)
+            v = [(r_[kk] if r_ and len(r_) > kk else None) for r_ in o_["ob"]]; n_ = len(v); i0_ = 0
+            while i0_ < n_:
+                if v[i0_] is None: i0_ += 1; continue
+                i1_ = i0_
+                while i1_ + 1 < n_ and v[i1_ + 1] is not None and abs(v[i1_ + 1] - v[i1_]) < 0.35 and not o_["jn"][i1_]: i1_ += 1
+                seg = np.array(v[i0_:i1_ + 1], float)
+                if len(seg) > 5:
+                    w_ = 4; md = np.array([np.median(seg[max(0, j - w_):j + w_ + 1]) for j in range(len(seg))])
+                    w2 = 12; sm = np.array([md[max(0, j - w2):j + w2 + 1].mean() for j in range(len(seg))])
+                    for j, val in enumerate(sm): o_["ob"][i0_ + j][kk] = round(float(val), 3)
+                i0_ = i1_ + 1
         scene["routes"][tag] = o_
     log(_TF("Koridor: scena izrađena ({0} presjeka po smjeru).", len(order)))
     return scene
