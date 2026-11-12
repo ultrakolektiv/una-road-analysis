@@ -94,12 +94,12 @@ def generate(cfg, outdir, log=print, word=True, excel=True, sight=None):
         with tempfile.TemporaryDirectory() as td:
             F = figs.make_all(P, sections, cases, axes, fw, bw, has_caps, td, log=log)
             log(_T("3/4 Izrada Word elaborata …"))
-            p = os.path.join(outdir, _TF("Elaborat_3_Vozno-dinamicke_analize_{0}.docx", name))
+            p = os.path.join(outdir, _TF("Vozno-dinamicke_analize_{0}.docx", name))
             report.write_docx(P, sections, cases, axes, fw, bw, has_caps, F, cfg, p, log=log); _stamp_docx(p, lic); outs.append(p)
             tp = cfg.get("template") or {}
             if tp.get("file"):
                 log(_T("3b/4 Izrada Word elaborata prema templatu …"))
-                p2 = os.path.join(outdir, _TF("Elaborat_3_Vozno-dinamicke_analize_{0}_po_templateu.docx", name))
+                p2 = os.path.join(outdir, _TF("Vozno-dinamicke_analize_{0}_po_templateu.docx", name))
                 report.write_docx_template(P, sections, cases, axes, fw, bw, has_caps, F, cfg, p2, log=log); _stamp_docx(p2, lic); outs.append(p2)
     else:
         report.LAST_REG = []
@@ -163,6 +163,10 @@ def load_cfg(path):
                     if sp.get(k) and not os.path.isabs(sp[k]): sp[k] = os.path.normpath(os.path.join(base, sp[k]))
     tp = cfg.get("template")
     if isinstance(tp, dict) and tp.get("file") and not os.path.isabs(tp["file"]): tp["file"] = os.path.normpath(os.path.join(base, tp["file"]))
+    el_ = cfg.get("elaborat")
+    if isinstance(el_, dict):
+        for k_ in ("logo_investitor", "logo_projektant"):
+            if el_.get(k_) and not os.path.isabs(el_[k_]): el_[k_] = os.path.normpath(os.path.join(base, el_[k_]))
     kc = cfg.get("koridor")
     from . import lx_axis as _lxa, corridor as _cor
     _lxa.RULES = _cor.naziv_pravila(kc.get("nazivi")) if isinstance(kc, dict) else {}

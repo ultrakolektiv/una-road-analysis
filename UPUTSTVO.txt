@@ -4,7 +4,7 @@ UNA - ROAD ENGINEERING ANALYSIS – GENERATOR VOZNO-DINAMIČKIH ANALIZA (uputstv
 ČEMU SLUŽI
 Iz ispisa geometrije (horizontalna osovina, uzdužni profil, poprečni nagibi) program
 pravi dva fajla:
-  1) Elaborat_3_...docx  – kompletan Word elaborat (poglavlja, tabele, jednačine, slike, prilozi A/B/C)
+  1) Vozno-dinamicke_analize_...docx  – kompletan Word elaborat (poglavlja, tabele, jednačine, slike, prilozi A/B/C)
   2) Proracun_...xlsx    – Excel radna knjiga sa FORMULAMA i dijagramima (svi koraci proračuna)
 Preglednost (optička analiza) nije obuhvaćena.
 
@@ -158,7 +158,7 @@ PROBLEMI
 
 === UNA - ROAD ENGINEERING ANALYSIS: OPTIČKE ANALIZE ===
 Uključite "Elaborat optičkih analiza (Word)" (ili u JSON-u "optika": {"ukljuci": true}). Program tada (uz Preglednost) pravi:
- - Elaborat_4_Opticke_analize_<projekat>.docx: 1 Uvod, 2 Zahtijevana preglednost Pzp=f(Vp), 3 Raspoloživa i preticajna preglednost
+ - Opticke_analize_<projekat>.docx: 1 Uvod, 2 Zahtijevana preglednost Pzp=f(Vp), 3 Raspoloživa i preticajna preglednost
    (tabele i dijagram za oba smjera, %Pp prema minimumu), 4 Model trase, 5 Vizuelizacija, 6 Sadržaj i Sadržaj grafičkih priloga;
  - Optika_dijagram_*.png/pdf (brzina Vp, Pzp, Pr, Pp po stacionaži) i Optika_preticanje_<projekat>.xlsx.
 Preticanje (BiH Smjernice 4.2.5.3, Tabela 30): Pp = 330/380/450/520/600/680 m za 50…100 km/h (promjena: "Pp_tablica"); zrake se crtaju iz LIJEVE (preticajne) trake
@@ -173,7 +173,7 @@ preticajna preglednost se NE računa (vozna + preticajna traka; Tabela 30 vrijed
 za dvosmjerni put sa jednim kolovozom (sekcija "osovina") računa se Pp (Tabela 30), %Pp i poredi sa minimumom (25 % grupa A, 15 % B/C).
 
 Optička analiza po templateu: ako je zadan Word template (isti kao za vozno-dinamičku analizu, dugme "Word template…"), uz standardni Word pravi se i
-Elaborat_4_Opticke_analize_<projekat>_po_templateu.docx (tekstualni dio, numerička i grafička dokumentacija u templateu). Na naslovnoj strani
+Opticke_analize_<projekat>_po_templateu.docx (tekstualni dio, numerička i grafička dokumentacija u templateu). Na naslovnoj strani
 možete zadati drugi folder za optičku analizu: "template": {"folder_sr_optika": "...", "folder_en_optika": "..."}.
 
 NOVO – postavke, više elemenata odjednom, izuzeci
@@ -239,3 +239,15 @@ Na koraku "Sekcije trase" dugme "Uvezi osovine iz LandXML-a" čita iz Civil 3D L
 (PVI i parabole) i poprečne nagibe (iz površi kolovoza u presjecima) i pravi sekciju trase. Dalje se sve radi kao i sa ispisima: vozno-dinamička analiza, Excel,
 preglednost (DXF), optička analiza, IFC... Reference u projektu su oblika "datoteka.xml#IME_OSOVINE". Poprečni nagib se računa na ±3,5 m od osovine;
 širina trake je zadano 3,5 m (mijenja se u sekciji). Stacionaže su iste kao u LandXML-u; presjeci obično pokrivaju kraći dio od osovine.
+
+
+NOVO – FORMALNI OKVIR ELABORATA, KRIVINSKA KARAKTERISTIKA, TRAKA ZA SPORA VOZILA
+- Korak "Projekat" → kartica "Podaci o elaboratu" (ili u JSON-u "elaborat": {...}). Ako je popunjeno bar jedno polje, Word elaborati (vozno-dinamički i optički) dobijaju:
+  naslovnu stranu sa šifrom knjige (polja "sifra_vozna", "sifra_optika"), obrazac sa podacima o projektu i okvirima za potpise (projektant, revident, nadležni organ),
+  sadržaj knjige (tekstualna, numerička i grafička dokumentacija), zaglavlje sa logotipom projektanta i potpisni blok na kraju.
+  Polja: investitor, projektant, objekat, dionica, faza, lokacija, autor_projekta, odgovorno_lice, vodeci_projektant, odgovorni_projektant, saradnici (lista), mjesto, datum,
+  logo_investitor, logo_projektant (putanja do slike), adresa_projektanta, revident. Analiza se ne mijenja; bez ovih podataka elaborat ostaje kao ranije.
+- Vozno-dinamička analiza, poglavlje 3.2: krivinska karakteristika K [gon/km], standardno odstupanje S po kilometarskim odsječcima i udio krivine, po osovinama.
+- Vozno-dinamička analiza, poglavlje 5.3: provjera potrebe za dodatnom trakom za spora vozila (usponi veći od 3 %, brzina teškog vozila prema Vn = 40 km/h i Vkr = 50 km/h).
+  Vrijednosti se mijenjaju u JSON-u: "spora_vozila": {"granica_nagiba": 3, "Vn": 40, "Vkr": 50}.
+- Nazivi izlaznih Word datoteka više ne sadrže redni broj elaborata: Vozno-dinamicke_analize_<projekat>.docx i Opticke_analize_<projekat>.docx.

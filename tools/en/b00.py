@@ -75,7 +75,7 @@ T = {
 97: "### Table of available sight distance – {0}, {1}\n",
 98: "List of graphical appendices",
 99: "Road type for passing: {0}",
-100: "Study 4 – Optical analyses | {0}",
+100: "Optical analyses | {0}",
 101: "Optical Analyses",
 102: "Numerical Calculation of Sight Distances",
 103: "Graphical Appendices – Optical Analyses",

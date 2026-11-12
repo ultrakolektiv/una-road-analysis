@@ -34,6 +34,19 @@ def bracket(xs, ys, x):
     return j, xs[j], xs[j + 1], ys[j], ys[j + 1], y
 
 
+def kriv_stat(c, step=1000.0):
+    """Krivinska karakteristika dionice slučaja c: K [gon/km], S (odstupanje po km-odsječcima), udio krivine, najveći odsječak."""
+    A_, B_ = c.SA, c.SB; L = B_ - A_
+    els = [(e["s0"], e["s1"], abs(e["dnu"]) * 10 / 9, e["typ"] != "PRAVAC", e["L"]) for e in c.axis.elems if e["s1"] > A_ and e["s0"] < B_ and e["L"] > 0.5]
+    def ov(a, b): return [(max(s0, a), min(s1, b), g, cv, le) for s0, s1, g, cv, le in els if min(s1, b) > max(s0, a)]
+    def ang(a, b): return sum(g * (y - x) / le for x, y, g, cv, le in ov(a, b))
+    ed = list(np.arange(A_, B_, step)) + [B_]
+    if len(ed) > 2 and ed[-1] - ed[-2] < 0.5 * step: ed.pop(-2)
+    ks = [ang(a, b) / ((b - a) / 1000) for a, b in zip(ed, ed[1:])]
+    cur = sum(y - x for x, y, g, cv, le in ov(A_, B_) if cv)
+    return dict(L=L, ang=ang(A_, B_), K=ang(A_, B_) / (L / 1000), S=float(np.std(ks, ddof=1)) if len(ks) > 1 else 0.0, kmax=max(ks), share=cur / L)
+
+
 def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log=print, template_mode=False):
     md = []; A = md.append
     tn = [0]; REG = []
@@ -207,6 +220,17 @@ $$V_p(i_N) = <<v1>> + \frac{<<g>> - <<g1>>}{<<g2>> - <<g1>>}\,(<<v2>> - <<v1>>) 
     low = [(c, ar) for c, ar in allarcs if not ar["ok3"]]
     if low:
         A(_T('**Lukovi sa radijusom manjim od najmanjeg za V~r~ (R~min~(V~r~) = ') + fm(Rmin_Vr, 0) + " m):** " + "; ".join(_TF('{0}, luk br. {1} (R = {2} m, V~p,R~ = {3} km/h)', c.axis.name, ar['no'], fm(ar['R'], 2), fm(ar['vpR'], 1)) for c, ar in low) + _T('. Dinamička provjera poprečnog nagiba data je u poglavlju 4.3.\n'))
+    A(_T('\n## Krivinska karakteristika trase\n'))
+    A(_T('Krivinska karakteristika K [gon/km] je zbir apsolutnih vrijednosti skretnih uglova svih elemenata (kružnih lukova i prijelaznica) podijeljen dužinom trase u km; služi za objektivno poređenje varijanti trase. S je standardno odstupanje karakteristike K po kilometarskim odsječcima (pokazatelj ujednačenosti trase), a udio krivine je odnos dužine elemenata koji nisu pravci i ukupne dužine.\n'))
+    kr = []
+    for c in uniq:
+        ks = kriv_stat(c); kr.append([c.axis.name, f"{fm(c.SA, 0)} – {fm(c.SB, 3).rstrip('0').rstrip(',')}", fm(ks['L'] / 1000, 3), fm(ks['K'], 2), fm(ks['S'], 2), fm(ks['kmax'], 1), fm(100 * ks['share'], 1)])
+    A(newtab(_T('Krivinska karakteristika po osovinama'), None))
+    A(tbl([_T('Osovina'), _T('Raspon st. [m]'), "L [km]", "K [gon/km]", "S [gon/km]", _T('K~max~ [gon/km]'), _T('Udio krivine [%]')], kr))
+    ar_k = [(c, kriv_stat(c)) for c in uniq]
+    if len(ar_k) > 1:
+        Lt = sum(k['L'] for _, k in ar_k); Kt = sum(k['ang'] for _, k in ar_k) / (Lt / 1000)
+        A(_TF('Za sve osovine zajedno (ponderisano dužinom): K = {0} gon/km.\n', fm(Kt, 2)))
     A(_T('\n## Uzdužni profil\n'))
     t_first = tn[0] + 1
     for c in uniq:
@@ -386,6 +410,30 @@ $$\Delta B = <<b>> \cdot \frac{<<Fu>> \cdot <<vav>>}{<<eta>> \cdot 1000} \cdot \
         tot.append(f"{v['kratko'].lower()} {fm(tt / 60, 2)} min i {fm(ff, 2)} l")
     A(_T('Ukupno za obilazak cijele trase (svi analizirani smjerovi): ') + "; ".join(tot) + _T('. Potrošnja u smjeru nizbrdice je mala jer se vozilo kreće uz kočenje motorom, a potrošnju u smjeru uspona određuje rad motora punom snagom. Apsolutne vrijednosti zavise od usvojenih parametara vozila (poglavlje 5.1) i služe za poređenje varijanti, a ne kao garantovana potrošnja.\n'))
     # =========================================================== zaključci
+    A(_T('\n## Provjera potrebe za dodatnom trakom za spora vozila\n'))
+    sv = cfg.get("spora_vozila") or {}; g_lim = float(sv.get("granica_nagiba", 3.0)); Vn = float(sv.get("Vn", 40)); Vkr = float(sv.get("Vkr", 50))
+    A(_TF('Potreba za dodatnom trakom za spora vozila analizira se na usponima većim od {0} %. Mjerodavno je teško teretno vozilo ({1}): trajna brzina V~t~ na dugom usponu, najmanja brzina V~n~ = {2} km/h ispod koje vozilo ne smije usporiti na normalnoj traci i kritična brzina V~kr~ = {3} km/h do koje se dopušta uključivanje u dodatnu traku (vrijednosti se zadaju u postavkama, "spora_vozila"). Podužni nagib je mjeren u smjeru vožnje (uspon je pozitivan).\n', fm(g_lim, 1), P.vozila[0]['kratko'].lower(), fm(Vn, 0), fm(Vkr, 0)))
+    sv_rows = []; sv_flag = []
+    for c in cases:
+        g = c.sg * np.asarray(c.G, float); v = np.asarray(c.trk[0]["v"], float); S_ = np.asarray(c.S, float)
+        ds = np.abs(np.diff(S_, prepend=S_[0])); up = g > g_lim; slow = v < Vn
+        Lup = float(ds[up].sum()); Lslow = float(ds[slow & up].sum())
+        rng = []
+        if up.any():
+            idx = np.flatnonzero(up); br = np.flatnonzero(np.diff(idx) > 1)
+            for a, b in zip(np.r_[0, br + 1], np.r_[br, len(idx) - 1]):
+                i0, i1 = idx[a], idx[b]; rng.append((float(S_[i0]), float(S_[i1]), float(g[i0:i1 + 1].max()), float(v[i0:i1 + 1].min()), float(ds[i0:i1 + 1].sum())))
+        ok = (Lup == 0) or (Lslow == 0 and v[up].min() >= Vkr)
+        if not ok: sv_flag += [(c, r) for r in rng if r[3] < Vkr]
+        sv_rows.append([c.key, fm(float(g.max()), 2), fm(Lup, 0), fm(float(v.min()), 1), fm(Lslow, 0), _T('nije potrebna') if Lup == 0 else (_T('nije potrebna (V ≥ V~kr~)') if ok else _T('provjeriti'))])
+    A(newtab(_T('Uspon i brzina teškog vozila po smjerovima vožnje'), None))
+    A(tbl([_T('Slučaj'), _T('Najveći uspon [%]'), _TF('Dužina uspona > {0} % [m]', fm(g_lim, 0)), _T('Najmanja brzina [km/h]'), _TF('Dužina uspona sa V < {0} [m]', fm(Vn, 0)), _T('Ocjena')], sv_rows))
+    if not sv_flag and max(max(c.sg * np.asarray(c.G, float)) for c in cases) <= g_lim:
+        A(_TF('Na trasi nema uspona većeg od {0} % u smjeru vožnje, pa dodatna traka za spora vozila nije potrebna.\n', fm(g_lim, 0)))
+    elif not sv_flag:
+        A(_TF('Uspona većih od {0} % ima, ali brzina teškog vozila nigdje ne pada ispod V~kr~ = {1} km/h, pa dodatna traka za spora vozila nije potrebna.\n', fm(g_lim, 0), fm(Vkr, 0)))
+    else:
+        A(_T('Brzina teškog vozila pada ispod kritične brzine na sljedećim dionicama uspona, na kojima treba razmotriti dodatnu traku (uz analizu kapaciteta): ') + "; ".join(_TF('{0}: st. {1} – {2} (nagib do {3} %, najmanja brzina {4} km/h, dužina {5} m)', c.key, fm(r[0], 0), fm(r[1], 0), fm(r[2], 2), fm(r[3], 1), fm(r[4], 0)) for c, r in sv_flag) + ".\n")
     A(_T('\n# Zaključci i preporuke\n'))
     z = []
     for c in cases:
@@ -406,6 +454,8 @@ $$\Delta B = <<b>> \cdot \frac{<<Fu>> \cdot <<vav>>}{<<eta>> \cdot 1000} \cdot \
         tt.append(_TF('{0}: putničko {1} min; ', lab, fm(rs_car[id(ch)]['time'] / 60, 2)) + "; ".join(f"{v['kratko'].lower()} {fm(rs_trk[(id(ch), q)]['time'] / 60, 2)} min / {fm(rs_trk[(id(ch), q)]['fuel'], 2)} l" for q, v in enumerate(P.vozila)))
     zk.append(_T('Vrijeme putovanja i potrošnja goriva po smjerovima: ') + " | ".join(tt) + ".")
     zk.append(_TF('Brzine teških vozila u smjeru uspona padaju do {0} km/h; razlika prema putničkim vozilima jedan je od ulaznih podataka za analizu preticanja, dodatne trake za spora vozila i saobraćajne opreme.', fm(min(c.trk[0]['v'].min() for c in cases), 0)))
+    zk.append(_TF('Krivinska karakteristika trase iznosi K = {0} gon/km (S = {1} gon/km).', fm(sum(kriv_stat(c)['ang'] for c in uniq) / (sum(kriv_stat(c)['L'] for c in uniq) / 1000), 2), fm(max(kriv_stat(c)['S'] for c in uniq), 2)))
+    zk.append(_T('Dodatna traka za spora vozila nije potrebna prema provedenoj provjeri (poglavlje 5.3).') if not sv_flag else _T('Na dionicama uspona navedenim u poglavlju 5.3 treba razmotriti dodatnu traku za spora vozila.'))
     for i, t in enumerate(zk, 1): A(f"{i}. {t}")
     A(_T('\n# Sadržaj i uslovi obrade\n'))
     A(_T('Elaborat je urađen u skladu sa Projektnim zadatkom (Elaborat vozno-dinamičkih analiza) i uslovima obrade iz Opšteg dijela. Numerički proračun dat je u tabelama (prilozi A) i u radnoj knjizi (Excel) sa formulama, dijagramima i svim tabelama iz ovog elaborata. Grafički prilozi (prilog B) prikazuju krivinu, uzdužni profil i profile brzina po segmentima trase za sve smjerove vožnje. Za grafičke priloge u razmjeri 1:1000 podaci iz radne knjige (listovi *Profil_n*) mogu se direktno prenijeti u CAD; prilozi u ovom dokumentu prilagođeni su formatu A4.\n'))
@@ -509,7 +559,7 @@ def postprocess_tables(tbl_elems):
         for gc in t._tbl.tblGrid.findall(qn('w:gridCol')): gc.set(qn('w:w'), str(int(9000 / max(ncol, 1))))
 
 
-def postprocess(raw, out, footer):
+def postprocess(raw, out, footer, okvir=None):
     from docx import Document
     from docx.shared import Pt, Cm
     from docx.oxml.ns import qn
@@ -543,9 +593,15 @@ def postprocess(raw, out, footer):
     else: st.append(u)
     z = st.find(qn('w:zoom'))
     if z is not None: st.remove(z); st.insert(0, z)
+    if okvir: okvir(d)
     from .template_export import normalize_order
     normalize_order(d.element)
     d.save(out)
+
+
+def _okvir(cfg, vrsta, n=1):
+    from . import elaborat_okvir as eo
+    return (lambda d: eo.apply(d, cfg, vrsta, n)) if eo.aktivan(cfg) else None
 
 
 def write_docx(P, sections, cases, axes, fw, bw, has_caps, F, cfg, out_docx, log=print):
@@ -560,7 +616,7 @@ def write_docx(P, sections, cases, axes, fw, bw, has_caps, F, cfg, out_docx, log
         open(os.path.join(os.path.dirname(out_docx), "elaborat3_izvor.md"), "w", encoding="utf-8").write(txt) if cfg.get("zadrzi_md") else None
         raw = os.path.join(td, "raw.docx")
         run_pandoc(mdp, raw, td, os.path.join(HERE, "data", "ref.docx"))
-        postprocess(raw, out_docx, _TF('Vozno-dinamičke analize | {0}', cfg.get('projekat', '')))
+        postprocess(raw, out_docx, _TF('Vozno-dinamičke analize | {0}', cfg.get('projekat', '')), okvir=_okvir(cfg, 'vozna', len(cases)))
     log(_TF("Word: {0}", out_docx))
 
 

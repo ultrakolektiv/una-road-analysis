@@ -24,7 +24,7 @@ sr: {
  nav_project:"Projekat", nav_sections:"Sekcije trase", nav_params:"Parametri", nav_sight:"Preglednost", nav_run:"Izrada",
  new:"Novi", open:"Otvori…", save:"Spremi", save_as:"Spremi kao…", untitled:"Novi projekat", unsaved:"nije spremljeno",
  p_title:"Projekat", p_sub:"Osnovni podaci o dionici i izlazu.", p_name:"Naziv dionice", p_vr:"Računska brzina Vr [km/h]", p_out:"Izlazni folder", p_browse:"Odaberi…",
- p_lang:"Jezik dokumenata", p_lang_h:"Jezik (bosanski ili engleski) u kome se prave Word/Excel/DXF izlazi.", p_notes:"Tekst za elaborat", p_notes_h:"Naslovna strana i dodatni opisi koji ulaze u elaborat.",
+ el_title:"Podaci o elaboratu (naslovna strana, obrazac, sadržaj knjige)", el_h:"Neobavezno. Ako popunite bar jedno polje, Word elaborati dobijaju naslovnu stranu sa šifrom knjige, obrazac sa podacima i potpisima, sadržaj knjige, zaglavlje sa logotipom i potpisni blok.", el_logo_i:"Logotip investitora (slika)", el_logo_p:"Logotip projektanta (slika)", el_investitor:"Investitor", el_projektant:"Projektant", el_objekat:"Objekat", el_dionica:"Dionica", el_faza:"Faza projekta (npr. Idejni projekat)", el_lokacija:"Lokacija", el_sifra_vozna:"Šifra knjige – vozno-dinamičke analize", el_sifra_optika:"Šifra knjige – optičke analize", el_autor_projekta:"Autor projekta", el_odgovorno_lice:"Odgovorno lice", el_vodeci_projektant:"Vodeći projektant", el_odgovorni_projektant:"Odgovorni projektant", el_saradnici:"Saradnici na projektu (svaki u novom redu)", el_mjesto:"Mjesto", el_datum_el:"Datum (npr. novembar 2026.)", p_lang:"Jezik dokumenata", p_lang_h:"Jezik (bosanski ili engleski) u kome se prave Word/Excel/DXF izlazi.", p_notes:"Tekst za elaborat", p_notes_h:"Naslovna strana i dodatni opisi koji ulaze u elaborat.",
  p_date:"Datum / verzija (naslovna strana)", p_desc:"Dodatni opis trase (Uvod)", p_remarks:"Dodatne napomene / pretpostavke (jedna po redu, Prilog C)",
  p_settings:"Postavke za sljedeći projekat", p_settings_h:"Spremite napredne parametre (bez sekcija i ispisa) i učitajte ih u novom projektu.", p_save_set:"Spremi postavke…", p_load_set:"Učitaj postavke…",
  s_title:"Sekcije trase", s_sub:"Redom po stacionaži. Svaka sekcija ima svoj tip: razdvojene osovine, centralna ili jedna osovina.", s_add:"Dodaj sekciju", s_edit:"Uredi", s_del:"Ukloni", s_up:"Gore", s_down:"Dolje",
@@ -75,7 +75,7 @@ en: {
  nav_project:"Project", nav_sections:"Alignment segments", nav_params:"Parameters", nav_sight:"Sight distance", nav_run:"Generate",
  new:"New", open:"Open…", save:"Save", save_as:"Save as…", untitled:"New project", unsaved:"not saved",
  p_title:"Project", p_sub:"Basic data about the road section and the output.", p_name:"Section name", p_vr:"Design speed Vr [km/h]", p_out:"Output folder", p_browse:"Browse…",
- p_lang:"Document language", p_lang_h:"Language of the Word/Excel/DXF outputs.", p_notes:"Text for the study", p_notes_h:"Title page and additional descriptions included in the study.",
+ el_title:"Document data (cover page, data sheet, book contents)", el_h:"Optional. If you fill in at least one field, the Word documents get a cover page with the book code, a data sheet with signature boxes, book contents, a header with the logo and a signature block.", el_logo_i:"Client logo (image)", el_logo_p:"Designer logo (image)", el_investitor:"Client", el_projektant:"Designer", el_objekat:"Facility", el_dionica:"Section", el_faza:"Design phase (e.g. Preliminary design)", el_lokacija:"Location", el_sifra_vozna:"Book code – vehicle-dynamic analyses", el_sifra_optika:"Book code – optical analyses", el_autor_projekta:"Project author", el_odgovorno_lice:"Responsible person", el_vodeci_projektant:"Leader designer", el_odgovorni_projektant:"Responsible designer", el_saradnici:"Project associates (one per line)", el_mjesto:"Place", el_datum_el:"Date (e.g. November 2026)", p_lang:"Document language", p_lang_h:"Language of the Word/Excel/DXF outputs.", p_notes:"Text for the study", p_notes_h:"Title page and additional descriptions included in the study.",
  p_date:"Date / version (title page)", p_desc:"Additional alignment description (Introduction)", p_remarks:"Additional remarks / assumptions (one per line, Appendix C)",
  p_settings:"Settings for the next project", p_settings_h:"Save the advanced parameters (without segments and printouts) and load them in a new project.", p_save_set:"Save settings…", p_load_set:"Load settings…",
  s_title:"Alignment segments", s_sub:"In order of chainage. Each segment has its own type: separate carriageway axes, central axis, or a single axis.", s_add:"Add segment", s_edit:"Edit", s_del:"Remove", s_up:"Up", s_down:"Down",
@@ -256,6 +256,7 @@ function pathRow(inp, mode, title, filters) { return h("div", { class: "row" }, 
 const sw = (label, checked, onchange, id) => { const i = h("input", { type: "checkbox", checked, onchange: e => onchange(e.target.checked) }); return h("label", { class: "sw" }, i, h("span", {}, label)); };
 
 /* ================================================================ PAGE 1 – PROJECT */
+const ELK = ["investitor", "projektant", "objekat", "dionica", "faza", "lokacija", "sifra_vozna", "sifra_optika", "autor_projekta", "odgovorno_lice", "vodeci_projektant", "odgovorni_projektant", "saradnici", "mjesto", "datum_el"];
 function pageProject() {
   const c = S.cfg;
   const name = txt(c.projekat, { oninput: e => { c.projekat = e.target.value; dirty(); } });
@@ -274,6 +275,13 @@ function pageProject() {
     h("div", { class: "card" }, h("h3", {}, t("p_notes")), h("p", { class: "hint" }, t("p_notes_h")),
       h("div", { class: "grid" }, field(t("p_date"), txt(c.datum || "", { oninput: e => { c.datum = e.target.value; dirty(); } })),
         field(t("p_desc"), ta("opis_sekcija")), field(t("p_remarks"), rem))),
+    h("div", { class: "card" }, h("h3", {}, t("el_title")), h("p", { class: "hint" }, t("el_h")),
+      h("div", { class: "grid g2" }, ELK.map(k => { const el = c.elaborat = c.elaborat || {}; const kk = k === "datum_el" ? "datum" : k;
+        const inp = k === "saradnici" ? (() => { const x = h("textarea", { rows: 3, oninput: ev => { el.saradnici = ev.target.value.split("\n").map(v => v.trim()).filter(Boolean); dirty(); } }); x.value = [].concat(el.saradnici || []).join("\n"); return x; })()
+          : txt(el[kk] || "", { oninput: e => { el[kk] = e.target.value; dirty(); } });
+        return field(t("el_" + k), inp); }),
+        ["logo_investitor", "logo_projektant"].map(k => { const el = c.elaborat = c.elaborat || {}; const inp = txt(el[k] || "", { oninput: e => { el[k] = e.target.value.trim(); dirty(); } });
+          return field(t(k === "logo_investitor" ? "el_logo_i" : "el_logo_p"), pathRow(inp, "open", t("dlg_file"), [["PNG / JPG", "*.png;*.jpg;*.jpeg"]])); }))),
     h("div", { class: "card" }, h("h3", {}, t("p_settings")), h("p", { class: "hint" }, t("p_settings_h")),
       h("div", { class: "row" }, h("button", { class: "btn", onclick: saveSettings }, t("p_save_set")), h("button", { class: "btn", onclick: loadSettings }, t("p_load_set")))),
     navButtons(null, "sections"));

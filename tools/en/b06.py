@@ -5,7 +5,7 @@ T = {
 653: "Cross-slope of the carriageway (left and right side)",
 654: "UNA licence {0}",
 655: "Excel saved: {0} ({1} sheets)",
-656: ". Sight distance (Study 4) is NOT covered.",
+656: ". Sight distance (optical analysis) is NOT covered.",
 657: "ASSUMPTIONS (verify!): 1) Vp–R = interpolation of the Rmin(Vr) table compiled from the diagram (Figure 3-07, Annex 2 of the Rulebook); 2) Vp–iN = table compiled from the diagram (Figure 3-08, Annex 2 of the Rulebook); 3) heavy vehicles: assumed parameters (sheet Parametri); 4) grid ",
 658: "{0:g} m, length-weighted statistics, time = ∫ds/v; 5) cross-slope of the curve = slope of the selected lane (Ulaz_*), absolute value; 6) ΔV criterion: ≤10 good, 10–20 fair, >20 poor (Lamm); rating by target speeds.",
 659: "Project Brief",

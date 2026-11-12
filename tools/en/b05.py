@@ -71,7 +71,7 @@ T = {
 629: "Formulas for motion resistance and traction force (5.1).",
 630: "Cvetanović, B.: *Theory of Motion of Motor Vehicles*, Belgrade.",
 631: "Driving resistances and fuel consumption (5.1).",
-632: "DRIVING-DYNAMICS ANALYSIS – {0} – workbook accompanying Study 3",
+632: "DRIVING-DYNAMICS ANALYSIS – {0} – workbook accompanying the driving-dynamics analysis",
 633: " 1. On the Ulaz_* sheets replace the blue data with the designer's printouts: horizontal axis elements (A–H), grade-line break points (O–U), cross-slopes (AC onwards). If you add rows, INSERT them inside the table (above the last row).",
 634: " 2. On the Profil_* sheets set the start/end chainage and the step (blue fields in row 3).",
 635: " 3. Everything else is calculated by formulas: Vp–R, Vp–iN, speed profile, heavy vehicles, time, fuel, statistics, slope checks and charts (sheet Dijagrami).",

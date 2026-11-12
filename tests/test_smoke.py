@@ -82,7 +82,7 @@ def test_engleski_elaborat(tmp_path):
     finally:
         i18n.set_lang("sr")
     names = [os.path.basename(o) for o in outs]
-    assert any(n.startswith("Study_3") and n.endswith(".docx") for n in names)
+    assert any(n.startswith("Driving-dynamics") and n.endswith(".docx") for n in names)
     assert any(n.startswith("Calculation_") and n.endswith(".xlsx") for n in names)
 
 
@@ -196,6 +196,19 @@ def test_koridor_rucno():
         t = open(h[0], encoding="utf-8").read()
         data = json.loads(t.split("const DATA=")[1].split(";\nconst L=")[0])
         F = data["routes"]["F"]; assert len(F["q"]) > 100 and set(F["kind"]) >= {"otvorena", "most", "tunel"}
+
+
+def test_elaborat_okvir():
+    """Naslovna strana, obrazac, sadržaj knjige i potpis; krivinska karakteristika."""
+    import docx
+    from una import elaborat_okvir as eo
+    cfg = {"elaborat": {"sifra": "AA-B-01-TR-06-ID-01", "investitor": "Inv", "projektant": "Proj", "objekat": "Put", "odgovorni_projektant": "Ime P.", "mjesto": "Sarajevo", "datum": "2026"}}
+    assert eo.aktivan(cfg) and not eo.aktivan({"elaborat": {}}) and not eo.aktivan({})
+    d = docx.Document(); d.add_paragraph("Naslov", style="Title"); d.add_heading("Uvod", 1); d.add_paragraph("tekst")
+    eo.apply(d, cfg, "vozna", 3)
+    t = "\n".join(p.text for p in d.paragraphs)
+    assert "SADRŽAJ KNJIGE" in t and "OBRAZAC 1" in t and "Ime P." in t and "Naslov" not in t.split("OBRAZAC")[0]
+    assert len(d.tables) >= 4
 
 
 def test_koridor_nazivi():

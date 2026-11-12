@@ -303,20 +303,20 @@ def make(P, cases, par, out, cfg, outdir, name, files, log=print):
     if pp: pgc.draw(P, cases, par, {k: r["E"] for k, r in pp.items()}, cfg, dp, mode="ocek", log=log, title=_T('PREGLEDNOST PRI PRETICANJU – zrake iz lijeve (preticajne) trake')); outs.append(dp)
     att = attachments(outdir, name, list(files) + outs)
     md = build_md(P, par, out, pp, o, cfg, figs, att, name)
-    docx = os.path.join(outdir, _TF("Elaborat_4_Opticke_analize_{0}.docx", name))
+    docx = os.path.join(outdir, _TF("Opticke_analize_{0}.docx", name))
     with tempfile.TemporaryDirectory() as td:
         fd = os.path.join(td, "fig"); os.makedirs(fd)
         for f in figs.values(): shutil.copy(f, fd)
         md = re.sub(r"\]\(([^)/]+\.png)\)", r"](fig/\1)", md)
         mdp = os.path.join(td, "doc.md"); open(mdp, "w", encoding="utf-8").write(md)
         raw = os.path.join(td, "raw.docx"); report.run_pandoc(mdp, raw, td, os.path.join(report.HERE, "data", "ref.docx"))
-        report.postprocess(raw, docx, _TF('Optičke analize | {0}', cfg.get('projekat', '')))
+        report.postprocess(raw, docx, _TF('Optičke analize | {0}', cfg.get('projekat', '')), okvir=report._okvir(cfg, 'optika'))
     log(_TF("Word: {0}", docx)); outs.append(docx)
     tp = cfg.get("template") or {}
     if tp.get("file"):
         from . import template_export
         md2 = build_md(P, par, out, pp, o, cfg, figs, att, name, template_mode=True)
-        d2 = os.path.join(outdir, _TF("Elaborat_4_Opticke_analize_{0}_po_templateu.docx", name))
+        d2 = os.path.join(outdir, _TF("Opticke_analize_{0}_po_templateu.docx", name))
         with tempfile.TemporaryDirectory() as td:
             fd = os.path.join(td, "fig"); os.makedirs(fd)
             for f in figs.values(): shutil.copy(f, fd)
