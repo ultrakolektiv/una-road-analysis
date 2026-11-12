@@ -249,5 +249,5 @@ NOVO – FORMALNI OKVIR ELABORATA, KRIVINSKA KARAKTERISTIKA, TRAKA ZA SPORA VOZI
   logo_investitor, logo_projektant (putanja do slike), adresa_projektanta, revident. Analiza se ne mijenja; bez ovih podataka elaborat ostaje kao ranije.
 - Vozno-dinamička analiza, poglavlje 3.2: krivinska karakteristika K [gon/km], standardno odstupanje S po kilometarskim odsječcima i udio krivine, po osovinama.
 - Vozno-dinamička analiza, poglavlje 5.3: provjera potrebe za dodatnom trakom za spora vozila (usponi veći od 3 %, brzina teškog vozila prema Vn = 40 km/h i Vkr = 50 km/h).
-  Vrijednosti se mijenjaju u JSON-u: "spora_vozila": {"granica_nagiba": 3, "Vn": 40, "Vkr": 50}.
+  Vrijednosti se mijenjaju u JSON-u: "spora_vozila": {"granica_nagiba": 3, "Vn": 40, "Vkr": 50, "Vt": {"2": 74, "3": 62, ...}} (trajne brzine Vt po nagibu, zadano prema Koy/Spacek 2005).
 - Nazivi izlaznih Word datoteka više ne sadrže redni broj elaborata: Vozno-dinamicke_analize_<projekat>.docx i Opticke_analize_<projekat>.docx.

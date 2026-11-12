@@ -413,6 +413,15 @@ $$\Delta B = <<b>> \cdot \frac{<<Fu>> \cdot <<vav>>}{<<eta>> \cdot 1000} \cdot \
     A(_T('\n## Provjera potrebe za dodatnom trakom za spora vozila\n'))
     sv = cfg.get("spora_vozila") or {}; g_lim = float(sv.get("granica_nagiba", 3.0)); Vn = float(sv.get("Vn", 40)); Vkr = float(sv.get("Vkr", 50))
     A(_TF('Potreba za dodatnom trakom za spora vozila analizira se na usponima većim od {0} %. Mjerodavno je teško teretno vozilo ({1}): trajna brzina V~t~ na dugom usponu, najmanja brzina V~n~ = {2} km/h ispod koje vozilo ne smije usporiti na normalnoj traci i kritična brzina V~kr~ = {3} km/h do koje se dopušta uključivanje u dodatnu traku (vrijednosti se zadaju u postavkama, "spora_vozila"). Podužni nagib je mjeren u smjeru vožnje (uspon je pozitivan).\n', fm(g_lim, 1), P.vozila[0]['kratko'].lower(), fm(Vn, 0), fm(Vkr, 0)))
+    VT = {int(k): float(v) for k, v in (sv.get("Vt") or {"2": 74, "3": 62, "4": 52, "5": 45, "6": 40, "7": 35, "8": 31, "9": 28}).items()}
+    gk = sorted(VT)
+    def vt_at(gr):
+        if gr <= gk[0]: return VT[gk[0]]
+        if gr >= gk[-1]: return VT[gk[-1]]
+        return float(np.interp(gr, gk, [VT[k] for k in gk]))
+    A(_T('Trajne brzine V~t~ teških teretnih vozila na dugim usponima uzete su prema švajcarskim istraživanjima (Koy, Spacek: Speed on upgrades and downgrades, 5th Swiss Transport Research Conference, 2005; dijagram trajnih brzina, vrijednosti očitane sa dijagrama):\n'))
+    A(newtab(_T('Trajna brzina teškog vozila V~t~ prema podužnom nagibu'), None))
+    A(tbl([_T('Nagib [%]')] + [str(k) for k in gk], [[_T('V~t~ [km/h]')] + [fm(VT[k], 0) for k in gk]]))
     sv_rows = []; sv_flag = []
     for c in cases:
         g = c.sg * np.asarray(c.G, float); v = np.asarray(c.trk[0]["v"], float); S_ = np.asarray(c.S, float)
@@ -425,9 +434,9 @@ $$\Delta B = <<b>> \cdot \frac{<<Fu>> \cdot <<vav>>}{<<eta>> \cdot 1000} \cdot \
                 i0, i1 = idx[a], idx[b]; rng.append((float(S_[i0]), float(S_[i1]), float(g[i0:i1 + 1].max()), float(v[i0:i1 + 1].min()), float(ds[i0:i1 + 1].sum())))
         ok = (Lup == 0) or (Lslow == 0 and v[up].min() >= Vkr)
         if not ok: sv_flag += [(c, r) for r in rng if r[3] < Vkr]
-        sv_rows.append([c.key, fm(float(g.max()), 2), fm(Lup, 0), fm(float(v.min()), 1), fm(Lslow, 0), _T('nije potrebna') if Lup == 0 else (_T('nije potrebna (V ≥ V~kr~)') if ok else _T('provjeriti'))])
+        sv_rows.append([c.key, fm(float(g.max()), 2), (fm(vt_at(float(g.max())), 0) if Lup else '–'), fm(Lup, 0), fm(float(v.min()), 1), fm(Lslow, 0), _T('nije potrebna') if Lup == 0 else (_T('nije potrebna (V ≥ V~kr~)') if ok else _T('provjeriti'))])
     A(newtab(_T('Uspon i brzina teškog vozila po smjerovima vožnje'), None))
-    A(tbl([_T('Slučaj'), _T('Najveći uspon [%]'), _TF('Dužina uspona > {0} % [m]', fm(g_lim, 0)), _T('Najmanja brzina [km/h]'), _TF('Dužina uspona sa V < {0} [m]', fm(Vn, 0)), _T('Ocjena')], sv_rows))
+    A(tbl([_T('Slučaj'), _T('Najveći uspon [%]'), _T('V~t~ za najveći uspon [km/h]'), _TF('Dužina uspona > {0} % [m]', fm(g_lim, 0)), _T('Najmanja brzina [km/h]'), _TF('Dužina uspona sa V < {0} [m]', fm(Vn, 0)), _T('Ocjena')], sv_rows))
     if not sv_flag and max(max(c.sg * np.asarray(c.G, float)) for c in cases) <= g_lim:
         A(_TF('Na trasi nema uspona većeg od {0} % u smjeru vožnje, pa dodatna traka za spora vozila nije potrebna.\n', fm(g_lim, 0)))
     elif not sv_flag:
