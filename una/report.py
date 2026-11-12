@@ -431,7 +431,9 @@ $$\Delta B = <<b>> \cdot \frac{<<Fu>> \cdot <<vav>>}{<<eta>> \cdot 1000} \cdot \
         if up.any():
             idx = np.flatnonzero(up); br = np.flatnonzero(np.diff(idx) > 1)
             for a, b in zip(np.r_[0, br + 1], np.r_[br, len(idx) - 1]):
-                i0, i1 = idx[a], idx[b]; rng.append((float(S_[i0]), float(S_[i1]), float(g[i0:i1 + 1].max()), float(v[i0:i1 + 1].min()), float(ds[i0:i1 + 1].sum())))
+                i0, i1 = idx[a], idx[b]; seg = slice(i0, i1 + 1); lw = np.flatnonzero(v[seg] < Vkr)
+                rng.append((float(S_[i0]), float(S_[i1]), float(g[seg].max()), float(v[seg].min()), float(ds[seg].sum()), float(v[i0]),
+                            (float(S_[i0 + lw[0]]), float(ds[i0 + 1:i0 + lw[0] + 1].sum())) if len(lw) else None))
         ok = (Lup == 0) or (Lslow == 0 and v[up].min() >= Vkr)
         if not ok: sv_flag += [(c, r) for r in rng if r[3] < Vkr]
         sv_rows.append([c.key, fm(float(g.max()), 2), (fm(vt_at(float(g.max())), 0) if Lup else '–'), fm(Lup, 0), fm(float(v.min()), 1), fm(Lslow, 0), _T('nije potrebna') if Lup == 0 else (_T('nije potrebna (V ≥ V~kr~)') if ok else _T('provjeriti'))])
@@ -442,7 +444,10 @@ $$\Delta B = <<b>> \cdot \frac{<<Fu>> \cdot <<vav>>}{<<eta>> \cdot 1000} \cdot \
     elif not sv_flag:
         A(_TF('Uspona većih od {0} % ima, ali brzina teškog vozila nigdje ne pada ispod V~kr~ = {1} km/h, pa dodatna traka za spora vozila nije potrebna.\n', fm(g_lim, 0), fm(Vkr, 0)))
     else:
-        A(_T('Brzina teškog vozila pada ispod kritične brzine na sljedećim dionicama uspona, na kojima treba razmotriti dodatnu traku (uz analizu kapaciteta): ') + "; ".join(_TF('{0}: st. {1} – {2} (nagib do {3} %, najmanja brzina {4} km/h, dužina {5} m)', c.key, fm(r[0], 0), fm(r[1], 0), fm(r[2], 2), fm(r[3], 1), fm(r[4], 0)) for c, r in sv_flag) + ".\n")
+        A(_T('Brzina teškog vozila pada ispod kritične brzine na sljedećim dionicama uspona. Na tim dionicama treba razmotriti dodatnu traku za spora vozila (uz analizu kapaciteta); mjesto početka trake određuje se prema stacionaži na kojoj brzina pada ispod V~kr~, uz dužinu uvlačenja ispred tog mjesta.\n'))
+        A(newtab(_T('Dionice uspona na kojima brzina teškog vozila pada ispod V~kr~'), None))
+        A(tbl([_T('Slučaj'), _T('Uspon, st. [m]'), _T('Najveći nagib [%]'), _T('V~t~ [km/h]'), _T('V na početku uspona [km/h]'), _T('V < V~kr~ od st. [m]'), _T('Dužina do tog mjesta [m]'), _T('Najmanja brzina [km/h]')],
+              [[c.key, f"{fm(r[0], 0)} – {fm(r[1], 0)}", fm(r[2], 2), fm(vt_at(r[2]), 0), fm(r[5], 1), fm(r[6][0], 0) if r[6] else "–", fm(r[6][1], 0) if r[6] else "–", fm(r[3], 1)] for c, r in sv_flag]))
     A(_T('\n# Zaključci i preporuke\n'))
     z = []
     for c in cases:
