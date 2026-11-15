@@ -272,7 +272,7 @@ function gApron(a,b){GOFF=100;const tun=a.kind==="tunel"&&a.hl&&b.hl,Fa=tun?a.hl
   const f=(s,z,d)=>z+s*(Math.min(d,80)+Math.max(0,Math.min(d,300)-80)*.25);let prev=null;
   for(let k=0;k<D.length;k++){const d=D[k];const pa=W(a,oa+sd*d,f(sa,za,d)),pb=W(b,ob+sd*d,f(sb,zb,d));if(prev){const cn=hs(Math.floor(a.q/9)*3.1+k),g=[C.grass2[0]*(.92+.1*cn),C.grass2[1]*(.92+.1*cn),C.grass2[2]*(.92+.1*cn)];bpoly([prev[0],pa,pb,prev[1]],`rgb(${g[0]|0},${g[1]|0},${g[2]|0})`)}prev=[pa,pb]}}}
 function gWalls(a,b){const R1=a.ring,R2=b.ring;if(!R1.length||R1.length!==R2.length)return;const F=a.F,Fb=b.F;
- for(const [ia,sd] of [[0,-1],[R1.length-1,1]]){const xa=R1[ia][0],xb=R2[ia][0],eA=sd>0?F[F.length-1][0]:F[0][0],eB=sd>0?Fb[Fb.length-1][0]:Fb[0][0],za=zp(F,sd*3.5)-.05,zb=zp(Fb,sd*3.5)-.05;
+ const rv=R1[0][0]>R1[R1.length-1][0];for(const [ia,sd] of [[rv?R1.length-1:0,-1],[rv?0:R1.length-1,1]]){const xa=R1[ia][0],xb=R2[ia][0],xe=(G,sg)=>{let m=G[0][0];for(const p of G)if(sg>0?p[0]>m:p[0]<m)m=p[0];return m},eA=xe(F,sd),eB=xe(Fb,sd),za=zp(F,sd*3.5)-.05,zb=zp(Fb,sd*3.5)-.05;
   bpoly([W(a,xa,za),W(a,xa,R1[ia][1]),W(b,xb,R2[ia][1]),W(b,xb,zb)],'rgb(120,120,116)');
   bpoly([W(a,eA,za),W(a,xa,za),W(b,xb,zb),W(b,eB,zb)],'rgb(110,110,106)')}}
 function buildGL(){const t0=performance.now();BUILD=true;camTun=false;GBUF.n=0;GBUF.chunks=[];TSEED=[];const n=SEC.length;GBUF.o=[SEC[0].x,SEC[0].y,SEC[0].z];const CH=24;let cur=null;
