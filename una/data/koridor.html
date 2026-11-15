@@ -225,7 +225,35 @@ function bloom(tun){if(!('filter' in cx))return;const w=Math.max(8,Wd>>2),h=Math
 let BUILD=false,BLIT=0,GOFF=0;const GLC={ok:false,route:null};let GLs=null;
 let GSEC=null;const GBUF={n:0,cap:0,p:null,nr:null,c:null,m:null,q:null,chunks:[],o:[0,0,0]};
 function gGrow(k){if(GBUF.n+k<=GBUF.cap)return;const nc=Math.max(GBUF.cap*2,1<<20,GBUF.n+k),np=new Float32Array(nc*3),nn=new Int8Array(nc*4),nco=new Uint8Array(nc*4),nm=new Uint8Array(nc*4),nq=new Float32Array(nc);if(GBUF.p){nq.set(GBUF.q.subarray(0,GBUF.n));np.set(GBUF.p.subarray(0,GBUF.n*3));nn.set(GBUF.nr.subarray(0,GBUF.n*4));nco.set(GBUF.c.subarray(0,GBUF.n*4));nm.set(GBUF.m.subarray(0,GBUF.n*4))}GBUF.p=np;GBUF.nr=nn;GBUF.c=nco;GBUF.m=nm;GBUF.q=nq;GBUF.cap=nc}
-function gTri(A,B,C,r,g,b,mat,N){gGrow(3);const o=GBUF.o,V=[A,B,C];for(let k=0;k<3;k++){const i=GBUF.n++,P=V[k];GBUF.p[i*3]=P[0]-o[0];GBUF.p[i*3+1]=P[1]-o[1];GBUF.p[i*3+2]=P[2]-o[2];GBUF.nr[i*4]=N[0]*127;GBUF.nr[i*4+1]=N[1]*127;GBUF.nr[i*4+2]=N[2]*127;GBUF.c[i*4]=r;GBUF.c[i*4+1]=g;GBUF.c[i*4+2]=b;GBUF.c[i*4+3]=mat*40;GBUF.q[i]=GSEC?(GSEC.q+(P[0]-GSEC.x)*GSEC.tx+(P[1]-GSEC.y)*GSEC.ty):0;GBUF.m[i*4]=Math.min(255,GOFF*2.5);GBUF.m[i*4+3]=BLIT?255:0}}
+function gTri(A,B,C,r,g,b,mat,N){if(mat===2&&GSEC&&GOFF>=9&&TREES)gSeed(A,B,C,N);gGrow(3);const o=GBUF.o,V=[A,B,C];for(let k=0;k<3;k++){const i=GBUF.n++,P=V[k];GBUF.p[i*3]=P[0]-o[0];GBUF.p[i*3+1]=P[1]-o[1];GBUF.p[i*3+2]=P[2]-o[2];GBUF.nr[i*4]=N[0]*127;GBUF.nr[i*4+1]=N[1]*127;GBUF.nr[i*4+2]=N[2]*127;GBUF.c[i*4]=r;GBUF.c[i*4+1]=g;GBUF.c[i*4+2]=b;GBUF.c[i*4+3]=mat*40;GBUF.q[i]=GSEC?(GSEC.q+(P[0]-GSEC.x)*GSEC.tx+(P[1]-GSEC.y)*GSEC.ty):0;GBUF.m[i*4]=Math.min(255,GOFF*2.5);GBUF.m[i*4+3]=BLIT?255:0}}
+// ---- drveće (3D): sjeme se sije po trouglovima terena istom maskom šume kao u shaderu
+const TREES=!/[?&]notrees/.test(location.search);let TSEED=[];
+function jfr(x){return x-Math.floor(x)}
+function jh21(x,y){let px=jfr(Math.fround(x*123.34)),py=jfr(Math.fround(y*456.21));const d=px*(px+45.32)+py*(py+45.32);px+=d;py+=d;return jfr(px*py)}
+function jvn(x,y){const ix=Math.floor(x),iy=Math.floor(y);let fx=x-ix,fy=y-iy;fx=fx*fx*(3-2*fx);fy=fy*fy*(3-2*fy);const a=jh21(ix,iy),b=jh21(ix+1,iy),c=jh21(ix,iy+1),d=jh21(ix+1,iy+1);return (a+(b-a)*fx)+((c+(d-c)*fx)-(a+(b-a)*fx))*fy}
+function jfbm(x,y){let s=0,a=.5;for(let i=0;i<5;i++){s+=a*jvn(x,y);x=x*2.03+17.1;y=y*2.03+9.2;a*=.5}return s}
+function jss(a,b,x){const t=Math.min(1,Math.max(0,(x-a)/(b-a)));return t*t*(3-2*t)}
+function gSeed(A,B,C,N){const o=GBUF.o,cx=(A[0]+B[0]+C[0])/3,cy=(A[1]+B[1]+C[1])/3,lat=Math.abs((cx-GSEC.x)*GSEC.nx+(cy-GSEC.y)*GSEC.ny);if(lat>250)return;
+ const ar=Math.abs((B[0]-A[0])*(C[1]-A[1])-(B[1]-A[1])*(C[0]-A[0]))/2;if(ar<.5)return;
+ const fm=jss(.40,.50,jfbm((cx-o[0])*.009+3,(cy-o[1])*.009+3))*jss(9,24,GOFF)*(1-jss(.45,.8,(1-Math.abs(N[2]))*1.4));if(fm<.35)return;
+ const dens=(lat<60?1/70:lat<140?1/120:Math.max(0,(250-lat)/110)/170);let n=ar*dens*fm,sd=(Math.abs(Math.round(cx*7.3)*73856093^Math.round(cy*7.3)*19349663)>>>0)||1;
+ const rnd=()=>{sd=(Math.imul(sd,1664525)+1013904223)>>>0;return sd/4294967296};let k=Math.floor(n);if(rnd()<n-k)k++;
+ for(let i=0;i<k;i++){let u=rnd(),v=rnd();if(u+v>1){u=1-u;v=1-v}const w=1-u-v,x=A[0]*w+B[0]*u+C[0]*v,y=A[1]*w+B[1]*u+C[1]*v,z=A[2]*w+B[2]*u+C[2]*v;
+  TSEED.push([x,y,z,GSEC.q+(x-GSEC.x)*GSEC.tx+(y-GSEC.y)*GSEC.ty,rnd(),rnd(),rnd(),rnd(),GBUF.chunks.length,lat])}}
+function gV(x,y,z,nx,ny,nz,r,g,b,q){gGrow(1);const i=GBUF.n++,o=GBUF.o;GBUF.p[i*3]=x-o[0];GBUF.p[i*3+1]=y-o[1];GBUF.p[i*3+2]=z-o[2];GBUF.nr[i*4]=nx*127;GBUF.nr[i*4+1]=ny*127;GBUF.nr[i*4+2]=nz*127;GBUF.c[i*4]=r;GBUF.c[i*4+1]=g;GBUF.c[i*4+2]=b;GBUF.c[i*4+3]=240;GBUF.q[i]=q;GBUF.m[i*4]=255;GBUF.m[i*4+3]=0}
+function gLathe(x,y,z,q,rot,segs,NS,col,amp,sd){const J=(k,zz)=>1+amp*(jh21((k%NS)*1.37+sd*9.1,zz*.731+sd*3.3)-.5)*2;
+ for(const sg of segs){const r0=sg[0],z0=sg[1],r1=sg[2],z1=sg[3],c0=sg[4],c1=sg[5],dl=Math.hypot(z1-z0,r0-r1)||1,nr=(z1-z0)/dl,nz=(r0-r1)/dl;
+  for(let k=0;k<NS;k++){const a0=rot+k*6.2832/NS,a1=rot+(k+1)*6.2832/NS,ca=Math.cos(a0),sa=Math.sin(a0),cb=Math.cos(a1),sb=Math.sin(a1),ra=r0*J(k,z0),rb=r0*J(k+1,z0),rc=r1*J(k+1,z1),rd=r1*J(k,z1);
+   const P=[[x+ca*ra,y+sa*ra,z+z0,ca*nr,sa*nr,nz,c0],[x+cb*rb,y+sb*rb,z+z0,cb*nr,sb*nr,nz,c0],[x+cb*rc,y+sb*rc,z+z1,cb*nr,sb*nr,nz,c1],[x+ca*rd,y+sa*rd,z+z1,ca*nr,sa*nr,nz,c1]];
+   for(const t of (r1<1e-3?[[0,1,2]]:r0<1e-3?[[0,2,3]]:[[0,1,2],[0,2,3]]))for(const j of t){const v=P[j];gV(v[0],v[1],v[2],v[3],v[4],v[5],col[0]*v[6],col[1]*v[6],col[2]*v[6],q)}}}}
+function gTree(s){const x=s[0],y=s[1],z=s[2]-.25,q=s[3],con=s[4]<.45,far=s[9]>75,h=(con?9+9*s[5]:7+7*s[5])*(far?1.15:1),R=con?h*(.17+.06*s[6]):h*(.24+.10*s[6]),rot=s[7]*6.28,t=.8+.4*s[6];
+ if(!far)gLathe(x,y,z,q,rot,[[h*.026,0,h*.02,h*(con?.2:.4),1,1]],4,[58*t,46*t,36*t],0,s[5]);
+ if(con){const c=[24+14*s[7],48+20*s[5],30+10*s[6]];
+  if(far)gLathe(x,y,z,q,rot,[[R,h*.12,R*.4,h*.55,.42,.8],[R*.62,h*.45,0,h,.7,1.12]],5,c,.14,s[6]);
+  else gLathe(x,y,z,q,rot,[[R,h*.14,R*.42,h*.40,.38,.7],[R*.80,h*.34,R*.3,h*.60,.55,.85],[R*.58,h*.54,R*.16,h*.80,.72,1.],[R*.34,h*.74,0,h,.9,1.15]],7,c,.16,s[6])}
+ else{const c=[44+24*s[7],72+24*s[5],30+12*s[6]];
+  if(far)gLathe(x,y,z,q,rot,[[0,h*.3,R*.85,h*.45,.34,.55],[R*.85,h*.45,R,h*.64,.55,.85],[R,h*.64,R*.6,h*.88,.85,1.08],[R*.6,h*.88,0,h,1.08,1.18]],5,c,.26,s[6]);
+  else gLathe(x,y,z,q,rot,[[0,h*.32,R*.55,h*.36,.3,.38],[R*.55,h*.36,R*.9,h*.47,.38,.55],[R*.9,h*.47,R,h*.6,.55,.78],[R,h*.6,R*.88,h*.74,.78,.95],[R*.88,h*.74,R*.6,h*.87,.95,1.08],[R*.6,h*.87,R*.25,h*.96,1.08,1.15],[R*.25,h*.96,0,h,1.15,1.18]],8,c,.3,s[6])}}
 function gNorm(pts){let nx=0,ny=0,nz=0;for(let i=0;i<pts.length;i++){const a=pts[i],b=pts[(i+1)%pts.length];nx+=(a[1]-b[1])*(a[2]+b[2]);ny+=(a[2]-b[2])*(a[0]+b[0]);nz+=(a[0]-b[0])*(a[1]+b[1])}const l=Math.hypot(nx,ny,nz);return l<1e-9?null:[nx/l,ny/l,nz/l]}
 function bpoly(pts,col,alpha){if(alpha!=null||pts.length<3)return;const m=/(\d+)\D+(\d+)\D+(\d+)/.exec(col);if(!m)return;const r=+m[1],g=+m[2],b=+m[3];let mat=1;
  if((r===240&&g===240&&b===240)||(r===255&&g===214&&b===80))mat=3;else if(r===112&&g===110&&b===104)mat=0;else if(Math.max(r,g,b)<=72)mat=0;else if(g>r*1.04&&g>b)mat=2;else if(r-b>=22&&r<=165)mat=2;else if(b>r+4)mat=4;
@@ -247,10 +275,11 @@ function gWalls(a,b){const R1=a.ring,R2=b.ring;if(!R1.length||R1.length!==R2.len
  for(const [ia,sd] of [[0,-1],[R1.length-1,1]]){const xa=R1[ia][0],xb=R2[ia][0],eA=sd>0?F[F.length-1][0]:F[0][0],eB=sd>0?Fb[Fb.length-1][0]:Fb[0][0],za=zp(F,sd*3.5)-.05,zb=zp(Fb,sd*3.5)-.05;
   bpoly([W(a,xa,za),W(a,xa,R1[ia][1]),W(b,xb,R2[ia][1]),W(b,xb,zb)],'rgb(120,120,116)');
   bpoly([W(a,eA,za),W(a,xa,za),W(b,xb,zb),W(b,eB,zb)],'rgb(110,110,106)')}}
-function buildGL(){const t0=performance.now();BUILD=true;camTun=false;GBUF.n=0;GBUF.chunks=[];const n=SEC.length;GBUF.o=[SEC[0].x,SEC[0].y,SEC[0].z];const CH=24;let cur=null;
+function buildGL(){const t0=performance.now();BUILD=true;camTun=false;GBUF.n=0;GBUF.chunks=[];TSEED=[];const n=SEC.length;GBUF.o=[SEC[0].x,SEC[0].y,SEC[0].z];const CH=24;let cur=null;
  for(let i=0;i<n-1;i++){if(i%CH===0){if(cur){cur.n=GBUF.n-cur.v0;cur.q1=SEC[i].q;GBUF.chunks.push(cur)}cur={v0:GBUF.n,q0:SEC[i].q,q1:0,n:0}}
   const A=SEC[i],B=SEC[i+1];if(A.jn)continue;GSEC=A;GCUR_Q=A.q;BLIT=A.kind==="tunel"?1:0;strip(A,B,0);if(BLIT)gWalls(A,B);BLIT=0;if(A.kind==="tunel"&&A.hl&&B.hl&&A.hl.length===B.hl.length)hill(A,B,0);gApron(A,B)}
  if(cur){cur.n=GBUF.n-cur.v0;cur.q1=SEC[n-1].q;GBUF.chunks.push(cur)}BUILD=false;
+ {const nc=GBUF.chunks.length,by=[];for(const t of TSEED)(by[t[8]]=by[t[8]]||[]).push(t);for(let k=0;k<nc;k++){if(!by[k])continue;const c={v0:GBUF.n,q0:GBUF.chunks[k].q0,q1:GBUF.chunks[k].q1,n:0};for(const t of by[k])gTree(t);c.n=GBUF.n-c.v0;GBUF.chunks.push(c)}console.log('trees',TSEED.length)}
  // glatke normale terena
  const P=GBUF.p,Nn=GBUF.nr,Cc=GBUF.c,M=new Map(),key=i=>Math.round(P[i*3]*40)+","+Math.round(P[i*3+1]*40)+","+Math.round(P[i*3+2]*40);
  for(let i=0;i<GBUF.n;i++){if(Cc[i*4+3]!==80)continue;const nz=Nn[i*4+2]/127;if(nz<.35)continue;const k=key(i);let e=M.get(k);if(!e){e=[0,0,0];M.set(k,e)}e[0]+=Nn[i*4];e[1]+=Nn[i*4+1];e[2]+=Nn[i*4+2]}
@@ -282,18 +311,19 @@ void main(){
  else if(mat==2){float n1=fbm(vP.xy*.22),n2=fbm(vP.xy*1.6+vP.z*.2),sl=1.-N.z;alb=mix(vec3(dot(alb,vec3(.33))),alb,.62);alb*=vec3(1.08,1.0,.8)*(.52+.7*n1);alb*=1.+det*.5*(n2-.5);N=normalize(N+det*.5*vec3(fbm(vP.xy*1.3+3.)-.5,fbm(vP.xy*1.3+9.)-.5,0.));
   float fm=smoothstep(.40,.50,fbm(vP.xy*.009+3.))*smoothstep(9.,24.,vOff)*(1.-smoothstep(.45,.8,sl*1.4));
   if(fm>.01){vec2 cp=vP.xy/6.5,ci=floor(cp),cf=fract(cp);float md=9.;vec2 mc=vec2(0.);for(int i=-1;i<=1;i++)for(int j=-1;j<=1;j++){vec2 nb=vec2(float(i),float(j)),pt=nb+vec2(h21(ci+nb),h21(ci+nb+13.7))*.85+.075;float dd=length(pt-cf);if(dd<md){md=dd;mc=ci+nb;}}
-   float aa=1.-smoothstep(.2,.8,length(fwidth(cp)));float crown=(1.-smoothstep(.0,.62,md))*aa+.45*(1.-aa);vec3 fo=mix(vec3(.006,.016,.006),vec3(.05,.085,.024),crown*crown)*(.6+.8*h21(mc));fo=mix(fo,vec3(.05,.06,.02),.25*h21(mc+4.));alb=mix(alb,fo,fm*.92);}}
+   float aa=1.-smoothstep(.2,.8,length(fwidth(cp)));float crown=(1.-smoothstep(.0,.62,md))*aa+.45*(1.-aa);vec3 fo=mix(vec3(.006,.016,.006),vec3(.05,.085,.024),crown*crown)*(.6+.8*h21(mc));fo=mix(fo,vec3(.05,.06,.02),.25*h21(mc+4.));fo=mix(fo,vec3(.020,.032,.013)*(.6+.8*n2),(1.-smoothstep(110.,300.,d))*.88);alb=mix(alb,fo,fm*.92);}}
  else if(mat==1){float n=vn(vec2(vP.x+vP.z*.8,vP.y+vP.z*.5)*1.4);alb*=.9+.2*n;alb*=1.+det*.12*(h21(floor(vec2(vP.x+vP.z,vP.y)*30.))-.5);spec=.04;}
  else if(mat==4){spec=.75;gl=90.;}
  else if(mat==3){spec=.1;}
  else if(mat==5){emi=vec3(1.,.9,.72)*5.;}
- float ndl=max(dot(N,uSun),0.);vec3 sc=vSh.xyz/vSh.w*.5+.5;float sh=1.;
+ else if(mat==6){vec2 lp=vec2(vP.x+vP.z*.7,vP.y-vP.z*.6);float l1=vn(lp*1.1),l2=vn(lp.yx*3.1+7.),l3=h21(floor(lp*8.));alb*=(.42+1.0*l1)*(.62+.75*l2)*(1.+det*.5*(l3-.5));N=normalize(N+.7*vec3(l1-.5,l2-.5,.5*(l1+l2)-.5));}
+ float ndl=max(dot(N,uSun),0.);if(mat==6)ndl=.62*ndl+.38*(dot(N,uSun)*.5+.5);vec3 sc=vSh.xyz/vSh.w*.5+.5;float sh=1.;
  if(max(abs(sc.x-.5),abs(sc.y-.5))<.5&&sc.z<1.){float bias=.0009+.0016*(1.-ndl);sh=0.;for(int i=-1;i<=1;i++)for(int j=-1;j<=1;j++)sh+=texture(uSM,vec3(sc.xy+vec2(float(i),float(j))*uShTex*1.2,sc.z-bias));sh/=9.;sh=mix(sh,1.,smoothstep(.40,.5,max(abs(sc.x-.5),abs(sc.y-.5))));}
  vec3 hemi=mix(vec3(.10,.09,.075),vec3(.24,.32,.46),N.z*.5+.5);
  vec3 fl=normalize(vec3(-uSun.x*.8,-uSun.y*.8,.35));vec3 col=alb*(uSunCol*ndl*sh+hemi+vec3(.30,.34,.42)*max(dot(N,fl),0.)*.55);
  vec3 Hh=normalize(V+uSun);col+=uSunCol*spec*pow(max(dot(N,Hh),0.),gl)*sh*ndl;
  col+=spec*.12*HZ*pow(1.-max(dot(N,V),0.),4.);
- vec3 fogc=HZ;float fd=uFogD;
+ vec3 fogc=HZ+vec3(.30,.19,.06)*pow(max(dot(-V,uSun),0.),5.);float fd=uFogD;
  if(vLit>.5){float fall=1./(1.+d*d/400.);float ph=fract(vQ/12.);float dl=min(ph,1.-ph)*12.;float pool=.22+.78*exp(-dl*dl/(2.*3.4*3.4));col=alb*(vec3(1.,.88,.7)*(.95*pool+.5*fall*.35+.10)+hemi*.12);col+=vec3(1.,.9,.7)*spec*.7*pow(max(dot(N,V),0.),gl)*pool;fogc=vec3(.012,.012,.014);fd=.0030;}
  col+=emi;float f=1.-exp(-d*fd);col=mix(col,fogc,f);
  col*=uExp;col=aces(col);col=mix(vec3(dot(col,vec3(.299,.587,.114))),col,.9);col=mix(col,col*col*(3.-2.*col),.3);col=pow(col,vec3(1./2.2));o=vec4(col,1.);}`;
