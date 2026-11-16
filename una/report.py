@@ -528,6 +528,9 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
     A(_T('Trajne brzine V~t~ teških teretnih vozila na dugim usponima uzete su prema švajcarskim istraživanjima (Koy, Spacek: Speed on upgrades and downgrades, 5th Swiss Transport Research Conference, 2005 [10]; dijagram trajnih brzina, vrijednosti očitane sa dijagrama):\n'))
     A(newtab(_T('Trajna brzina teškog vozila V~t~ prema podužnom nagibu'), None))
     A(tbl([_T('Nagib [%]')] + [str(k) for k in gk], [[_T('V~t~ [km/h]')] + [fm(VT[k], 0) for k in gk]]))
+    if F.get('koy'):
+        A(_TF('![]({0}){{width=16cm}}\n\n*Slika 7 – Usporavanje i ubrzavanje teškog teretnog vozila na usponima i trajne brzine (izvor: Koy, Spacek, 2005 [10])*\n', os.path.basename(F['koy'])))
+        A(_T('Pune linije na slici 7 prikazuju usporavanje teškog vozila koje ulazi u uspon brzinom 80 km/h, isprekidane ubrzavanje iz manje brzine; vrijednosti u zagradama desno su trajne brzine V~t~ za pojedine nagibe.\n'))
     sv_rows = []; sv_flag = []
     for c in cases:
         g = c.sg * np.asarray(c.G, float); v = np.asarray(c.trk[0]["v"], float); S_ = np.asarray(c.S, float)

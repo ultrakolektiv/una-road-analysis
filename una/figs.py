@@ -157,4 +157,7 @@ def make_all(P, sections, cases, axes, fw, bw, has_caps, outdir, log=print):
         t0 = int(math.ceil(a / 100) * 100); axs[-1].set_xticks(range(t0, int(b) + 1, 100)); plt.setp(axs[-1].get_xticklabels(), rotation=60, fontsize=7)
         plt.tight_layout(); p = f"{outdir}/s{k + 1}.png"; plt.savefig(p); plt.close(); F["strips"].append(p)
     log(_TF('Slike: {0}', len(F['strips']) + 6 + 0))
+    try:
+        import shutil; q = f"{outdir}/f_koy_spacek_2005.png"; shutil.copy(os.path.join(os.path.dirname(__file__), 'data', 'koy_spacek_2005.png'), q); F['koy'] = q
+    except Exception: pass
     return F

@@ -999,6 +999,8 @@
 "*Značenje kolona:* ": "*Column meanings:* ",
 ", što daje V~p~(i~N~) = {0} km/h.\n": ", which gives V~p~(i~N~) = {0} km/h.\n",
 "OZNAKE I SIMBOLI": "SYMBOLS AND NOTATION",
+"![]({0}){{width=16cm}}\n\n*Slika 7 – Usporavanje i ubrzavanje teškog teretnog vozila na usponima i trajne brzine (izvor: Koy, Spacek, 2005 [10])*\n": "![]({0}){{width=16cm}}\n\n*Figure 7 – Deceleration and acceleration of a heavy goods vehicle on upgrades and crawl speeds (source: Koy, Spacek, 2005 [10])*\n",
+"Pune linije na slici 7 prikazuju usporavanje teškog vozila koje ulazi u uspon brzinom 80 km/h, isprekidane ubrzavanje iz manje brzine; vrijednosti u zagradama desno su trajne brzine V~t~ za pojedine nagibe.\n": "The solid lines in Figure 7 show the deceleration of a heavy vehicle entering an upgrade at 80 km/h, the dashed lines the acceleration from a lower speed; the values in brackets on the right are the crawl speeds V~t~ for the individual grades.\n",
 "ručni unos": "manual input",
 "Koridor: nazivi elemenata presjeka: {0}": "Corridor: cross-section element names: {0}",
 "Koridor: nijedan element nije prepoznat kao most ili tunel (ako ih ima, zadajte nazive u koridor → nazivi).": "Corridor: no element was recognised as bridge or tunnel (if there are any, set the names in corridor → nazivi).",
