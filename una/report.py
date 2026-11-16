@@ -47,6 +47,100 @@ def kriv_stat(c, step=1000.0):
     return dict(L=L, ang=ang(A_, B_), K=ang(A_, B_) / (L / 1000), S=float(np.std(ks, ddof=1)) if len(ks) > 1 else 0.0, kmax=max(ks), share=cur / L)
 
 
+# Oznake ispod formula: (regex u LaTeX-u formule, oznaka, značenje, jedinica)
+FLEG = [
+    (r"V_\{ri\}", "V~ri~", "računska brzina izračunata iz radijusa (tablica R~min~(V~r~))", "km/h"),
+    (r"\\max V_r", "max V~r~", "najveća projektna brzina", "km/h"),
+    (r"V_r(?![a-z])", "V~r~", "računska brzina", "km/h"),
+    (r"V_p\(R\)", "V~p~(R)", "projektna brzina na kružnom luku radijusa R", "km/h"),
+    (r"V_p\(i_N\)", "V~p~(i~N~)", "projektna brzina zavisno od podužnog nagiba", "km/h"),
+    (r"i_N(?![a-z])", "i~N~", "podužni nagib u smjeru vožnje", "%"),
+    (r"V_p(?![,(_\w])|V_p\(s\)", "V~p~", "projektna brzina (V85)", "km/h"),
+    (r"R_j", "R~j~, R~j+1~, V~j~, V~j+1~", "susjedne vrijednosti radijusa i brzine iz tablice R~min~(V~r~)", "m, km/h"),
+    (r"v_1", "v~1~, v~2~", "brzina na početku i na kraju promjene brzine", "m/s"),
+    (r"2\\,a\\,s|2\\,a\\,\\Delta", "a", "ubrzanje", "m/s²"),
+    (r"2\\,d", "d", "usporenje", "m/s²"),
+    (r"\\,a\\,s\}|\{2\\,d\}", "s", "dužina puta promjene brzine", "m"),
+    (r"V_\{p,sr\}", "V~p,sr~", "srednja projektna brzina na dionici (ponderisana po dužini)", "km/h"),
+    (r"\\frac\{1\}\{L\}|\\int_0\^L", "L", "dužina dionice", "m"),
+    (r"V_i \+ V_\{i\+1\}", "V~i~, V~i+1~", "projektne brzine u susjednim tačkama proračuna", "km/h"),
+    (r"\\Delta s_i|\\Delta s(?!_)", "Δs", "korak proračuna", "m"),
+    (r"\\sigma", "σ", "srednje kvadratno odstupanje brzine od V~p,sr~", "km/h"),
+    (r"D_h", "D~h~", "koeficijent dinamičke homogenosti", "%"),
+    (r"\\Delta V_\{i,i\+1\}", "ΔV~i,i+1~", "razlika projektnih brzina susjednih elemenata i i i+1", "km/h"),
+    (r"T = \\int", "T", "vrijeme putovanja", "s"),
+    (r"v\(s\)|\\frac\{1\}\{v_i\}", "v", "brzina u tački proračuna", "m/s"),
+    (r"i_\{pk\}", "i~pk~(V~r~)", "potreban poprečni nagib na krivini za računsku brzinu", "%"),
+    (r"R_\{min\}", "R~min~(V~r~)", "najmanji radijus kružnog luka za V~r~", "m"),
+    (r"\{R\}|\\,R\}|R - R_j", "R", "radijus kružnog luka", "m"),
+    (r"f_\{pot\}", "f~pot~", "iskorišteni koeficijent bočnog trenja", "–"),
+    (r"V\^2", "V", "rezultirajuća projektna brzina na luku", "km/h"),
+    (r"i_p\}|i_p(?![,_\w])", "i~p~", "primijenjeni poprečni nagib kolovoza", "%"),
+    (r"f_R\(V\)", "f~R~(V)", "dopušteni koeficijent bočnog trenja za brzinu V", "–"),
+    (r"i_\{p,potr\}", "i~p,potr~", "potreban poprečni nagib za rezultirajuću brzinu", "%"),
+    (r"R_\{r\}", "R~r~", "otpor kotrljanja", "N"),
+    (r"f_\{rl\}", "f~rl~", "koeficijent otpora kotrljanja", "–"),
+    (r"f_\{rl\}\\, m\\, g", "m", "masa vozila", "kg"),
+    (r"\\, g(?![a-z])", "g", "ubrzanje zemljine teže (9,81)", "m/s²"),
+    (r"\\frac\{v\}\{44", "v", "brzina vozila", "m/s"),
+    (r"R_\{a\}", "R~a~", "otpor vazduha", "N"),
+    (r"\\rho", "ρ", "gustina vazduha", "kg/m³"),
+    (r"C_d A", "C~d~A", "aerodinamički faktor (koeficijent otpora × čeona površina)", "m²"),
+    (r"R_\{g\}", "R~g~", "otpor nagiba", "N"),
+    (r"g\\, G", "G", "podužni nagib u smjeru vožnje (decimalno)", "–"),
+    (r"F_\{r\}", "F~r~", "ukupni otpor kretanju", "N"),
+    (r"F_t", "F~t~", "raspoloživa vučna sila", "N"),
+    (r"\\eta\\,P", "η, P", "stepen iskorištenja pogona i snaga motora", "–, W"),
+    (r"\\mu\\, m", "μ", "koeficijent prianjanja", "–"),
+    (r"\\gamma_m", "γ~m~", "faktor rotirajućih masa", "–"),
+    (r"v_\{i\+1\}", "v~i~, v~i+1~", "brzina na početku i na kraju koraka", "m/s"),
+    (r"v_\{lim\}", "v~lim~", "ograničenje brzine vozila", "m/s"),
+    (r"\\Delta B", "ΔB", "potrošnja goriva na koraku", "l"),
+    (r"b \\cdot", "b", "specifična potrošnja goriva", "l/kWh"),
+    (r"F_u", "F~u~", "sila koja se koristi za potrošnju (vučna sila u pogonu)", "N"),
+    (r"v_\{sr\}", "v~sr~", "srednja brzina na koraku", "m/s"),
+]
+
+
+def legende(txt, legt):
+    """Ispod svake grupe formula dodaje 'gdje je:' (oznaka se objašnjava jednom po poglavlju); ispod tabele značenje kolona."""
+    import re
+    out = []
+    for ch in re.split(r'(?m)^(?=# )', txt):
+        seen = set(); blocks = ch.split("\n\n"); res = []; grp = []
+        def flush():
+            if not grp: return
+            tex = " ".join(grp); items = []
+            for rx, lab, mean, unit in FLEG:
+                m_ = re.search(rx, tex)
+                if lab in seen or not m_: continue
+                seen.add(lab); items.append((m_.start(), f"{lab} – {_T(mean)}" + (f" [{unit}]" if unit not in ("–",) else "")))
+            items = [x for _, x in sorted(items, key=lambda t: t[0])]
+            if items: res.append(_T('gdje je:') + " " + "; ".join(items) + ".")
+            grp.clear()
+        for b in blocks:
+            st = b.strip()
+            if st.startswith("$$") and st.endswith("$$") and len(st) > 4:
+                res.append(b); grp.append(st); continue
+            flush(); res.append(b)
+        flush(); out.append("\n\n".join(res))
+    txt = "".join(out)
+    for n, mean in legt:
+        pfx = _TF('**Tabela {0} – {1}**\n\n', n, '').split(' – ')[0] + ' – '
+        i = txt.find(pfx)
+        if i < 0: continue
+        j = txt.find("\n|", i)
+        if j < 0: continue
+        k = j + 1
+        while True:
+            e = txt.find("\n", k)
+            if e < 0 or not txt[e + 1:e + 2] == "|": break
+            k = e + 1
+        e = txt.find("\n", k); e = len(txt) if e < 0 else e
+        txt = txt[:e] + "\n\n" + _T('*Značenje kolona:* ') + mean + "\n" + txt[e:]
+    return txt
+
+
 def lit_po_poglavlju(txt, lit):
     """Na kraj svakog numerisanog poglavlja (# ...) dodaje spisak izvora citiranih u njemu ([n], [n, m], [n–m])."""
     import re
@@ -71,10 +165,12 @@ def lit_po_poglavlju(txt, lit):
 
 def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log=print, template_mode=False):
     md = []; A = md.append
-    tn = [0]; REG = []
+    tn = [0]; REG = []; LEGT = []
+    def reg(t):
+        REG.append(t); LEGT.append((tn[0], t[1]))
     def newtab(title, meaning=None):
         tn[0] += 1
-        if meaning: REG.append((_TF('Tabela {0}', tn[0]), meaning))
+        if meaning: reg((_TF('Tabela {0}', tn[0]), meaning))
         return _TF('**Tabela {0} – {1}**\n\n', tn[0], title)
     Vr, maxVr, a_, d_ = P.Vr, P.maxVr, P.a, P.d
     Rmin_Vr = P.RminVr(); fRVr = P.fRv(Vr)
@@ -148,10 +244,7 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
     if zv: A(_TF('Računska brzina je promijenjena na zonama: {0}; izvan zona važi V~r~ = {1:.0f} km/h. U zonama se max V~r~ = V~r~ + {2} km/h, R~min~(V~r~), granica V~p,R~ i provjere lukova računaju za računsku brzinu zone, a prijelazi brzine između zona izvode se ubrzanjem a i usporenjem d.\n', "; ".join(_TF('V~r~ = {0} km/h na st. {1} – {2}', fm(z[2], 0), fm(z[0], 3), fm(z[1], 3)) for z in zv), Vr, fm(P.dodatak_maxVr, 0)))
     A(_TF('Sa osnovnom računskom brzinom **V~r~ = {0:.0f} km/h** analiza obuhvata:\n', Vr))
     A(_TF('- rezultirajući profil projektne brzine V~p~ (V85) za putničko vozilo i teška vozila ({0}) u uslovima slobodnog saobraćajnog toka, za sve smjerove vožnje na cijeloj trasi;\n- usklađivanje (harmonizaciju) elemenata trase i statističke pokazatelje dinamičke homogenosti: srednju vrijednost projektne brzine, srednje kvadratno odstupanje i koeficijent dinamičke homogenosti;\n- profil brzina, vrijeme putovanja i potrošnju goriva teških vozila;\n- provjeru poprečnih nagiba kolovoza na kružnim lukovima za dobijene projektne brzine{1}.\n\n**Zahtijevana preglednost i optičke analize nisu predmet ovog elaborata.** Rezultirajući profili projektne brzine iz poglavlja 4 su ulazni podatak za te analize (P~zp~ = f(V~p~)).\n\nNumerički proračun dat je tabelarno u ovom elaboratu (prilozi A) i u pratećoj radnoj knjizi (Excel), u kojoj su svi koraci urađeni formulama, a svi dijagrami iz ovog elaborata izrađeni su kao Excel dijagrami koji se automatski preračunavaju kada se u listove *Ulaz_n* ubace novi ispisi (ulazni podaci su označeni plavom bojom).\n', ', '.join(v['kratko'].lower() for v in P.vozila), ''))
-    A(_T("\n# Oznake i simboli {.unnumbered}\n"))
     A(_T('Brojevi u uglastim zagradama [n] u tekstu odnose se na popis literature na kraju elaborata. Indeksi slučajeva (smjerova vožnje): ') + "; ".join(f"**{c.key}** – {c.label}" for c in cases) + _T('.\n\n**Tabela O1 – Značenje oznaka**\n\n'))
-    A(tbl(["Oznaka", _T('Značenje'), "Jedinica", "Izvor vrijednosti", "Gdje se koristi"], [list(r) for r in tr_obj(SYM)], ["l", "l", "c", "l", "l"]))
-    A("@@TABCOL@@")
     # =========================================================== 2 ulazni podaci
     A(_T("\n# Ulazni podaci i metodologija\n"))
     A(_T("## Ulazni podaci\n"))
@@ -192,10 +285,7 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
         txt = _TF('Zakonitost V~p~ – i~N~ ograničava brzinu u slučajevima: {0}; najnepovoljnije u slučaju {1} ({2}), gdje nagib u smjeru vožnje dostiže {3} %', ', '.join(sorted({x.key for x, _ in gl})), c.key, c.label, fm(g, 3))
         if br:
             j, g1, g2, v1, v2, y = br
-            txt += r""":
-
-$$V_p(i_N) = <<v1>> + \frac{<<g>> - <<g1>>}{<<g2>> - <<g1>>}\,(<<v2>> - <<v1>>) = <<y>>\ \text{km/h}$$
-""".replace("<<v1>>", fm(v1, 0)).replace("<<v2>>", fm(v2, 0)).replace("<<g>>", fm(g, 3)).replace("<<g1>>", fm(g1, 1)).replace("<<g2>>", fm(g2, 1)).replace("<<y>>", fm(y, 2))
+            txt += _TF(', što daje V~p~(i~N~) = {0} km/h.\n', fm(y, 1))
         A(txt + _T('\nZbog toga je potvrda izvora tablice V~p~(i~N~) posebno važna za te dionice.\n'))
     else:
         A(_T('Na analiziranim dionicama zakonitost V~p~ – i~N~ ne ograničava brzinu putničkog vozila (V~p~(i~N~) ≥ max V~r~), pa V~p~ zavisi samo od radijusa lukova.\n'))
@@ -225,7 +315,7 @@ $$V_p(i_N) = <<v1>> + \frac{<<g>> - <<g1>>}{<<g2>> - <<g1>>}\,(<<v2>> - <<v1>>) 
     for c in uniq:
         A(newtab(_TF('Elementi horizontalne osovine: {0}, st. {1} – {2} ({3})', c.axis.name, fm(c.SA, 0), fm(c.SB, 3).rstrip('0').rstrip(','), os.path.basename(c.axis.files[0])), None))
         A(tbl(["Br.", "Element", "Smjer", _T('St. početka [m]'), "St. kraja [m]", "L [m]", "R [m]", "A [m]"], elrows(c)))
-    REG.append((_TF('Tabele {0}–{1}', t_first, tn[0]) if tn[0] > t_first else _TF('Tabela {0}', t_first), HEAD_EL))
+    reg((_TF('Tabele {0}–{1}', t_first, tn[0]) if tn[0] > t_first else _TF('Tabela {0}', t_first), HEAD_EL))
     cl = None
     for c in uniq:
         for e in c.axis.elems:
@@ -262,7 +352,7 @@ $$V_p(i_N) = <<v1>> + \frac{<<g>> - <<g1>>}{<<g2>> - <<g1>>}\,(<<v2>> - <<v1>>) 
             rows.append([i, fm(p[0], 3), fm(p[1], 3), fm(gin, 3), fm(gout, 3), fm(abs(dg), 3), fm(p[2], 0), fm(L_, 1), fm(T_, 1), fm(e_, 2), "udubljena" if dg > 0 else _T('ispupčena')])
         A(newtab(_TF('Prelomne tačke nivelete: {0}, st. {1} – {2} ({3})', c.axis.name, fm(c.SA, 0), fm(c.SB, 3).rstrip('0').rstrip(','), os.path.basename(c.axis.files[1]))))
         A(tbl(["PT", "Stac. [m]", "Kota [m]", "i~ul~ [%]", "i~izl~ [%]", "Δi [%]", "R~v~ [m]", "L~vk~ [m]", "T [m]", "e [m]", "Tip"], rows) if rows else _T('(nema vertikalnih krivina u rasponu)\n\n'))
-    REG.append((_TF('Tabele {0}–{1}', t_first, tn[0]) if tn[0] > t_first else _TF('Tabela {0}', t_first), _T('PT – prelomna tačka nivelete; Stac., Kota – položaj PT; i~ul~, i~izl~ – nagib prije i poslije; Δi – promjena nagiba; R~v~, L~vk~, T, e – elementi vertikalne krivine; Tip – udubljena (Δi > 0) ili ispupčena (Δi < 0).')))
+    reg((_TF('Tabele {0}–{1}', t_first, tn[0]) if tn[0] > t_first else _TF('Tabela {0}', t_first), _T('PT – prelomna tačka nivelete; Stac., Kota – položaj PT; i~ul~, i~izl~ – nagib prije i poslije; Δi – promjena nagiba; R~v~, L~vk~, T, e – elementi vertikalne krivine; Tip – udubljena (Δi > 0) ili ispupčena (Δi < 0).')))
     ex = None
     for c in uniq:
         pis = c.axis.pis
@@ -309,7 +399,7 @@ $$V_p(i_N) = <<v1>> + \frac{<<g>> - <<g1>>}{<<g2>> - <<g1>>}\,(<<v2>> - <<v1>>) 
         A(tbl(["Br.", "Element", _T('St. od [m]'), _T('St. do [m]'), "L [m]", "R [m]", "Smjer", "V~p,i~ cilj [km/h]", "ΔV~cilj~ [km/h]", "Ocjena", "V~p,i~ rez. [km/h]", "ΔV~rez~ [km/h]"], rows))
         for i, u, vt, vr, dvt, dvr in res:
             if dvt is not None and dvt > 10: bad_dv.append((c, i, u, dvt, dvr))
-    REG.append((_TF('Tabele {0}–{1}', t_first, tn[0]) if tn[0] > t_first else _TF('Tabela {0}', t_first), _T('Br., Element – krivina (luk sa prijelaznicama) ili pravac; St. od / do; L; R; Smjer; V~p,i~ cilj – ciljna brzina elementa T (krivina: najmanja, pravac: najveća); ΔV~cilj~ – razlika u odnosu na sljedeći element i Ocjena prema kriteriju 10 / 20 km/h; V~p,i~ rez. i ΔV~rez~ – isto za rezultirajući profil poslije ubrzanja/usporenja.')))
+    reg((_TF('Tabele {0}–{1}', t_first, tn[0]) if tn[0] > t_first else _TF('Tabela {0}', t_first), _T('Br., Element – krivina (luk sa prijelaznicama) ili pravac; St. od / do; L; R; Smjer; V~p,i~ cilj – ciljna brzina elementa T (krivina: najmanja, pravac: najveća); ΔV~cilj~ – razlika u odnosu na sljedeći element i Ocjena prema kriteriju 10 / 20 km/h; V~p,i~ rez. i ΔV~rez~ – isto za rezultirajući profil poslije ubrzanja/usporenja.')))
     if not bad_dv:
         A(_T('Na svim dionicama razlike ciljnih brzina susjednih elemenata su ≤ 10 km/h, tj. trasa je sa aspekta dinamičke usklađenosti susjednih elemenata ocijenjena kao **dobra**.\n'))
     else:
@@ -338,7 +428,7 @@ $$V_p(i_N) = <<v1>> + \frac{<<g>> - <<g1>>}{<<g2>> - <<g1>>}\,(<<v2>> - <<v1>>) 
         A(newtab(_TF('Poprečni nagibi na kružnim lukovima, {0}: {1}', c.key, c.label)))
         A(tbl([_T('Luk br.'), "R [m]", "Smjer", "V~p~ [km/h]", "i~pk~(V~r~) [%]", "i~p~ prim. [%]", "i~p~ ≥ i~pk~", "f~R~(V~p~)", "i~p,potr~ [%]", "f~pot~", "f~pot~ ≤ f~R~", "R ≥ R~min~"],
                   [[ar["no"], fm(ar["R"], 2), ar["dir"], fm(ar["V"], 1), fm(ar["ipk"], 2), fm(ar["ipa"], 1), "da" if ar["ok1"] else "NE", fm(ar["fR"], 3), fm(ar["ipr"], 2), fm(ar["fp"], 3), "da" if ar["ok2"] else "NE", "da" if ar["ok3"] else "NE"] for ar in ARC[c.key]]) if ARC[c.key] else _T('(nema kružnih lukova)\n\n'))
-    REG.append((_TF('Tabele {0}–{1}', t_first, tn[0]) if tn[0] > t_first else _TF('Tabela {0}', t_first), _T('Luk br. – broj elementa; R; Smjer; V~p~ – najmanja brzina na luku (u dijelu unutar dionice); i~pk~(V~r~) – potreban nagib za V~r~; i~p~ prim. – primijenjeni nagib; i~p~ ≥ i~pk~ – uslov (poređenje na 0,1 %); f~R~(V~p~); i~p,potr~ – potreban nagib za V~p~; f~pot~ – iskorišteno trenje; f~pot~ ≤ f~R~ – uslov; R ≥ R~min~ – da li je radijus veći od najmanjeg za V~r~.')))
+    reg((_TF('Tabele {0}–{1}', t_first, tn[0]) if tn[0] > t_first else _TF('Tabela {0}', t_first), _T('Luk br. – broj elementa; R; Smjer; V~p~ – najmanja brzina na luku (u dijelu unutar dionice); i~pk~(V~r~) – potreban nagib za V~r~; i~p~ prim. – primijenjeni nagib; i~p~ ≥ i~pk~ – uslov (poređenje na 0,1 %); f~R~(V~p~); i~p,potr~ – potreban nagib za V~p~; f~pot~ – iskorišteno trenje; f~pot~ ≤ f~R~ – uslov; R ≥ R~min~ – da li je radijus veći od najmanjeg za V~r~.')))
     bad1 = [(c, ar) for c in cases for ar in ARC[c.key] if not ar["ok1"]]
     bad2 = [(c, ar) for c in cases for ar in ARC[c.key] if not ar["ok2"]]
     bad3 = [(c, ar) for c in cases for ar in ARC[c.key] if not ar["ok3"]]
@@ -493,6 +583,7 @@ $$V_p(i_N) = <<v1>> + \frac{<<g>> - <<g1>>}{<<g2>> - <<g1>>}\,(<<v2>> - <<v1>>) 
     A("**Prilozi:** " + "; ".join(f"{n} – {c.key}: {c.label}" for c, n in app) + _T('; B – Grafički prilozi; C – Pretpostavke i ograničenja.'))
     A("\n\nZZSEGA\n\n")
     A(PB)
+    leg_A = _T('s – stacionaža; z – kota; i – nagib; El. – P pravac, K kružni luk, Pr prijelaznica; R; V~p~ – putničko; V~1~, V~2~ … – brzine teških vozila; t – kumulativno vrijeme [s]; B – kumulativna potrošnja [l], računato od ulaza u dionicu.')
     for c, an in app:
         A(_TF('# Prilog {0} – Numerički proračun profila brzina, {1}: {2} {{.unnumbered}}\n', an, c.key, c.label))
         A(_TF('Vrijednosti na svakoj 10. tački mreže (korak {0} m; {1} rastuće stacionaže; vremena i gorivo računati od ulaza u dionicu); potpuni proračun na koraku {2} m nalazi se u radnoj knjizi (listovi *Profil_{3}* i *Voz1_{4}* …). Oznake: V~p~ – putničko vozilo; ', fm(P.korak * 10, 0), _T('u smjeru') if c.sg == 1 else _T('suprotno smjeru'), fm(P.korak, 0), c.key, c.key) + ", ".join(f"V~{i + 1}~ – {v['kratko'].lower()}" for i, v in enumerate(P.vozila)) + _T('; t – kumulativno vrijeme prvog teškog vozila [s]; B – kumulativna potrošnja prvog teškog vozila [l].\n\n'))
@@ -501,9 +592,10 @@ $$V_p(i_N) = <<v1>> + \frac{<<g>> - <<g1>>}{<<g2>> - <<g1>>}\,(<<v2>> - <<v1>>) 
             if rows and fm(c.S[i], 0) == rows[-1][0]: continue
             e = c.axis.elems[c.IDX[i]]; Rt = "∞" if c.RR[i] == 0 else fm(c.RR[i], 0)
             rows.append([fm(c.S[i], 0), fm(c.Z[i], 2), fm(c.G[i], 2), {"PRAVAC": "P", "KRUZNI_LUK": "K", "PRIJELAZNICA": "Pr"}[e["typ"]], Rt, fm(c.V[i], 1)] + [fm(t["v"][i], 1) for t in c.trk] + [fm(c.trk[0]["time"][i], 0), fm(c.trk[0]["fuel"][i], 2)])
+        A(_T('*Značenje kolona:* ') + leg_A + "\n")
         A(tbl(["s [m]", "z [m]", "i [%]", "El.", "R [m]", "V~p~"] + [f"V~{i + 1}~" for i in range(len(P.vozila))] + ["t [s]", "B [l]"], rows))
         A(PB)
-    REG.append(("Prilozi A", _T('s – stacionaža; z – kota; i – nagib; El. – P pravac, K kružni luk, Pr prijelaznica; R; V~p~ – putničko; V~1~, V~2~ … – brzine teških vozila; t – kumulativno vrijeme [s]; B – kumulativna potrošnja [l], računato od ulaza u dionicu.')))
+    REG.append(("Prilozi A", leg_A))
     A("\n\nZZSEGB\n\n")
     A(_T('# Prilog B – Grafički prilozi {.unnumbered}\n'))
     A(_TF('Svaki prilog prikazuje segment trase: krivinu 1000/R, nivelete i profile brzina za sva mjerodavna vozila (po smjerovima vožnje). Isprekidana crvena linija – računska brzina V~r~ = {0} km/h.\n', fm(Vr, 0)))
@@ -532,10 +624,10 @@ $$V_p(i_N) = <<v1>> + \frac{<<g>> - <<g1>>}{<<g2>> - <<g1>>}\,(<<v2>> - <<v1>>) 
     A("Brojevi odgovaraju oznakama [n] u tekstu.\n\n")
     A(tbl(["Br.", "Izvor", _T('Šta je preuzeto / gdje se koristi')], [[n + 1, a, b] for n, (a, b) in enumerate(tr_obj(LIT))], ["c", "l", "l"]))
     # TABCOL
-    tc = _T('**Tabela O2 – Objašnjenje kolona u tabelama**\n\n') + tbl([_T('Tabela'), _T('Značenje kolona')], [list(r) for r in REG], ["l", "l"])
     global LAST_REG
     LAST_REG = REG
-    txt = "\n\n".join(md).replace("@@TABCOL@@", tc)
+    txt = "\n\n".join(md)
+    txt = legende(txt, LEGT)
     txt = lit_po_poglavlju(txt, tr_obj(LIT))
     txt = re.sub(r"\$\$.*?\$\$", lambda m: re.sub(r"(\d),(\d)", r"\1{,}\2", m.group(0)), txt, flags=re.S)
     return txt

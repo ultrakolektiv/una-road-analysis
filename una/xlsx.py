@@ -50,7 +50,7 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
         c = ws.cell(i, 1, l); c.font = BOLD if i in (1, 4) else BLK; c.alignment = Alignment(wrap_text=True, vertical="top")
     ws.column_dimensions["A"].width = 150
     # ------------------------------------------------------------ Oznake
-    o = wb.create_sheet("Oznake"); put(o, "A1", _T('OZNAKE I SIMBOLI (isto kao Tabela O1 u elaboratu)'), BOLD)
+    o = wb.create_sheet("Oznake"); put(o, "A1", _T('OZNAKE I SIMBOLI'), BOLD)
     hdr(o, 3, ["Oznaka", _T('Značenje'), "Jedinica", "Izvor vrijednosti", "Gdje se koristi"])
     for i, r in enumerate(SYM):
         for j, v in enumerate(r): put(o, f"{CL(1 + j)}{4 + i}", v.replace("~", ""))
