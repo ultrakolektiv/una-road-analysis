@@ -47,6 +47,28 @@ def kriv_stat(c, step=1000.0):
     return dict(L=L, ang=ang(A_, B_), K=ang(A_, B_) / (L / 1000), S=float(np.std(ks, ddof=1)) if len(ks) > 1 else 0.0, kmax=max(ks), share=cur / L)
 
 
+def lit_po_poglavlju(txt, lit):
+    """Na kraj svakog numerisanog poglavlja (# ...) dodaje spisak izvora citiranih u njemu ([n], [n, m], [n–m])."""
+    import re
+    parts = re.split(r'(?m)^(?=# )', txt); out = []
+    for ch in parts:
+        head = ch.split("\n", 1)[0]
+        if not ch.startswith("# ") or "{.unnumbered}" in head:
+            out.append(ch); continue
+        refs = []
+        for m in re.finditer(r'\[(\d+(?:\s*[,–-]\s*\d+)*)\](?!\()', ch):
+            for tok in re.split(r'\s*,\s*', m.group(1)):
+                ab = re.split(r'\s*[–-]\s*', tok)
+                rr = range(int(ab[0]), int(ab[-1]) + 1) if len(ab) == 2 else [int(ab[0])]
+                for n in rr:
+                    if 1 <= n <= len(lit) and n not in refs: refs.append(n)
+        if refs:
+            refs.sort()
+            ch = ch.rstrip() + "\n\n" + _T('**Literatura uz poglavlje:**') + "\n\n" + "\n".join(f"- [{n}] {lit[n - 1][0]}" for n in refs) + "\n\n"
+        out.append(ch)
+    return "".join(out)
+
+
 def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log=print, template_mode=False):
     md = []; A = md.append
     tn = [0]; REG = []
@@ -419,7 +441,7 @@ $$\Delta B = <<b>> \cdot \frac{<<Fu>> \cdot <<vav>>}{<<eta>> \cdot 1000} \cdot \
         if gr <= gk[0]: return VT[gk[0]]
         if gr >= gk[-1]: return VT[gk[-1]]
         return float(np.interp(gr, gk, [VT[k] for k in gk]))
-    A(_T('Trajne brzine V~t~ teških teretnih vozila na dugim usponima uzete su prema švajcarskim istraživanjima (Koy, Spacek: Speed on upgrades and downgrades, 5th Swiss Transport Research Conference, 2005; dijagram trajnih brzina, vrijednosti očitane sa dijagrama):\n'))
+    A(_T('Trajne brzine V~t~ teških teretnih vozila na dugim usponima uzete su prema švajcarskim istraživanjima (Koy, Spacek: Speed on upgrades and downgrades, 5th Swiss Transport Research Conference, 2005 [10]; dijagram trajnih brzina, vrijednosti očitane sa dijagrama):\n'))
     A(newtab(_T('Trajna brzina teškog vozila V~t~ prema podužnom nagibu'), None))
     A(tbl([_T('Nagib [%]')] + [str(k) for k in gk], [[_T('V~t~ [km/h]')] + [fm(VT[k], 0) for k in gk]]))
     sv_rows = []; sv_flag = []
@@ -520,6 +542,7 @@ $$\Delta B = <<b>> \cdot \frac{<<Fu>> \cdot <<vav>>}{<<eta>> \cdot 1000} \cdot \
     global LAST_REG
     LAST_REG = REG
     txt = "\n\n".join(md).replace("@@TABCOL@@", tc)
+    txt = lit_po_poglavlju(txt, tr_obj(LIT))
     txt = re.sub(r"\$\$.*?\$\$", lambda m: re.sub(r"(\d),(\d)", r"\1{,}\2", m.group(0)), txt, flags=re.S)
     return txt
 

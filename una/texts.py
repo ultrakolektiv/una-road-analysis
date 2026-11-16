@@ -48,4 +48,5 @@ LIT = [
 ("Smjernice za projektovanje, građenje, održavanje i nadzor na putevima u Bosni i Hercegovini, 2005.", "Opšti okvir (računske brzine); numeričke vrijednosti nisu korištene."),
 ("Wong, J. Y.: *Theory of Ground Vehicles*, 4. izd., Wiley, 2008.", "Formule otpora kretanja i vučne sile (5.1)."),
 ("Cvetanović, B.: *Teorija kretanja motornih vozila*, Beograd.", "Otpori vožnji i potrošnja goriva (5.1)."),
+("Koy, T., Spacek, P.: Speed on upgrades and downgrades, 5th Swiss Transport Research Conference (STRC), Monte Verità / Ascona, 2005.", "Trajne brzine teških teretnih vozila V~t~ na usponima (poglavlje 5.3, provjera trake za spora vozila)."),
 ]
