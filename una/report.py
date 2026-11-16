@@ -174,7 +174,7 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
         br = bracket(P.Rmin_tab, P.Vr_tab, ar0["R"])
         if br and br[5] <= maxVr:
             j, R1, R2, V1, V2, y = br
-            A(T(_T('**Primjer – kružni luk br. <<no>> ({<<ax>>}, R = <<R>> m, st. <<s0>> – <<s1>>):** R leži između R~j~ = <<R1>> m (V = <<V1>> km/h) i R~j+1~ = <<R2>> m (V = <<V2>> km/h):\n\n$$V_p(<<R>>) = <<V1>> + \\frac{<<R>> - <<R1>>}{<<R2>> - <<R1>>}\\,(<<V2>> - <<V1>>) = <<V1>> + <<q>> \\cdot <<dV>> = <<y>>\\ \\text{km/h}$$\n').replace("{<<ax>>}", "<<ax>>"), no=ar0["no"], ax=c0.axis.name, R=fm(ar0["R"], 1), s0=fm(ar0["s0"], 1), s1=fm(ar0["s1"], 1), R1=fm(R1, 0), R2=fm(R2, 0), V1=fm(V1, 0), V2=fm(V2, 0), q=fm((ar0["R"] - R1) / (R2 - R1), 4), dV=fm(V2 - V1, 0), y=fm(y, 2)))
+            A(_TF('Npr. za kružni luk br. {0} ({1}, R = {2} m, st. {3} – {4}) linearnom interpolacijom između R = {5} m i R = {6} m dobija se V~p,R~ = {7} km/h.\n', ar0["no"], c0.axis.name, fm(ar0["R"], 1), fm(ar0["s0"], 1), fm(ar0["s1"], 1), fm(R1, 0), fm(R2, 0), fm(y, 1)))
         else:
             A(_TF('Na svim kružnim lukovima najmanji radijus je R = {0} m (osovina {1}, luk br. {2}), što daje V~p,R~ = {3} km/h (ograničenje max V~r~ = {4} km/h).\n', fm(ar0['R'], 1), c0.axis.name, ar0['no'], fm(ar0['vpR'], 1), fm(maxVr, 0)))
         lim = [(c, ar) for c, ar in allarcs if ar["vpR"] < ar["vmx"] - 1e-6]
@@ -200,13 +200,12 @@ $$V_p(i_N) = <<v1>> + \frac{<<g>> - <<g1>>}{<<g2>> - <<g1>>}\,(<<v2>> - <<v1>>) 
     else:
         A(_T('Na analiziranim dionicama zakonitost V~p~ – i~N~ ne ograničava brzinu putničkog vozila (V~p~(i~N~) ≥ max V~r~), pa V~p~ zavisi samo od radijusa lukova.\n'))
     A(_T('\n### Model vožnje\n'))
-    A(T(_T('Prijelaz sa jedne ciljne brzine V~1~ na drugu odvija se konstantnim ubrzanjem a ili usporenjem d. Brzina nakon pređenog puta s određuje se iz\n\n$$v_2 = \\sqrt{v_1^2 \\pm 2\\,a\\,s}$$\n\na dužina puta potrebna za promjenu brzine sa V~1~ na V~2~ je\n\n$$s = \\frac{v_1^2 - v_2^2}{2\\,d}$$\n\nPravilnik (slika 3-09) daje put ubrzanja i usporenja pri a = d = 0,8 m/s² obrascem L~a,d~ = 0,1·(V~sr~·ΔV), gdje je V~sr~ = (V~1~ + V~2~)/2 i ΔV = |V~1~ − V~2~| (brzine u km/h, put u m). Taj obrazac je ekvivalentan gornjim jednačinama s ubrzanjem i usporenjem a = d = 1/(0,1·3,6²) = <<aef>> m/s², pa se u proračunu primjenjuju te vrijednosti (npr. 100 → 80 km/h: L = 0,1·90·20 = 180 m).\n'), aef=fm(a_, 4)))
+    A(T(_T('Prijelaz sa jedne ciljne brzine V~1~ na drugu odvija se konstantnim ubrzanjem a ili usporenjem d. Brzina nakon pređenog puta s određuje se iz\n\n$$v_2 = \\sqrt{v_1^2 \\pm 2\\,a\\,s}$$\n\na dužina puta potrebna za promjenu brzine sa V~1~ na V~2~ je\n\n$$s = \\frac{v_1^2 - v_2^2}{2\\,d}$$\n\nPravilnik (slika 3-09) daje put ubrzanja i usporenja pri a = d = 0,8 m/s² obrascem L~a,d~ = 0,1·(V~sr~·ΔV), gdje je V~sr~ = (V~1~ + V~2~)/2 i ΔV = |V~1~ − V~2~| (brzine u km/h, put u m). Taj obrazac je ekvivalentan gornjim jednačinama s ubrzanjem i usporenjem a = d = 1/(0,1·3,6²) = <<aef>> m/s², pa se u proračunu primjenjuju te vrijednosti.\n'), aef=fm(a_, 4)))
     if allarcs:
         c0, ar0 = min(allarcs, key=lambda x: x[1]["V"]); v2 = ar0["V"]; v1 = maxVr
         if v2 < v1 - 1e-6:
             s_ = ((v1 / 3.6) ** 2 - (v2 / 3.6) ** 2) / (2 * d_)
-            A(T(_T('**Primjer – ulaz u kružni luk br. <<no>> (<<ax>>, smanjenje <<v1>> → <<v2>> km/h):**\n\n$$s = \\frac{(<<v1>>/3,6)^2 - (<<v2>>/3,6)^2}{2 \\cdot <<d>>} = \\frac{<<a1>> - <<b1>>}{<<d2>>} = <<s>>\\ \\text{m}$$\n\nPočetak luka je na st. <<s0>> m, pa (u smjeru vožnje koji ide ka luku) usporenje počinje oko <<dist>> m prije početka luka, a nakon izlaza iz luka brzina se vraća na <<v1>> km/h na istom rastojanju.'),
-                 no=ar0["no"], ax=c0.axis.name, v1=fm(v1, 0), v2=fm(v2, 1), d=fm(d_, 2), a1=fm((v1 / 3.6) ** 2, 2), b1=fm((v2 / 3.6) ** 2, 2), d2=fm(2 * d_, 3), s=fm(s_, 1), s0=fm(ar0["s0"], 3), dist=fm(s_, 1)))
+            A(_TF('Npr. pri ulazu u kružni luk br. {0} ({1}) brzina se smanjuje sa {2} na {3} km/h; potrebna dužina usporenja je s = {4} m prije početka luka (st. {5}), a na izlazu se brzina na istoj dužini vraća na {2} km/h.', ar0["no"], c0.axis.name, fm(v1, 0), fm(v2, 1), fm(s_, 1), fm(ar0["s0"], 3)))
     A(_T('\n## Statistički pokazatelji dinamičke homogenosti\n'))
     A(_T('Na osnovu rezultirajućeg profila V~p~(s) na dionici dužine L određuju se (ponderisano po dužini, integracija trapeznom formulom na mreži Δs):\n\n$$V_{p,sr} = \\frac{1}{L}\\int_0^L V_p(s)\\,ds \\approx \\frac{1}{L}\\sum_{i=1}^{n-1} \\frac{V_i + V_{i+1}}{2}\\,\\Delta s_i$$\n\n$$\\sigma = \\sqrt{\\frac{1}{L}\\int_0^L \\left(V_p(s) - V_{p,sr}\\right)^2 ds}$$\n\n$$D_h = \\frac{\\sigma}{V_{p,sr}} \\cdot 100\\ [\\%]$$\n\nDinamička usklađenost susjednih elemenata trase (pravac – krivina – pravac) izražava se razlikom projektnih brzina\n\n$$\\Delta V_{i,i+1} = \\left| V_{p,i} - V_{p,i+1} \\right|$$\n\nKriterij ocjene (Lamm i dr. [5]): ΔV ≤ 10 km/h – dobro; 10 < ΔV ≤ 20 km/h – zadovoljavajuće; ΔV > 20 km/h – loše. Za projektnu brzinu elementa uzima se: na kružnom luku (sa prijelaznicama) najmanja brzina, na pravcu najveća brzina u elementu. Ocjena se daje prema razlici *ciljnih* brzina elemenata (V~p,R~ odnosno V~p~(i~N~), prije glačanja ubrzanjem/usporenjem), jer rezultirajući profil po definiciji ublažava skokove; razlika rezultirajućih brzina data je uz nju radi poređenja.\n\nVrijeme putovanja određuje se iz\n\n$$T = \\int_0^L \\frac{ds}{v(s)} \\approx \\sum_{i=1}^{n-1} \\frac{\\Delta s_i}{2}\\left(\\frac{1}{v_i} + \\frac{1}{v_{i+1}}\\right)$$'))
     # =========================================================== 3 geometrija
@@ -274,7 +273,8 @@ $$V_p(i_N) = <<v1>> + \frac{<<g>> - <<g1>>}{<<g2>> - <<g1>>}\,(<<v2>> - <<v1>>) 
         c, i, p, gin = ex; dg = p[3] - gin; Lv = p[5] - p[4]
         z1 = p[1] + gin / 100 * (p[0] - p[4]) * 0 + 0  # kota u PT = kota PT (parabola)
         zpt = c.axis.vert(p[0])[0]
-        A(T(_T('Elementi vertikalne krivine (parabola): Δi = i~izl~ − i~ul~; L~vk~ = R~v~·|Δi|/100; T = L~vk~/2; e = T²/(2R~v~). Primjer za PT <<i>> osovine <<ax>> (st. <<s>> m): Δi = <<go>> − (<<gi>>) = <<dg>> %, L~vk~ = <<Rv>> · <<adg>>/100 = <<L1>> m (iz ispisa: <<tk>> − <<tz>> = <<L2>> m), T = <<t>> m, e = <<e>> m.\n\nKota nivelete unutar krivine: z(s) = z~PT~ + i~ul~/100 · (s − s~PT~) + Δi/(200·L~vk~) · (s − s~TZ~)². Nagib nivelete mijenja se linearno unutar vertikalne krivine: i(s) = i~ul~ + Δi·(s − s~TZ~)/L~vk~. Provjera: kota nivelete u tjemenu PT je z~PT~ <<sg>> e = <<zz>> <<sg>> <<e>> = <<zpt>> m.\n'), i=i, ax=c.axis.name, s=fm(p[0], 3), go=fm(p[3], 3), gi=fm(gin, 3), dg=fm(dg, 3), Rv=fm(p[2], 0), adg=fm(abs(dg), 3), L1=fm(p[2] * abs(dg) / 100, 1), tk=fm(p[5], 3), tz=fm(p[4], 3), L2=fm(Lv, 1), t=fm(Lv / 2, 1), e=fm(Lv ** 2 / 4 / (2 * p[2]), 2), zpt=fm(zpt, 3), zz=fm(p[1], 3), sg="+" if dg > 0 else "−"))
+        A(_T('Elementi vertikalne krivine (parabola): Δi = i~izl~ − i~ul~; L~vk~ = R~v~·|Δi|/100; T = L~vk~/2; e = T²/(2R~v~). Kota nivelete unutar krivine: z(s) = z~PT~ + i~ul~/100 · (s − s~PT~) + Δi/(200·L~vk~) · (s − s~TZ~)², a nagib se mijenja linearno: i(s) = i~ul~ + Δi·(s − s~TZ~)/L~vk~.\n'))
+        A(_TF('Npr. za PT {0}, {1} (st. {2} m): Δi = {3} %, L~vk~ = {4} m, T = {5} m, e = {6} m.\n', i, c.axis.name, fm(p[0], 3), fm(dg, 3), fm(Lv, 1), fm(Lv / 2, 1), fm(Lv ** 2 / 4 / (2 * p[2]), 2)))
     A(_T('Najveći podužni nagib nivelete (apsolutno) po dionicama: ') + "; ".join(f"{c.key}: {fm(maxG[c.key], 3)} %" for c in cases) + ".")
     if max(maxG.values()) > P.max_nagib:
         bad = [(c, (np.abs(c.G) > P.max_nagib).sum() * P.korak) for c in cases if maxG[c.key] > P.max_nagib]
@@ -316,7 +316,7 @@ $$V_p(i_N) = <<v1>> + \frac{<<g>> - <<g1>>}{<<g2>> - <<g1>>}\,(<<v2>> - <<v1>>) 
         A(_T('Razlike ciljnih brzina susjednih elemenata veće od 10 km/h: ') + "; ".join(_TF('{0}, prelaz sa elementa {1} na element {2} (st. {3}): ΔV~cilj~ = {4} km/h (**{5}**), ΔV~rez~ = {6} km/h', c.key, i + 1, i + 2, fm(u['s1'], 1), fm(d, 1), ocj(d), fm(r, 1)) for c, i, u, d, r in bad_dv) + _T('. Razlika rezultirajućih brzina je manja jer se usporenje odvija na prijelaznici i prethodnim elementima; ostale razlike su ≤ 10 km/h („dobro”).\n'))
     A(_T('\n## Statistika rezultirajućeg profila\n'))
     c = cases[0]; s_ = c.stc
-    A(T(_T('Primjer proračuna statistike za slučaj **<<k>>** (<<lab>>), dužina L = <<L>> m, <<n>> tačaka:\n\n$$V_{p,sr} = \\frac{1}{<<L>>}\\sum \\frac{V_i + V_{i+1}}{2}\\,\\Delta s_i = <<m>>\\ \\text{km/h}$$\n\n$$\\sigma = \\sqrt{\\frac{1}{<<L>>}\\sum \\frac{(V_i - <<m>>)^2 + (V_{i+1} - <<m>>)^2}{2}\\,\\Delta s_i} = <<sd>>\\ \\text{km/h}$$\n\n$$D_h = \\frac{\\sigma}{V_{p,sr}} \\cdot 100 = \\frac{<<sd>>}{<<m>>} \\cdot 100 = <<dh>>\\ \\%$$\n\n$$T = \\sum \\frac{\\Delta s_i}{2}\\left(\\frac{1}{v_i} + \\frac{1}{v_{i+1}}\\right) = <<t>>\\ \\text{s} = <<tm>>\\ \\text{min}$$\n'), k=c.key, lab=c.label, L=fm(c.L, 3).rstrip("0").rstrip(","), n=c.N, m=fm(s_["mean"], 3), sd=fm(s_["sd"], 3), dh=fm(s_["Dh"], 2), t=fm(s_["time"], 1), tm=fm(s_["time"] / 60, 2)))
+    A(_TF('Npr. za slučaj **{0}** ({1}, L = {2} m): V~p,sr~ = {3} km/h, σ = {4} km/h, D~h~ = {5} %, vrijeme putovanja T = {6} min.\n', c.key, c.label, fm(c.L, 0), fm(s_["mean"], 1), fm(s_["sd"], 2), fm(s_["Dh"], 2), fm(s_["time"] / 60, 2)))
     A(newtab(_T('Pokazatelji dinamičke homogenosti, putničko vozilo'), _T('Dionica / smjer; V~p,sr~, σ, D~h~ – statistika po dužini; V~min~, V~max~; T – vrijeme putovanja; redovi „cijela trasa” obuhvataju sve dionice u istom smjeru vožnje (lančano).')))
     rows = []
     for c in cases:
@@ -331,9 +331,8 @@ $$V_p(i_N) = <<v1>> + \frac{<<g>> - <<g1>>}{<<g2>> - <<g1>>}\,(<<v2>> - <<v1>>) 
     A(T(_T('Potreban poprečni nagib na krivini za računsku brzinu određuje se iz Priloga 2 [1]:\n\n$$i_{pk}(V_r) = 7 \\cdot \\left(\\frac{R_{min}(V_r)}{R}\\right)^{0,74},\\qquad 2,5\\ \\% \\le i_{pk} \\le 7\\ \\%$$\n\na dinamička provjera za rezultirajuću brzinu V (uslov bočnog trenja):\n\n$$f_{pot} = \\frac{V^2}{127\\,R} - \\frac{i_p}{100} \\le f_R(V),\\qquad i_{p,potr} = \\left(\\frac{V^2}{127\\,R} - f_R(V)\\right)\\cdot 100$$\n')))
     if allarcs:
         c0, ar = min(allarcs, key=lambda x: x[1]["fR"] - x[1]["fp"])
-        A(T(_T('**Primjer – najnepovoljniji luk: <<k>>, luk br. <<no>> (R = <<R>> m, V = <<V>> km/h, R~min~(<<Vr>>) = <<Rm>> m, primijenjeni nagib <<ip>> %):**\n\n$$i_{pk}(<<Vr>>) = 7 \\cdot \\left(\\frac{<<Rm>>}{<<R>>}\\right)^{0,74} = 7 \\cdot <<x>> = <<y>>\\ \\% <<cmp>>$$\n\n$$f_{pot} = \\frac{<<V>>^2}{127 \\cdot <<R>>} - <<ipf>> = <<a>> - <<ipf>> = <<b>> <<c2>> f_R(<<V>>) = <<fr>>$$\n\n$$i_{p,potr} = \\left(<<a>> - <<fr>>\\right) \\cdot 100 = <<ipr>>\\ \\%$$\n'), k=c0.key, no=ar["no"], R=fm(ar["R"], 2), V=fm(ar["V"], 1), Vr=fm(Vr, 0), Rm=fm(Rmin_Vr, 0), ip=fm(ar["ipa"], 1), x=fm((Rmin_Vr / ar["R"]) ** 0.74, 3), y=fm(7 * (Rmin_Vr / ar["R"]) ** 0.74, 3),
-                 cmp=(r"\Rightarrow\ " + fm(ar["ipa"], 1) + r"\ \%\ (\text{primijenjeno})") if 7 * (Rmin_Vr / ar["R"]) ** 0.74 <= 7 else _T('> 7,0\\ \\%\\ (\\text{ne može se postići ni sa najvećim dopuštenim nagibom})'),
-                 ipf=fm(ar["ipa"] / 100, 3), a=fm(ar["V"] ** 2 / (127 * ar["R"]), 4), b=fm(ar["fp"], 3), c2=r"\le" if ar["ok2"] else ">", fr=fm(ar["fR"], 3), ipr=fm(ar["ipr"], 2)))
+        ipk_ = 7 * (Rmin_Vr / ar["R"]) ** 0.74
+        A(_TF('Najnepovoljniji luk je {0}, luk br. {1} (R = {2} m, V = {3} km/h): potreban poprečni nagib i~pk~ = {4} % (primijenjeno {5} %), f~pot~ = {6} {7} f~R~ = {8}, potreban nagib za rezultirajuću brzinu i~p,potr~ = {9} %.\n', c0.key, ar["no"], fm(ar["R"], 1), fm(ar["V"], 1), fm(min(ipk_, 7.0), 2) if ipk_ <= 7 else _T('> 7,0'), fm(ar["ipa"], 1), fm(ar["fp"], 3), "≤" if ar["ok2"] else ">", fm(ar["fR"], 3), fm(ar["ipr"], 2)))
     t_first = tn[0] + 1
     for c in cases:
         A(newtab(_TF('Poprečni nagibi na kružnim lukovima, {0}: {1}', c.key, c.label)))
@@ -388,25 +387,20 @@ $$V_p(i_N) = <<v1>> + \frac{<<g>> - <<g1>>}{<<g2>> - <<g1>>}\,(<<v2>> - <<v1>>) 
         fl = veh["prazan_hod"] * dt / 3600 if Fr <= 0 else veh["b"] * (Fu * vav / veh["eta"] / 1000) * dt / 3600
         return dict(s=float(S[si]), ds=ds, v=v, Gm=Gm, frl=frl, Rr=Rr, Ra=Ra, Rg=Rg, Fr=Fr, Ft=Ft, a=a2, vn=vn, vav=vav, dt=dt, fl=fl, Fu=Fu, veh=veh, W=W, full=full)
     def exm(E, title, c):
-        m = int(E["veh"]["m"])
-        return T(_T('**<<title>>** st. <<s>> m: brzina v = <<vkmh>> km/h = <<v>> m/s, nagib u smjeru vožnje G = <<G>> %, korak Δs = <<ds>> m.\n\n$$f_{rl} = 0,01\\left(1 + \\frac{<<v>>}{44,73}\\right) = <<frl>>,\\qquad R_r = <<frl>> \\cdot <<m>> \\cdot <<g>> = <<Rr>>\\ \\text{N}$$\n\n$$R_a = 0,5 \\cdot <<rho>> \\cdot <<cda>> \\cdot <<v>>^2 = <<Ra>>\\ \\text{N},\\qquad R_g = <<m>> \\cdot <<g>> \\cdot <<Gf>> = <<Rg>>\\ \\text{N}$$\n\n$$F_r = <<Rr>> + <<Ra>> + (<<Rg>>) = <<Fr>>\\ \\text{N}$$\n\n$$F_t = \\min\\left(\\frac{<<eta>> \\cdot <<Pw>>}{<<v>>},\\ <<mu>> \\cdot <<m>> \\cdot <<g>>\\right) = \\min(<<Fp>>;\\ <<Fm>>) = <<Ft>>\\ \\text{N}$$\n\n<<tail>>\n'), title=title, s=fm(E["s"], 0), vkmh=fm(E["v"] * 3.6, 1), v=fm(E["v"], 3), G=fm(E["Gm"] * 100, 3), ds=fm(E["ds"], 0), frl=fm(E["frl"], 5), m=m, g=fm(P.g, 2), rho=fm(P.rho, 3),
-                 Rr=fm(E["Rr"], 0), cda=fm(E["veh"]["CdA"], 1), Ra=fm(E["Ra"], 0), Gf=fm(E["Gm"], 5), Rg=fm(E["Rg"], 0), Fr=fm(E["Fr"], 0), eta=fm(E["veh"]["eta"], 2), Pw=fm(E["veh"]["P"] * 1000, 0),
-                 mu=fm(E["veh"]["mu"], 2), Fp=fm(E["veh"]["eta"] * E["veh"]["P"] * 1000 / E["v"], 0), Fm=fm(E["veh"]["mu"] * E["veh"]["m"] * P.g, 0), Ft=fm(E["Ft"], 0),
-                 tail=(T(r"""$$a = \frac{<<Ft>> - (<<Fr>>)}{<<gam>> \cdot <<m>>} = <<a>>\ \text{m/s}^2,\qquad v_{i+1} = \sqrt{<<v>>^2 + 2 \cdot (<<a>>) \cdot <<ds>>} = <<vn>>\ \text{m/s}$$
-
-$$\Delta B = <<b>> \cdot \frac{<<Fu>> \cdot <<vav>>}{<<eta>> \cdot 1000} \cdot \frac{<<dt>>}{3600} = <<fl>>\ \text{l}$$""", Ft=fm(E["Ft"], 0), Fr=fm(E["Fr"], 0), gam=fm(E["veh"]["gam"], 2), m=m, a=fm(E["a"], 4), v=fm(E["v"], 3), ds=fm(E["ds"], 0), vn=fm(E["vn"], 3), b=fm(E["veh"]["b"], 2), Fu=fm(E["Fu"], 0), vav=fm(E["vav"], 3), eta=fm(E["veh"]["eta"], 2), dt=fm(E["dt"], 3), fl=fm(E["fl"], 5))
-                       if E["full"] else T(_T('Vozilo je na ograničenju brzine v~lim~ i sile pogona dovoljno: F~u~ = F~r~ = <<Fu>> N, v~i+1~ = v~lim~ = <<vn>> m/s, ΔB = <<fl>> l'), Fu=fm(E["Fu"], 0), vn=fm(E["vn"], 3), fl=fm(E["fl"], 5)) if E["Fr"] > 0 else
-                       T(_T('F~r~ ≤ 0 – vozilo ne troši gorivo za pogon (kočenje motorom), računa se samo prazan hod: ΔB = <<b>> · <<dt>>/3600 = <<fl>> l'), b=fm(E["veh"]["prazan_hod"], 1), dt=fm(E["dt"], 3), fl=fm(E["fl"], 5))))
+        if E["full"]: kraj = _TF('a = {0} m/s², v~i+1~ = {1} km/h', fm(E["a"], 3), fm(E["vn"] * 3.6, 1))
+        elif E["Fr"] > 0: kraj = _TF('vozilo vozi ograničenom brzinom, v~i+1~ = {0} km/h', fm(E["vn"] * 3.6, 1))
+        else: kraj = _T('F~r~ ≤ 0, troši se samo gorivo praznog hoda')
+        return _TF('**{0}** (st. {1} m, v = {2} km/h, G = {3} %): R~r~ = {4} N, R~a~ = {5} N, R~g~ = {6} N, F~r~ = {7} N, F~t~ = {8} N; {9}; potrošnja na koraku Δs = {10} m iznosi ΔB = {11} l.\n', title, fm(E["s"], 0), fm(E["v"] * 3.6, 1), fm(E["Gm"] * 100, 2), fm(E["Rr"], 0), fm(E["Ra"], 0), fm(E["Rg"], 0), fm(E["Fr"], 0), fm(E["Ft"], 0), kraj, fm(E["ds"], 0), fm(E["fl"], 4))
     # primjeri: najslabiji uspon (min brzina) i nizbrdica (Fr<=0) ili puna snaga
     k0 = 0
     cmin = min(cases, key=lambda c: c.trk[k0]["v"].min()); imin = int(np.argmin(cmin.trk[k0]["v"]))
-    A(exm(tex(cmin, cmin.S[imin], k0), f"Primjer 1 – {P.vozila[k0]['kratko'].lower()}, {c_ and ''}" if False else _TF('Primjer 1 – {0}, {1} ({2}, najmanja brzina)', P.vozila[k0]['kratko'].lower(), cmin.key, cmin.label.split(',')[0].lower()), cmin))
+    A(exm(tex(cmin, cmin.S[imin], k0), _TF('{0}, {1} ({2}, mjesto najmanje brzine)', P.vozila[k0]['kratko'], cmin.key, cmin.label.split(',')[0].lower()), cmin))
     done = False
     for c in cases:
         for i in range(0, c.N - 1, 5):
             E = tex(c, c.S[i], k0)
             if E["Fr"] <= 0:
-                A(exm(E, f"Primjer 2 – {P.vozila[k0]['kratko'].lower()}, {c.key} (nizbrdica)", c)); done = True; break
+                A(exm(E, _TF('{0}, {1} (nizbrdica)', P.vozila[k0]['kratko'], c.key), c)); done = True; break
         if done: break
     A(_T("\n## Rezultati\n"))
     # tekst
