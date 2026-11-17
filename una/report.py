@@ -200,7 +200,7 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
                 RmA = float(np.interp(float(c.VRS[m].min()), P.Vr_tab, P.Rmin_tab))      # Rmin za računsku brzinu na luku (zona Vr ili osnovna)
                 ipk = min(7, max(2.5, 7 * (RmA / R) ** 0.74)); ipa = abs(c.axis.cross(mid))
                 fR = P.fRv(V); fp = V * V / (127 * R) - ipa / 100; ipr = max(2.5, (V * V / (127 * R) - fR) * 100)
-                out.append(dict(no=e["no"], R=R, dir="desno" if e["R0"] > 0 else "lijevo", s0=e["s0"], s1=e["s1"], a=a, b=b, V=V, ipk=ipk, ipa=ipa, fR=fR, fp=fp, ipr=ipr,
+                out.append(dict(no=e.get("kno", e["no"]), R=R, dir="desno" if e["R0"] > 0 else "lijevo", s0=e["s0"], s1=e["s1"], a=a, b=b, V=V, ipk=ipk, ipa=ipa, fR=fR, fp=fp, ipr=ipr,
                                 ok1=ipa >= round(ipk, 1) - 1e-9, ok2=fp <= fR + 1e-9, ok3=R >= RmA - 1e-9, Rmin=RmA, Vrl=float(c.VRS[m].min()), vpR=min(P.vpR(R), float(c.VMX[m].min())), vmx=float(c.VMX[m].min()), partial=(e["s0"] < c.SA - 1 or e["s1"] > c.SB + 1)))
         return out
     ARC = {c.key: arcs(c) for c in cases}
@@ -269,12 +269,12 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
         br = bracket(P.Rmin_tab, P.Vr_tab, ar0["R"])
         if br and br[5] <= maxVr:
             j, R1, R2, V1, V2, y = br
-            A(_TF('Npr. za kružni luk br. {0} ({1}, R = {2} m, st. {3} – {4}) linearnom interpolacijom između R = {5} m i R = {6} m dobija se V~p,R~ = {7} km/h.\n', ar0["no"], c0.axis.name, fm(ar0["R"], 1), fm(ar0["s0"], 1), fm(ar0["s1"], 1), fm(R1, 0), fm(R2, 0), fm(y, 1)))
+            A(_TF('Npr. za krivinu br. {0} ({1}, R = {2} m, st. {3} – {4}) linearnom interpolacijom između R = {5} m i R = {6} m dobija se V~p,R~ = {7} km/h.\n', ar0["no"], c0.axis.name, fm(ar0["R"], 1), fm(ar0["s0"], 1), fm(ar0["s1"], 1), fm(R1, 0), fm(R2, 0), fm(y, 1)))
         else:
-            A(_TF('Na svim kružnim lukovima najmanji radijus je R = {0} m (osovina {1}, luk br. {2}), što daje V~p,R~ = {3} km/h (ograničenje max V~r~ = {4} km/h).\n', fm(ar0['R'], 1), c0.axis.name, ar0['no'], fm(ar0['vpR'], 1), fm(maxVr, 0)))
+            A(_TF('Na svim kružnim lukovima najmanji radijus je R = {0} m (osovina {1}, krivina br. {2}), što daje V~p,R~ = {3} km/h (ograničenje max V~r~ = {4} km/h).\n', fm(ar0['R'], 1), c0.axis.name, ar0['no'], fm(ar0['vpR'], 1), fm(maxVr, 0)))
         lim = [(c, ar) for c, ar in allarcs if ar["vpR"] < ar["vmx"] - 1e-6]
         if lim:
-            A(_T('Lukovi kod kojih zakonitost V~p~ – R ograničava brzinu: ') + "; ".join(_TF('{0}, luk br. {1} (R = {2} m, st. {3} – {4}) – V~p,R~ = {5} km/h', c.axis.name, ar['no'], fm(ar['R'], 2), fm(ar['s0'], 1), fm(ar['s1'], 1), fm(ar['vpR'], 1)) for c, ar in lim) + _TF('. Svi ostali kružni lukovi imaju V~p,R~ = {0} km/h (ograničenje max V~r~).\n', fm(maxVr, 0)))
+            A(_T('Lukovi kod kojih zakonitost V~p~ – R ograničava brzinu: ') + "; ".join(_TF('{0}, krivina br. {1} (R = {2} m, st. {3} – {4}) – V~p,R~ = {5} km/h', c.axis.name, ar['no'], fm(ar['R'], 2), fm(ar['s0'], 1), fm(ar['s1'], 1), fm(ar['vpR'], 1)) for c, ar in lim) + _TF('. Svi ostali kružni lukovi imaju V~p,R~ = {0} km/h (ograničenje max V~r~).\n', fm(maxVr, 0)))
         else:
             A(_TF('Nijedan kružni luk ne ograničava brzinu ispod max V~r~ = {0} km/h.\n', fm(maxVr, 0)))
     A("\n### Zakonitost V~p~ – i~N~\n")
@@ -299,7 +299,7 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
         c0, ar0 = min(allarcs, key=lambda x: x[1]["V"]); v2 = ar0["V"]; v1 = maxVr
         if v2 < v1 - 1e-6:
             s_ = ((v1 / 3.6) ** 2 - (v2 / 3.6) ** 2) / (2 * d_)
-            A(_TF('Npr. pri ulazu u kružni luk br. {0} ({1}) brzina se smanjuje sa {2} na {3} km/h; potrebna dužina usporenja je s = {4} m prije početka luka (st. {5}), a na izlazu se brzina na istoj dužini vraća na {2} km/h.', ar0["no"], c0.axis.name, fm(v1, 0), fm(v2, 1), fm(s_, 1), fm(ar0["s0"], 3)))
+            A(_TF('Npr. pri ulazu u krivinu br. {0} ({1}) brzina se smanjuje sa {2} na {3} km/h; potrebna dužina usporenja je s = {4} m prije početka luka (st. {5}), a na izlazu se brzina na istoj dužini vraća na {2} km/h.', ar0["no"], c0.axis.name, fm(v1, 0), fm(v2, 1), fm(s_, 1), fm(ar0["s0"], 3)))
     A(_T('\n## Statistički pokazatelji dinamičke homogenosti\n'))
     A(_T("*Pojašnjenje:* Statistički pokazatelji opisuju koliko je trasa ujednačena za vozača [2]. Mala vrijednost σ i D~h~ znači da se brzina malo mijenja duž dionice, pa vozač ne nailazi na neočekivane promjene karaktera trase. Kriterij razlike brzina susjednih elemenata ΔV potiče iz istraživanja Lamma i saradnika [5], koja su pokazala da broj saobraćajnih nezgoda raste s razlikom brzina na prijelazu s pravca ili blage krivine na oštriju krivinu; razlike do 10 km/h ocjenjuju se kao dobre, od 10 do 20 km/h kao zadovoljavajuće, a veće od 20 km/h kao loše.\n"))
     A(_T('Na osnovu rezultirajućeg profila V~p~(s) na dionici dužine L određuju se (ponderisano po dužini, integracija trapeznom formulom na mreži Δs):\n\n$$V_{p,sr} = \\frac{1}{L}\\int_0^L V_p(s)\\,ds \\approx \\frac{1}{L}\\sum_{i=1}^{n-1} \\frac{V_i + V_{i+1}}{2}\\,\\Delta s_i$$\n\n$$\\sigma = \\sqrt{\\frac{1}{L}\\int_0^L \\left(V_p(s) - V_{p,sr}\\right)^2 ds}$$\n\n$$D_h = \\frac{\\sigma}{V_{p,sr}} \\cdot 100\\ [\\%]$$\n\nDinamička usklađenost susjednih elemenata trase (pravac – krivina – pravac) izražava se razlikom projektnih brzina\n\n$$\\Delta V_{i,i+1} = \\left| V_{p,i} - V_{p,i+1} \\right|$$\n\nKriterij ocjene (Lamm i dr. [5]): ΔV ≤ 10 km/h – dobro; 10 < ΔV ≤ 20 km/h – zadovoljavajuće; ΔV > 20 km/h – loše. Za projektnu brzinu elementa uzima se: na kružnom luku (sa prijelaznicama) najmanja brzina, na pravcu najveća brzina u elementu. Ocjena se daje prema razlici *ciljnih* brzina elemenata (V~p,R~ odnosno V~p~(i~N~), prije glačanja ubrzanjem/usporenjem), jer rezultirajući profil po definiciji ublažava skokove; razlika rezultirajućih brzina data je uz nju radi poređenja.\n\nVrijeme putovanja određuje se iz\n\n$$T = \\int_0^L \\frac{ds}{v(s)} \\approx \\sum_{i=1}^{n-1} \\frac{\\Delta s_i}{2}\\left(\\frac{1}{v_i} + \\frac{1}{v_{i+1}}\\right)$$'))
@@ -311,6 +311,7 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
         for e in c.axis.elems:
             if e["s1"] > c.SA and e["s0"] < c.SB and e["L"] > 0.5:
                 typ = {"PRAVAC": "pravac", "KRUZNI_LUK": _T('kružni luk'), "PRIJELAZNICA": _T('prijelaznica')}[e["typ"]]
+                if e.get("kno"): typ += _TF(' (krivina {0})', e["kno"])
                 Rt = "∞" if e["typ"] == "PRAVAC" else (fm(abs(e["R0"]), 2) if e["typ"] == "KRUZNI_LUK" else f"{'∞' if math.isinf(e['R0']) else fm(abs(e['R0']), 2)} → {'∞' if math.isinf(e['R1']) else fm(abs(e['R1']), 2)}")
                 smj = "" if e["typ"] == "PRAVAC" else ("desno" if (e["R0"] if not math.isinf(e["R0"]) else e["R1"]) > 0 else "lijevo")
                 rows.append([e["no"], typ, smj, fm(e["s0"], 3), fm(e["s1"], 3), fm(e["L"], 3), Rt, fm(e["A"], 3) if e["A"] else "–"])
@@ -335,7 +336,7 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
         A(_T('Elementi koji prelaze granice sekcija ocjenjuju se samo u dijelu unutar sekcije: ') + "; ".join(_TF("{0}, element {1} (st. {2} – {3}) u sekciji st. {4} – {5}", c.axis.name, e['no'], fm(e['s0'], 1), fm(e['s1'], 1), fm(c.SA, 0), fm(c.SB, 0)) for c, e in part) + _T('. Proračun profila brzine izvršen je na cijeloj dionici (uključujući puni ulaz u luk), a rezultati su prikazani za granice sekcije.\n'))
     low = [(c, ar) for c, ar in allarcs if not ar["ok3"]]
     if low:
-        A(_T('**Lukovi sa radijusom manjim od najmanjeg za V~r~ (R~min~(V~r~) = ') + fm(Rmin_Vr, 0) + " m):** " + "; ".join(_TF('{0}, luk br. {1} (R = {2} m, V~p,R~ = {3} km/h)', c.axis.name, ar['no'], fm(ar['R'], 2), fm(ar['vpR'], 1)) for c, ar in low) + _T('. Dinamička provjera poprečnog nagiba data je u poglavlju 4.3.\n'))
+        A(_T('**Lukovi sa radijusom manjim od najmanjeg za V~r~ (R~min~(V~r~) = ') + fm(Rmin_Vr, 0) + " m):** " + "; ".join(_TF('{0}, krivina br. {1} (R = {2} m, V~p,R~ = {3} km/h)', c.axis.name, ar['no'], fm(ar['R'], 2), fm(ar['vpR'], 1)) for c, ar in low) + _T('. Dinamička provjera poprečnog nagiba data je u poglavlju 4.3.\n'))
     A(_T('\n## Krivinska karakteristika trase\n'))
     A(_T('Krivinska karakteristika K [gon/km] je zbir apsolutnih vrijednosti skretnih uglova svih elemenata (kružnih lukova i prijelaznica) podijeljen dužinom trase u km; služi za objektivno poređenje varijanti trase. S je standardno odstupanje karakteristike K po kilometarskim odsječcima (pokazatelj ujednačenosti trase), a udio krivine je odnos dužine elemenata koji nisu pravci i ukupne dužine.\n'))
     kr = []
@@ -383,7 +384,7 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
     A(_T('## Brzine na elementima i harmonizacija\n'))
     vlow = sorted(((ar["V"], c.key, ar) for c in cases for ar in ARC[c.key] if ar["V"] < maxVr - 0.05), key=lambda x: x[0])
     if vlow:
-        A(_TF('Primjenom metode iz poglavlja 2 dobijeni su rezultirajući profili V~p~ na slici 4. Ograničenja brzine ispod max V~r~ = {0} km/h postoje na lukovima: ', fm(maxVr, 0)) + "; ".join(_TF('{0}, luk br. {1} (R = {2} m, st. {3} – {4}) – V~p~ = {5} km/h', k, ar['no'], fm(ar['R'], 1), fm(ar['s0'], 1), fm(ar['s1'], 1), fm(v, 1)) for v, k, ar in vlow) + ".\n")
+        A(_TF('Primjenom metode iz poglavlja 2 dobijeni su rezultirajući profili V~p~ na slici 4. Ograničenja brzine ispod max V~r~ = {0} km/h postoje na lukovima: ', fm(maxVr, 0)) + "; ".join(_TF('{0}, krivina br. {1} (R = {2} m, st. {3} – {4}) – V~p~ = {5} km/h', k, ar['no'], fm(ar['R'], 1), fm(ar['s0'], 1), fm(ar['s1'], 1), fm(v, 1)) for v, k, ar in vlow) + ".\n")
     else:
         A(_TF('Primjenom metode iz poglavlja 2 dobijeni su rezultirajući profili V~p~ na slici 4. Na svim kružnim lukovima ostvaruje se najveća dopuštena brzina max V~r~ = {0} km/h.\n', fm(maxVr, 0)))
     # provjera donje granice V_ri ≤ V_p (tačka 3.3.3 Priloga 2)
@@ -391,7 +392,7 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
     bg = [(c, int(np.argmin(c.V))) for c in cases if c.V.min() < Vr - 0.05]
     if below or bg:
         w = []
-        if below: w.append(_T('na lukovima ') + "; ".join(_TF('{0}, luk br. {1} (R = {2} m, V~p~ = {3} km/h)', k, ar['no'], fm(ar['R'], 1), fm(v, 1)) for v, k, ar in below))
+        if below: w.append(_T('na lukovima ') + "; ".join(_TF('{0}, krivina br. {1} (R = {2} m, V~p~ = {3} km/h)', k, ar['no'], fm(ar['R'], 1), fm(v, 1)) for v, k, ar in below))
         if bg: w.append(_T('na dionicama s velikim podužnim nagibom: ') + "; ".join(_TF('{0} (najmanja V~p~ = {1} km/h na st. {2} m)', c.key, fm(float(c.V.min()), 1), fm(float(c.S[i]), 0)) for c, i in bg))
         A(_TF('**Provjera uslova V~ri~ ≤ V~p~.** Prema tački 3.3.3 Priloga 2 pravilnika mora biti V~ri~ ≤ V~p~ ≤ max V~r~. Računska brzina je V~r~ = {0} km/h, a rezultirajuća V~p~ je manja od nje ', fm(Vr, 0)) + " i ".join(w) + _T('. Ti elementi ne zadovoljavaju računsku brzinu i treba ih ispraviti ili obrazložiti; brzina se u profilu ne podiže na V~r~ jer bi to prikrilo stvarno ograničenje.\n'))
     else:
@@ -428,7 +429,7 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
     if allarcs:
         c0, ar = min(allarcs, key=lambda x: x[1]["fR"] - x[1]["fp"])
         ipk_ = 7 * (Rmin_Vr / ar["R"]) ** 0.74
-        A(_TF('Najnepovoljniji luk je {0}, luk br. {1} (R = {2} m, V = {3} km/h): potreban poprečni nagib i~pk~ = {4} % (primijenjeno {5} %), f~pot~ = {6} {7} f~R~ = {8}, potreban nagib za rezultirajuću brzinu i~p,potr~ = {9} %.\n', c0.key, ar["no"], fm(ar["R"], 1), fm(ar["V"], 1), fm(min(ipk_, 7.0), 2) if ipk_ <= 7 else _T('> 7,0'), fm(ar["ipa"], 1), fm(ar["fp"], 3), "≤" if ar["ok2"] else ">", fm(ar["fR"], 3), fm(ar["ipr"], 2)))
+        A(_TF('Najnepovoljniji luk je {0}, krivina br. {1} (R = {2} m, V = {3} km/h): potreban poprečni nagib i~pk~ = {4} % (primijenjeno {5} %), f~pot~ = {6} {7} f~R~ = {8}, potreban nagib za rezultirajuću brzinu i~p,potr~ = {9} %.\n', c0.key, ar["no"], fm(ar["R"], 1), fm(ar["V"], 1), fm(min(ipk_, 7.0), 2) if ipk_ <= 7 else _T('> 7,0'), fm(ar["ipa"], 1), fm(ar["fp"], 3), "≤" if ar["ok2"] else ">", fm(ar["fR"], 3), fm(ar["ipr"], 2)))
     t_first = tn[0] + 1
     for c in cases:
         A(newtab(_TF('Poprečni nagibi na kružnim lukovima, {0}: {1}', c.key, c.label)))
@@ -440,9 +441,9 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
     bad3 = [(c, ar) for c in cases for ar in ARC[c.key] if not ar["ok3"]]
     q = lambda l, f: "; ".join(f(c, ar) for c, ar in l)
     out = [_T('**Zaključak provjere:**')]
-    out.append(_T('kriterij i~p~ ≥ i~pk~(V~r~) zadovoljen je na svim lukovima.') if not bad1 else _T('kriterij i~p~ ≥ i~pk~(V~r~) nije zadovoljen na: ') + q(bad1, lambda c, ar: _TF('{0}, luk br. {1} (primijenjeno {2} %, potrebno {3} %)', c.key, ar['no'], fm(ar['ipa'], 1), fm(ar['ipk'], 2))) + ".")
-    out.append(_T('Dinamički uslov bočnog trenja zadovoljen je na svim lukovima za dobijene brzine.') if not bad2 else _T('Dinamička provjera za rezultirajuću brzinu V~p~ pokazuje da nagib nije dovoljan na: ') + q(bad2, lambda c, ar: _TF('{0}, luk br. {1} (R = {2} m, V = {3} km/h, primijenjeno {4} %, potrebno {5} %)', c.key, ar['no'], fm(ar['R'], 2), fm(ar['V'], 1), fm(ar['ipa'], 1), fm(ar['ipr'], 2))) + _T('. Preporuka: nagib na luku povećati (do 7,0 %), ili prihvatiti manju brzinu na luku, ili povećati radijus.'))
-    out.append(_T('Svi lukovi imaju R ≥ R~min~(V~r~).') if not bad3 else _TF('Uslov R ≥ R~min~(V~r~) = {0} m nije zadovoljen na: ', fm(Rmin_Vr, 0)) + q(bad3, lambda c, ar: _TF('{0}, luk br. {1} (R = {2} m)', c.key, ar['no'], fm(ar['R'], 2))) + _T('. Projektant treba potvrditi da je za te lukove dopušteno odstupanje ili povećati radijus.'))
+    out.append(_T('kriterij i~p~ ≥ i~pk~(V~r~) zadovoljen je na svim lukovima.') if not bad1 else _T('kriterij i~p~ ≥ i~pk~(V~r~) nije zadovoljen na: ') + q(bad1, lambda c, ar: _TF('{0}, krivina br. {1} (primijenjeno {2} %, potrebno {3} %)', c.key, ar['no'], fm(ar['ipa'], 1), fm(ar['ipk'], 2))) + ".")
+    out.append(_T('Dinamički uslov bočnog trenja zadovoljen je na svim lukovima za dobijene brzine.') if not bad2 else _T('Dinamička provjera za rezultirajuću brzinu V~p~ pokazuje da nagib nije dovoljan na: ') + q(bad2, lambda c, ar: _TF('{0}, krivina br. {1} (R = {2} m, V = {3} km/h, primijenjeno {4} %, potrebno {5} %)', c.key, ar['no'], fm(ar['R'], 2), fm(ar['V'], 1), fm(ar['ipa'], 1), fm(ar['ipr'], 2))) + _T('. Preporuka: nagib na luku povećati (do 7,0 %), ili prihvatiti manju brzinu na luku, ili povećati radijus.'))
+    out.append(_T('Svi lukovi imaju R ≥ R~min~(V~r~).') if not bad3 else _TF('Uslov R ≥ R~min~(V~r~) = {0} m nije zadovoljen na: ', fm(Rmin_Vr, 0)) + q(bad3, lambda c, ar: _TF('{0}, krivina br. {1} (R = {2} m)', c.key, ar['no'], fm(ar['R'], 2))) + _T('. Projektant treba potvrditi da je za te lukove dopušteno odstupanje ili povećati radijus.'))
     A(" ".join(out) + "\n")
     # =========================================================== 5 teška
     A(_T('\n# Dinamički model vozila – brzine, vrijeme putovanja i potrošnja goriva\n'))
@@ -575,8 +576,8 @@ def build_report(P, sections, cases, axes, fw, bw, has_caps, F, cfg, outdir, log
         zk.append(_TF('Na dionicama sa povoljnim elementima dobijena V~p~ prelazi računsku brzinu V~r~ = {0} km/h (do {1} km/h). Preglednost u optičkoj analizi treba provjeriti za V~p~, a ne samo za V~r~.', fm(Vr, 0), fm(maxVr, 0)))
     if bad_dv: zk.append(_T('Dinamička usklađenost susjednih elemenata nije dobra na: ') + "; ".join(_TF("{0} (elementi {1}–{2}, ΔV~cilj~ = {3} km/h – {4})", c.key, i + 1, i + 2, fm(d, 1), ocj(d)) for c, i, u, d, r in bad_dv) + _T('. Preporučuje se ujednačiti radijuse susjednih elemenata ili obezbijediti odgovarajuću signalizaciju.'))
     else: zk.append(_T('Dinamička usklađenost susjednih elemenata je ocijenjena kao dobra (ΔV~cilj~ ≤ 10 km/h) na svim dionicama.'))
-    if bad3: zk.append(_TF('Radijus manji od R~min~(V~r~) = {0} m imaju: ', fm(Rmin_Vr, 0)) + "; ".join(_TF('{0}, luk br. {1} (R = {2} m)', c.key, ar['no'], fm(ar['R'], 2)) for c, ar in bad3) + _T('. Preporučuje se povećati radijus ili obrazložiti odstupanje (preporučena brzina, signalizacija).'))
-    if bad2 or bad1: zk.append(_T('Poprečni nagib nije dovoljan na: ') + "; ".join(_TF('{0}, luk br. {1} (primijenjeno {2} %, potrebno {3} % za V = {4} km/h)', c.key, ar['no'], fm(ar['ipa'], 1), fm(ar['ipr'], 2), fm(ar['V'], 1)) for c, ar in (bad2 or bad1)) + _T('. Preporuka: povećati nagib (do 7,0 %) ili prihvatiti manju brzinu na luku.'))
+    if bad3: zk.append(_TF('Radijus manji od R~min~(V~r~) = {0} m imaju: ', fm(Rmin_Vr, 0)) + "; ".join(_TF('{0}, krivina br. {1} (R = {2} m)', c.key, ar['no'], fm(ar['R'], 2)) for c, ar in bad3) + _T('. Preporučuje se povećati radijus ili obrazložiti odstupanje (preporučena brzina, signalizacija).'))
+    if bad2 or bad1: zk.append(_T('Poprečni nagib nije dovoljan na: ') + "; ".join(_TF('{0}, krivina br. {1} (primijenjeno {2} %, potrebno {3} % za V = {4} km/h)', c.key, ar['no'], fm(ar['ipa'], 1), fm(ar['ipr'], 2), fm(ar['V'], 1)) for c, ar in (bad2 or bad1)) + _T('. Preporuka: povećati nagib (do 7,0 %) ili prihvatiti manju brzinu na luku.'))
     else: zk.append(_T('Primijenjeni poprečni nagibi zadovoljavaju dinamički uslov bočnog trenja na svim lukovima za dobijene brzine.'))
     if max(maxG.values()) > P.max_nagib: zk.append(_TF('Podužni nagib dostiže {0} %, što je više od referentne granice {1} % za V~r~ = {2} km/h (granicu potvrditi u pravilniku/Projektnom zadatku).', fm(max(maxG.values()), 3), fm(P.max_nagib, 1), fm(Vr, 0)))
     if gl: zk.append(_T('Zakonitost V~p~ – i~N~ određuje brzinu na dijelu trase (uspon), pa izvor te zakonitosti treba potvrditi.'))

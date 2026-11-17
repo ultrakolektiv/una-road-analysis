@@ -279,7 +279,7 @@ def build_xlsx(path, P, sections, cases, axes, SYM, TABCOL, has_caps, log=print,
         arcs = [e for e in c.axis.elems if e["typ"] == "KRUZNI_LUK" and min(e["s1"], c.SB) - max(e["s0"], c.SA) >= 20]
         for i, e in enumerate(arcs):
             r = q0 + 1 + i; a_ = max(e["s0"], c.SA); b_ = min(e["s1"], c.SB)
-            put(h, f"A{r}", e["no"], BLUE); put(h, f"B{r}", abs(e["R0"]), BLUE, "0.00"); put(h, f"C{r}", "desna" if e["R0"] > 0 else "lijeva", BLUE)
+            put(h, f"A{r}", e.get("kno", e["no"]), BLUE); put(h, f"B{r}", abs(e["R0"]), BLUE, "0.00"); put(h, f"C{r}", "desna" if e["R0"] > 0 else "lijeva", BLUE)
             put(h, f"D{r}", round(a_, 3), BLUE, "0.000"); put(h, f"E{r}", round(b_, 3), BLUE, "0.000")
             put(h, f"F{r}", f"=INDEX({ug}!$I${U['e0']}:$I${U['e1']},MATCH(A{r},{ug}!$A${U['e0']}:$A${U['e1']},0))", GREEN, "0.0")
             put(h, f"G{r}", f'=_xlfn.MINIFS({rg},{ag},">="&D{r},{ag},"<="&E{r})', GREEN, "0.0")

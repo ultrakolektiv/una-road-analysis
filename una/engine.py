@@ -119,7 +119,24 @@ def build_cases(cfg, P, log=print):
             c.label = f"{_T('Desni kolovoz') if tag=='D' and tip=='razdvojene' else _T('Lijevi kolovoz') if tag=='L' and tip=='razdvojene' else _T('Centralna osovina') if tip=='centralna' else _T('Osovina')}, " + \
                       _TF("{0}, st. {1:.0f} – {2:.0f}", _T('smjer stacionaže') if sg==1 else _T('suprotno smjeru stacionaže'), sa, sb)
             cases.append(c)
+    number_curves(cases, cfg)
     return sections, cases, list(axes.values())
+
+
+def number_curves(cases, cfg):
+    """Redni broj krivine na dionici (e["kno"]): kružni lukovi u analiziranim rasponima, poredani po stacionaži;
+    lukovi lijeve/desne/centralne osovine koji se preklapaju po stacionaži (ista krivina) dobijaju isti broj."""
+    if cfg.get("numeracija_krivina", "dionica") != "dionica": return
+    arcs = []; seen = set()
+    for c in cases:
+        for e in c.axis.elems:
+            if e["typ"] == "KRUZNI_LUK" and e["s1"] > c.SA and e["s0"] < c.SB and e["L"] > 0.5 and id(e) not in seen:
+                seen.add(id(e)); arcs.append(e)
+    arcs.sort(key=lambda e: (e["s0"], e["s1"])); n = 0; end = -1e18
+    for e in arcs:
+        if e["s0"] >= end - 1e-6: n += 1; end = e["s1"]
+        else: end = max(end, e["s1"])
+        e["kno"] = n
 
 
 def grid(SA, SB, step):
