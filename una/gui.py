@@ -115,9 +115,9 @@ class SectionDialog(tk.Toplevel):
         ttk.Button(top, text="Postavi OD/DO prema ispisima", command=self.autorange).grid(row=1, column=4, padx=6)
         self.body = ttk.Frame(top); self.body.grid(row=2, column=0, columnspan=5, sticky="we", pady=6)
         self.sec0 = sec; self.pickers = {}
-        cf = ttk.LabelFrame(top, text="Zone računske brzine Vr (opciono) – jedan red: OD; DO; Vr km/h", padding=6); cf.grid(row=3, column=0, columnspan=5, sticky="we")
+        cf = ttk.LabelFrame(top, text="Zone računske brzine Vr (opciono) – jedan red: OD; DO; Vr km/h [; naprijed|nazad] [; znak]", padding=6); cf.grid(row=3, column=0, columnspan=5, sticky="we")
         self.caps = tk.Text(cf, width=70, height=3); self.caps.pack()
-        self.caps.insert("1.0", "\n".join(f"{z['od']}; {z['do']}; {z['v']}" for z in sec.get("zone_Vr", [])))
+        self.caps.insert("1.0", "\n".join(f"{z['od']}; {z['do']}; {z['v']}" + (f"; {z['smjer']}" if z.get("smjer") else "") + ("; znak" if z.get("ogranicenje") else "") for z in sec.get("zone_Vr", [])))
         ttk.Label(cf, text="Unutar zone proračun (Vp, Rmin, zrake preglednosti) koristi računsku brzinu zone.").pack(anchor="w")
         bf = ttk.Frame(top); bf.grid(row=4, column=0, columnspan=5, sticky="e", pady=6)
         ttk.Button(bf, text="U redu", command=self.ok).pack(side="left", padx=4); ttk.Button(bf, text="Otkaži", command=self.destroy).pack(side="left")
@@ -160,9 +160,15 @@ class SectionDialog(tk.Toplevel):
             for ln in self.caps.get("1.0", "end").splitlines():
                 ln = ln.strip()
                 if not ln: continue
-                a = [fnum(x) for x in ln.replace(";", " ").replace("\t", " ").split()]
-                if len(a) != 3 or None in a: raise ValueError(f"Zona Vr: neispravan red '{ln}' (OD; DO; Vr).")
-                caps.append({"od": a[0], "do": a[1], "v": a[2]})
+                w = ln.replace(";", " ").replace("\t", " ").split(); a = [fnum(x) for x in w[:3]]
+                if len(a) != 3 or None in a: raise ValueError(f"Zona Vr: neispravan red '{ln}' (OD; DO; Vr [; naprijed|nazad] [; znak]).")
+                z = {"od": a[0], "do": a[1], "v": a[2]}
+                for x in (q.lower() for q in w[3:]):
+                    if x in ("naprijed", "+", "+1", "→"): z["smjer"] = "naprijed"
+                    elif x in ("nazad", "-", "-1", "←"): z["smjer"] = "nazad"
+                    elif x in ("znak", "ogranicenje", "ograničenje"): z["ogranicenje"] = True
+                    elif x != "oba": raise ValueError(f"Zona Vr: neispravan red '{ln}' (OD; DO; Vr [; naprijed|nazad] [; znak]).")
+                caps.append(z)
             if caps: s["zone_Vr"] = caps
             self.result = s; self.destroy()
         except Exception as e:

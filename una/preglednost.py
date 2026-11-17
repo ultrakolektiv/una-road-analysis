@@ -188,7 +188,7 @@ def case_frame(c, par, s):
 
 def build_chain(ch, P, par, scen=1, side="D"):
     """Lanac slučajeva u smjeru vožnje → čvorovi (korak 1 m) po osovini vozne trake na strani side ('D' desno / 'L' lijevo od osovine)."""
-    cols = {k: [] for k in ("x", "y", "s", "ci", "z", "v", "g", "vr")}
+    cols = {k: [] for k in ("x", "y", "s", "ci", "z", "v", "g", "vr", "reg")}
     ob = {k: [] for k in ("rx", "ry", "lx", "ly")}            # prepreke u smjeru vožnje (desno/lijevo od vozača), CAD koordinate
     for ci, c in enumerate(ch):
         pr = case_prof(c, par)
@@ -214,6 +214,7 @@ def build_chain(ch, P, par, scen=1, side="D"):
         V = c.V
         cols["vr"] += list(np.interp(s, c.S, c.VRS))        # računska brzina Vr (zone) na tački
         cols["v"] += list(np.interp(s, c.S, V)); cols["g"] += list(c.sg * np.interp(s, c.S, c.G))
+        cols["reg"] += list(np.interp(s, c.S, getattr(c, "reg", np.zeros(c.N, bool)).astype(float)))      # >0: brzina snižena znakom / rubnim uslovom
     A = {k: np.array(v) for k, v in cols.items()}
     for k, v in ob.items(): A["ob" + k] = np.array(v)
     xa = A["x"].copy(); ya = A["y"].copy(); ci = A["ci"]
@@ -352,7 +353,7 @@ def expected(A, par, Lfun=L_vp):
         lim = (_T("teren (usjek)") if by_t else "prepreka") if (blocked is not None and Dh <= Dv + 1e-9) else ("niveleta" if Dv < Dh - 1e-9 else (_T('kraj trase') if end else "Lmax"))
         short_end = (lim == _T('kraj trase')) and D < Lr - 1e-6
         okH = (Dh >= Lr - 1e-6) or (end and blocked is None); okV = (Dv >= Lr - 1e-6) or (end and Dv >= float(q[bmax] - q[a]) - 1e-6)
-        rows.append(dict(i=a, s=float(A["s"][a]), q=float(q[a]), V=float(A["v"][a]), g=float(A["g"][a]), Lz=Lr, Dh=Dh, Dv=float(Dv), D=float(D), b=b, lim=lim,
+        rows.append(dict(i=a, s=float(A["s"][a]), q=float(q[a]), V=float(A["v"][a]), g=float(A["g"][a]), Lz=Lr, Dh=Dh, Dv=float(Dv), D=float(D), b=b, lim=lim, reg=bool(A["reg"][a] > 0.5) if "reg" in A else False,
                          trunc=short_end, ok=(D >= Lr - 1e-6) or short_end, kc=kc, okH=bool(okH), okV=bool(okV)))
     return dict(rows=rows)
 

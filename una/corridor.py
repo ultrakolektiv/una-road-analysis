@@ -696,12 +696,14 @@ def _face_x(ss, kind, sd, e, z_ray=1.0):
     """Apsolutni ofset (od osovine) prepreke na strani sd (+1 desno, -1 lijevo u smjeru stacionaže) iz presjeka koridora.
     Most: unutrašnja strana parapeta (vijenac) na visini zrake (ili najviše što parapet seže); tunel: krajnja (vanjska) ivica revizione staze. None ako nema."""
     if kind == "most":
-        pts = [(p[0], p[1]) for n, _, pp in ss if n == "Vijenac" for p in pp if p[0] * sd > e + 0.02 and p[1] >= 0.05]
+        # vijenac cijelom širinom izvan ivice kolovoza na toj strani; visine su relativne na osovinu, pa se na širokim mostovima
+        # (proširenja, ulivne/izlivne trake) s poprečnim nagibom naniže vrh vijenca može naći ispod kote osovine
+        vij = [pp for n, _, pp in ss if n == "Vijenac" and pp and min(p[0] * sd for p in pp) > e + 0.02]
+        pts = [(p[0], p[1]) for pp in vij for p in pp]
         if len(pts) < 3: return None
         zt = max(z for _, z in pts); zr = min(z_ray, zt - 0.03)
         xs = []
-        for n, _, pp in ss:
-            if n != "Vijenac": continue
+        for pp in vij:
             for p1, p2 in zip(pp, pp[1:]):
                 if p1[0] * sd > e and p2[0] * sd > e and (p1[1] - zr) * (p2[1] - zr) <= 0 and p1[1] != p2[1]:
                     xs.append(abs(p1[0] + (p2[0] - p1[0]) * (zr - p1[1]) / (p2[1] - p1[1])))

@@ -265,3 +265,15 @@ KORIDOR (LandXML): OGRADA PREMA RIGOLU / IVIČNJAKU, CUT & COVER, VIŠE CENTRALN
 - Cut & cover (element AB_konstrukcija) tretira se kao tunel: prepreka je unutrašnja strana zidova, srednji zid u razdjelnom pojasu.
 - Mostovi sa dvije odvojene konstrukcije: ograda u razdjelnom pojasu iz unutrašnjih vijenaca.
 - Vožnja spaja više centralnih osovina (npr. centralna – razdvojene – centralna) redom po stacionaži.
+- Vijenac mosta se prepoznaje i kad mu je vrh ispod kote osovine (široki mostovi sa proširenjem ili ulivnom/izlivnom trakom i poprečnim
+  nagibom naniže) – ranije je na takvom dijelu mosta ograda izostajala pa se koristila zadana prepreka uz ivicu kolovoza.
+
+OGRANIČENJA BRZINE (ZNAKOVI), ZONE PO SMJERU, NAPLATNO MJESTO
+- Zona računske brzine može važiti samo u jednom smjeru i može biti ograničenje brzine saobraćajnim znakom:
+  "zone_Vr": [{"od": 7559.66, "do": 7659.24, "v": 80, "smjer": "naprijed", "ogranicenje": true, "opis": "znak 80 km/h"}]
+  smjer: "naprijed" (smjer stacionaže), "nazad" (suprotno) ili izostavljeno (oba smjera). U prozoru: red "OD; DO; Vr; naprijed; znak".
+- "ogranicenje": true – zona je propisana znakom, a ne geometrijom: profil Vp je poštuje, a ocjena homogenosti (Dh, ΔV susjednih elemenata)
+  i uslov Pr (Pzp) ≥ Xd daju se i za profil samo iz geometrije; usporenja zbog znakova u tabeli Xd imaju oznaku "znak".
+- Rubni uslovi brzine na početku/kraju lanca po smjeru (npr. naplatno mjesto):
+  "rubne_brzine": {"naprijed": {"kraj": 20}, "nazad": {"pocetak": 20}}
+- Teško vozilo ne vozi brže od rezultirajućeg profila Vp putničkog vozila (isto u Excelu, list Voz*_*).

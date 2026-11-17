@@ -55,7 +55,7 @@ def xd_rows(out, k, dv_min=2.0):
             if V1 - V2 >= dv_min:
                 Xd = 0.1 * (V1 + V2) / 2 * (V1 - V2); r0 = rows[i]
                 res.append(dict(s0=r0["s"], s1=rows[j]["s"], V1=V1, V2=V2, Xd=Xd, Pzp=r0["Lz"], Pr=r0["D"], trunc=bool(r0.get("trunc")),
-                                ok_pzp=r0["Lz"] >= Xd, ok_pr=r0["D"] >= Xd))
+                                ok_pzp=r0["Lz"] >= Xd, ok_pr=r0["D"] >= Xd, znak=bool(rows[j].get("reg"))))      # usporenje propisano znakom / naplatom
             i = j
         else: i += 1
     return res
@@ -209,14 +209,17 @@ def build_md(P, par, out, pp, o, cfg, figs, att, name, template_mode=False):
     A(table(["Trag", "Vp [km/h]", "Pzp [m]", "Pr [m]", "Vert. nedov. (br. zona)", "Hor. nedov. (br. zona)", _T('Dužina Pr<Pzp [m]'), "Pr ≥ Pzp"], rows))
     A(_T("## Uslov Pr (Pzp) ≥ X~d~ – put usporenja\n"))
     A(_T('Prema tački 3.4.2.1 Priloga 2 Pravilnika jedan od uslova bezbjednosti vožnje je da dužina raspoložive preglednosti Pr, odnosno zahtijevane preglednosti Pzp, bude veća ili jednaka dužini puta usporenja X~d~, tj. **Pr (Pzp) ≥ X~d~**. Dužina puta usporenja pri prelazu sa brzine V~1~ na V~2~ (slika 3-09, a = d = 0,8 m/s²) iznosi X~d~ = 0,1·V~sr~·ΔV, gdje je V~sr~ = (V~1~ + V~2~)/2, ΔV = V~1~ − V~2~ [km/h], X~d~ u [m]. Provjera se vrši na početku svake zone usporenja rezultirajućeg profila V~p~ (u smjeru vožnje), tj. na mjestu na kojem V~p~ počinje opadati.\n'))
-    xr = []; xbad = 0
+    xr = []; xbad = 0; xznak = False
     for k in out["vp"]:
         for z in xd_rows(out, k):
-            xr.append([k, f"{z['s0']:.0f}–{z['s1']:.0f}", f"{z['V1']:.0f} → {z['V2']:.0f}", f"{z['Xd']:.0f}", f"{z['Pzp']:.0f}", ("≥ " if z["trunc"] else "") + f"{z['Pr']:.0f}", "DA" if z["ok_pzp"] else "NE", "DA" if z["ok_pr"] else "NE"])
-            xbad += (not z["ok_pzp"]) + (not z["ok_pr"])
+            zn = z.get("znak")
+            xr.append([k, f"{z['s0']:.0f}–{z['s1']:.0f}" + (" *" if zn else ""), f"{z['V1']:.0f} → {z['V2']:.0f}", f"{z['Xd']:.0f}", f"{z['Pzp']:.0f}", ("≥ " if z["trunc"] else "") + f"{z['Pr']:.0f}", "DA" if z["ok_pzp"] else ("znak" if zn else "NE"), "DA" if z["ok_pr"] else ("znak" if zn else "NE")])
+            if not zn: xbad += (not z["ok_pzp"]) + (not z["ok_pr"])
+            else: xznak = True
     if xr:
         A(tab(_T('Provjera uslova Pr (Pzp) ≥ X~d~ na zonama usporenja')))
         A(table(["Trag", _T('Zona usporenja od–do [m]'), "V~1~ → V~2~ [km/h]", "X~d~ [m]", "Pzp [m]", "Pr [m]", "Pzp ≥ X~d~", "Pr ≥ X~d~"], xr))
+        if xznak: A(_T('\\* Usporenje propisano saobraćajnom signalizacijom (zone ograničenja brzine, naplatno mjesto), a ne geometrijom trase: vozač ga ne započinje zato što vidi prepreku ili krivinu, nego na osnovu znaka postavljenog na propisanoj udaljenosti, pa se uslov Pr (Pzp) ≥ X~d~ za te zone ne primjenjuje (oznaka „znak”). Najava naplate i ograničenja brzine treba da budu vidljivi najmanje na dužini zaustavne preglednosti.\n'))
         A(_T('Uslov je ispunjen na svim zonama usporenja.\n') if not xbad else _TF('Uslov nije ispunjen na {0} provjera; na tim mjestima treba povećati raspoloživu preglednost ili ublažiti prelaz brzine (npr. većim radijusom ili dužim elementom ispred krivine).\n', xbad))
     else:
         A(_T('U profilu V~p~ nema zona usporenja (V~p~ se ne smanjuje za više od 2 km/h), pa uslov Pr (Pzp) ≥ X~d~ nije potrebno provjeravati.\n'))

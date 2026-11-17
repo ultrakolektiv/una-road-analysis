@@ -35,7 +35,7 @@ DEFAULTS = dict(
     fR=[0.22, 0.19, 0.17, 0.15, 0.13, 0.12, 0.11, 0.10, 0.10, 0.10],
     iN_tab=[-10, -8, -7, -5, 4, 4.1, 6, 8, 10],          # slika 3-08 (očitano s grafikona, tačnost ≈ ±5 km/h)
     ViN_tab=[70, 90, 100, 130, 130, 120, 100, 75, 50],
-    maxVr_tab=None, obrazac_puta=True,
+    maxVr_tab=None, obrazac_puta=True, rubne_brzine=None,
     max_nagib=5.0,
     vozila=[dict(naziv="merodavno teretno vozilo prema Pravilniku (slika 3-10 Priloga 2)", kratko="Tegljač (Pravilnik)", m=40000, P=None, CdA=5.2, eta=0.90, vlim=80, gam=1.06, mu=0.5, Ft_kriva=ft_diag(40000, 5.2)),
             dict(naziv="teško teretno vozilo – tegljač s poluprikolicom (savremeno vozilo)", kratko="Tegljač (savremeni)", m=40000, P=350, CdA=5.2, eta=0.90, vlim=80, gam=1.06, mu=0.5),
@@ -61,6 +61,19 @@ class Params:
         self.vozila = [dict(v, naziv=_T(v["naziv"]), kratko=_T(v["kratko"]), vlim=(self.maxVr if v.get("vlim") in (None, "", 0) else v["vlim"]),
                             b=(self.b if v.get("b") in (None, "") else v["b"]), prazan_hod=(self.prazan_hod if v.get("prazan_hod") in (None, "") else v["prazan_hod"])) for v in self.vozila]
         if self.ulazna_brzina is None: self.ulazna_brzina = self.maxVr
+        self.rub = {}                                                       # rubni uslovi brzine na početku/kraju lanca po smjeru (npr. naplatno mjesto)
+        for k, v in (self.rubne_brzine or {}).items():
+            sg = smjer_sg(k)
+            if sg is None or not isinstance(v, dict): raise ValueError(_TF("Rubne brzine: nepoznat smjer '{0}' (naprijed / nazad).", k))
+            for w in ("pocetak", "kraj"):
+                x = v.get(w)
+                if x not in (None, ""):
+                    x = float(x)
+                    if x <= 0: raise ValueError(_TF("Rubne brzine: brzina mora biti veća od 0 ({0}, {1}).", k, w))
+                    self.rub[(sg, w)] = x
+
+    def rub_v(self, sg, w):
+        return self.rub.get((sg, w))
 
     def vpR(self, R):
         return min(self.maxVr, float(np.interp(R, self.Rmin_tab, self.Vr_tab)))
@@ -82,6 +95,15 @@ class Params:
 
 class Case:
     pass
+
+
+def smjer_sg(x):
+    """Smjer zone / rubnog uslova: None ili 'oba' → 0; 'naprijed' (+1, smjer stacionaže); 'nazad' (−1). Nepoznato → None."""
+    if x in (None, "", 0, "0", "oba", "both"): return 0
+    t = str(x).strip().lower()
+    if t in ("naprijed", "+", "+1", "1", "→", "f", "forward", "smjer stacionaže"): return 1
+    if t in ("nazad", "-", "-1", "←", "b", "backward", "suprotno"): return -1
+    return None
 
 
 def build_cases(cfg, P, log=print):
@@ -111,11 +133,13 @@ def build_cases(cfg, P, log=print):
             c.key = f"{tag}{si}"; c.axis = axis(sec[role], aname)
             c.short = f"{short} [{sa:.0f}–{sb:.0f}]"; c.shortname = short
             c.SA, c.SB = sa, sb
-            c.zvr = []                                                       # zone računske brzine Vr po stacionaži (OD; DO; Vr)
+            c.zvr = []; c.zvr_g = []                                         # zone računske brzine Vr po stacionaži (OD; DO; Vr); _g bez zona ograničenja brzine (znak)
             for z in sec.get("zone_Vr", []):
-                zo, zd, zv = float(z["od"]), float(z["do"]), float(z["v"])
-                if not (zd > zo and zv > 0): raise ValueError(_TF("Zona računske brzine: neispravan red (OD {0}; DO {1}; Vr {2}).", zo, zd, zv))
-                c.zvr.append((zo, zd, zv))
+                zo, zd, zv = float(z["od"]), float(z["do"]), float(z["v"]); zs = smjer_sg(z.get("smjer"))
+                if not (zd > zo and zv > 0) or zs is None: raise ValueError(_TF("Zona računske brzine: neispravan red (OD {0}; DO {1}; Vr {2}; smjer {3}).", zo, zd, zv, z.get("smjer", "")))
+                if zs in (0, sg):
+                    c.zvr.append((zo, zd, zv))
+                    if not z.get("ogranicenje"): c.zvr_g.append((zo, zd, zv))   # zona projektne (računske) brzine; 'ogranicenje' = samo saobraćajni znak
             c.label = f"{_T('Desni kolovoz') if tag=='D' and tip=='razdvojene' else _T('Lijevi kolovoz') if tag=='L' and tip=='razdvojene' else _T('Centralna osovina') if tip=='centralna' else _T('Osovina')}, " + \
                       _TF("{0}, st. {1:.0f} – {2:.0f}", _T('smjer stacionaže') if sg==1 else _T('suprotno smjeru stacionaže'), sa, sb)
             cases.append(c)
@@ -186,31 +210,39 @@ def target(c, P):
     return np.array([min(c.VPR[i], c.VPG[i]) for i in range(c.N)])
 
 
-def car_chain(chain, P):
-    """Prolaz ubrzanja naprijed i usporenja nazad kroz cijeli lanac slučajeva (u smjeru vožnje)."""
+def car_chain(chain, P, free=False):
+    """Prolaz ubrzanja naprijed i usporenja nazad kroz cijeli lanac slučajeva (u smjeru vožnje).
+    free=True: profil samo iz geometrije (bez zona Vr i rubnih uslova) → c.Vfree, za razdvajanje uticaja ograničenja brzine od uticaja geometrije."""
     trav = []
     for c in chain:
-        T = target(c, P); c.T = T
+        if free:
+            vmx = [P.maxVr_at(max([z[2] for z in c.zvr_g if z[0] - 1e-9 <= s_ <= z[1] + 1e-9] or [P.Vr])) for s_ in c.S]
+            T = np.array([min(min(vmx[i], float(np.interp(c.RR[i], P.Rmin_tab, P.Vr_tab))) if c.RR[i] > 0 else vmx[i], c.VPG[i]) for i in range(c.N)]); c.Tg = T
+        else:
+            T = target(c, P); c.T = T
         order = np.arange(c.N) if c.sg == 1 else np.arange(c.N - 1, -1, -1)
         ds = np.abs(np.diff(c.S[order]))
         trav.append((c, order, T[order] / 3.6, ds))
-    J = []; prev = P.ulazna_brzina / 3.6
+    sg0 = chain[0].sg if chain else 1
+    J = []; prev = ((None if free else P.rub_v(sg0, "pocetak")) or P.ulazna_brzina) / 3.6
     for c, order, T, ds in trav:
         j = T.copy(); j[0] = min(j[0], prev)
         for i in range(1, len(j)): j[i] = min(j[i], math.sqrt(j[i - 1] ** 2 + 2 * P.a * ds[i - 1]))
         J.append(j); prev = j[-1]
-    K = [None] * len(trav); nxt = None
+    K = [None] * len(trav); nxt = None if free else P.rub_v(sg0, "kraj"); nxt = nxt / 3.6 if nxt else None
     for q in range(len(trav) - 1, -1, -1):
         c, order, T, ds = trav[q]; j = J[q]; k = j.copy()
         if nxt is not None: k[-1] = min(k[-1], nxt)
         for i in range(len(k) - 2, -1, -1): k[i] = min(k[i], math.sqrt(k[i + 1] ** 2 + 2 * P.d * ds[i]))
         K[q] = k; nxt = k[0]
     for q, (c, order, T, ds) in enumerate(trav):
-        v = np.zeros(c.N); v[order] = K[q] * 3.6; c.V = v
+        v = np.zeros(c.N); v[order] = K[q] * 3.6
+        if free: c.Vfree = v; continue
+        c.V = v
         a = np.zeros(c.N); a[order] = J[q] * 3.6; c.Vacc = a
 
 
-def truck_run(c, veh, P, v0):
+def truck_run(c, veh, P, v0, cap=None):
     m = veh["m"]; W = m * P.g; vl = veh["vlim"] / 3.6
     idx = list(range(c.N)) if c.sg == 1 else list(range(c.N - 1, -1, -1))
     v = v0 if v0 is not None else vl
@@ -222,8 +254,11 @@ def truck_run(c, veh, P, v0):
         if v >= vl - 1e-9 and Ft >= Fr: vn = vl; Fu = max(Fr, 0)
         else:
             vn = min(vl, math.sqrt(max(v * v + 2 * (Ft - Fr) / (veh["gam"] * m) * ds, 9.0))); Fu = Ft if Fr > 0 else 0.0
+        cb = cap[b] / 3.6 if cap is not None else None                     # teško vozilo ne vozi brže od profila Vp putničkog vozila (zone Vr, naplata)
+        if cb is not None and vn > cb:
+            vn = cb; Fu = max(Fr, 0) if cb >= v - 1e-9 else 0.0
         vav = (v + vn) / 2; dt = ds / vav
-        fl = veh["prazan_hod"] * dt / 3600 if Fr <= 0 else veh["b"] * (Fu * vav / veh["eta"] / 1000) * dt / 3600
+        fl = veh["prazan_hod"] * dt / 3600 if (Fr <= 0 or Fu <= 0) else veh["b"] * (Fu * vav / veh["eta"] / 1000) * dt / 3600
         fuel += fl; tt += dt; v = vn; vs.append(v); fs.append(fuel); ts.append(tt)
     arr = np.zeros(c.N); far = np.zeros(c.N); tar = np.zeros(c.N)
     arr[idx] = np.array(vs) * 3.6; far[idx] = fs; tar[idx] = ts
@@ -263,14 +298,16 @@ def run(cfg, log=print):
     fw, bw = chains(cases)
     has_caps = False
     for ch in (fw, bw):
-        if ch: car_chain(ch, P)
+        if ch: car_chain(ch, P); car_chain(ch, P, free=True)
+    for c in cases: c.reg = c.V < c.Vfree - 0.5                              # tačke gdje je brzina niža zbog zona Vr / rubnih uslova (ne zbog geometrije)
     for c in cases: c.caps = []; c.stc = stat(c, c.V)
     for ch in (fw, bw):
-        prev = [None] * len(P.vozila)
+        v0 = P.rub_v(ch[0].sg, "pocetak") if ch else None
+        prev = [None if v0 is None else min(v0, veh["vlim"]) / 3.6 for veh in P.vozila]
         for c in ch:
             c.trk = []
             for k, veh in enumerate(P.vozila):
-                r = truck_run(c, veh, P, prev[k]); c.trk.append(r); prev[k] = r["vend"]
+                r = truck_run(c, veh, P, prev[k], c.V); c.trk.append(r); prev[k] = r["vend"]
             for k in range(len(P.vozila)):
                 c.trk[k]["stat"] = stat(c, np.maximum(c.trk[k]["v"], 1))
                 c.trk[k]["stat"]["fuel"] = c.trk[k]["Fu"]; c.trk[k]["stat"]["time"] = c.trk[k]["T"]

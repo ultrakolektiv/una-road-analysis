@@ -290,3 +290,27 @@ X.update({"Koridor: osovina '{0}' (centralna) nije uključena u vožnju kroz kor
 X.update({"Koridor → proračun: sekcija {0} ({1}): trake {2} → {3} × {4:.2f} m, pola razdjelnog pojasa {5:.2f} m.": "Corridor → calculation: segment {0} ({1}): lanes {2} → {3} × {4:.2f} m, half median {5:.2f} m."})
 
 X.update({"Koridor → proračun: ograda u razdjelnom pojasu: ofset od unutrašnje ivice kolovoza {0:.2f}–{1:.2f} m.": "Corridor → calculation: median barrier: offset from the inner carriageway edge {0:.2f}–{1:.2f} m."})
+
+# --- zone Vr po smjeru, rubne brzine (naplata), teška vozila ograničena profilom Vp, ograničenja brzine znakom
+X.update({
+    "Rubne brzine: nepoznat smjer '{0}' (naprijed / nazad).": "Boundary speeds: unknown direction '{0}' (naprijed / nazad).",
+    "Rubne brzine: brzina mora biti veća od 0 ({0}, {1}).": "Boundary speeds: the speed must be greater than 0 ({0}, {1}).",
+    "Zona računske brzine: neispravan red (OD {0}; DO {1}; Vr {2}; smjer {3}).": "Design-speed zone: invalid row (FROM {0}; TO {1}; Vr {2}; direction {3}).",
+    " (samo u smjeru stacionaže)": " (direction of chainage only)",
+    " (samo suprotno smjeru stacionaže)": " (against the chainage only)",
+    "početak lanca": "start of the chain",
+    "kraj lanca": "end of the chain",
+    "{0}, {1}: V = {2} km/h": "{0}, {1}: V = {2} km/h",
+    "Rubni uslovi brzine u lancu: {0}. Brzina u tim tačkama ograničena je zadanom vrijednošću, a prijelaz do nje izvodi se ubrzanjem a, odnosno usporenjem d.\n": "Boundary speed conditions in the chain: {0}. The speed at these points is limited to the given value, and the transition to it uses acceleration a or deceleration d.\n",
+    " km/h": " km/h",
+    ", osim gdje je zadan rubni uslov (": ", except where a boundary condition is given (",
+    ". Teško vozilo ne vozi brže od rezultirajućeg profila V~p~ putničkog vozila (to je mjerodavno u zonama ograničene računske brzine i na prilazu naplatnom mjestu). Pretpostavlja se da se vozilo na granici sekcija kreće bez zaustavljanja, a stacionaže osovina u susjednim sekcijama uzimaju se kao nominalno jednake.": ". A heavy vehicle does not drive faster than the resulting V~p~ profile of the passenger car (this governs in zones of reduced design speed and on the approach to the toll plaza). The vehicle is assumed to pass segment boundaries without stopping, and the chainages of axes in adjacent segments are taken as nominally equal.",
+    "Primjenom metode iz poglavlja 2 dobijeni su rezultirajući profili V~p~ na slici 4. Geometrija trase ograničava brzinu ispod max V~r~ = {0} km/h na lukovima: ": "Applying the method of chapter 2 gives the resulting V~p~ profiles in figure 4. The alignment geometry limits the speed below max V~r~ = {0} km/h on the arcs: ",
+    "Primjenom metode iz poglavlja 2 dobijeni su rezultirajući profili V~p~ na slici 4. Sama geometrija trase ni na jednom kružnom luku ne ograničava brzinu ispod max V~r~ = {0} km/h.\n": "Applying the method of chapter 2 gives the resulting V~p~ profiles in figure 4. The alignment geometry alone does not limit the speed below max V~r~ = {0} km/h on any circular arc.\n",
+    "Niža brzina na lukovima zbog zadanih zona računske brzine (ograničenja brzine) ili rubnih uslova lanca, a ne zbog geometrije: ": "Lower speed on arcs due to the given design-speed zones (speed limits) or chain boundary conditions, not due to geometry: ",
+    "{0}, krivina br. {1} (R = {2} m) – V~p~ = {3} km/h (samo iz geometrije {4} km/h)": "{0}, curve no. {1} (R = {2} m) – V~p~ = {3} km/h (from geometry alone {4} km/h)",
+    "Na dionicama sa zadanim ograničenjima brzine (zone V~r~, naplatno mjesto) D~h~ uključuje i promjene brzine koje propisuje saobraćajna signalizacija; ocjena homogenosti same geometrije data je profilom bez tih ograničenja: ": "On sections with given speed limits (V~r~ zones, toll plaza), D~h~ also includes speed changes prescribed by traffic signs; the consistency of the geometry itself is assessed on the profile without these limits: ",
+    "smjer (+1 / −1; prazno = oba)": "direction (+1 / −1; blank = both)",
+    "Tabela zona računske brzine (izvan zona važi Vr iz B4)": "Design-speed zone table (outside the zones Vr from B4 applies)",
+    "\\* Usporenje propisano saobraćajnom signalizacijom (zone ograničenja brzine, naplatno mjesto), a ne geometrijom trase: vozač ga ne započinje zato što vidi prepreku ili krivinu, nego na osnovu znaka postavljenog na propisanoj udaljenosti, pa se uslov Pr (Pzp) ≥ X~d~ za te zone ne primjenjuje (oznaka „znak”). Najava naplate i ograničenja brzine treba da budu vidljivi najmanje na dužini zaustavne preglednosti.\n": "\\* Deceleration prescribed by traffic signs (speed-limit zones, toll plaza) rather than by the alignment geometry: the driver does not start it because an obstacle or curve comes into view, but at a sign placed at the prescribed distance, so the condition Pr (Pzp) ≥ X~d~ does not apply to these zones (marked “znak”). The toll and speed-limit advance signs should be visible at least over the stopping sight distance.\n",
+})

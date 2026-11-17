@@ -33,7 +33,7 @@ sr: {
  r_desna:"DESNA osovina (desni kolovoz, vožnja u smjeru stacionaže)", r_lijeva:"LIJEVA osovina (lijevi kolovoz, vožnja suprotno stacionaži)", r_centralna:"CENTRALNA osovina", r_osovina:"Osovina",
  f_h:"Horizontalna osovina (elementi)", f_v:"Uzdužni profil (prelomne tačke)", f_x:"Poprečni nagibi", f_pick3:"Odaberi sva 3 fajla odjednom (automatsko prepoznavanje)", f_none:"nije odabrano",
  d_title_new:"Nova sekcija", d_title_edit:"Sekcija trase", d_type:"Vrsta sekcije", d_from:"Stacionaža OD [m]", d_to:"DO [m]", d_auto:"Postavi OD/DO prema ispisima",
- d_caps:"Zone računske brzine Vr (opciono)", d_caps_h:"Jedan red: OD; DO; Vr km/h. Unutar zone proračun (Vp, Rmin, zrake preglednosti) koristi tu računsku brzinu.", d_caps_why:"Napomena uz zone (ne ulazi u proračun)",
+ d_caps:"Zone računske brzine Vr (opciono)", d_caps_h:"Jedan red: OD; DO; Vr km/h [; naprijed | nazad] [; znak]. Unutar zone proračun (Vp, Rmin, zrake preglednosti) koristi tu računsku brzinu; „naprijed”/„nazad” = zona samo u jednom smjeru vožnje, „znak” = ograničenje brzine saobraćajnim znakom (homogenost geometrije ocjenjuje se bez njega).", d_caps_why:"Napomena uz zone (ne ulazi u proračun)",
  d_cs:"Kolona poprečnog nagiba LIJEVE strane (redni broj trake, prazno = automatski)", d_cross:"Poprečni profil i ofset osovine vozne trake (prazno = podrazumijevano)",
  d_half:"Centralna osovina: POLA širine razdjelnog pojasa [m]", d_wr:"Širine traka DESNO od osovine puta [m] (npr. 3.5, 3.5)", d_wl:"Širine traka LIJEVO od osovine puta [m] (npr. 3.5, 3.5)",
  d_or:"Osovina oka vozača DESNO od osovine kolovoza [m]", d_ol:"Osovina oka vozača LIJEVO od osovine kolovoza [m]", d_range:"Zajednički raspon ispisa: {0} – {1} m. Prilagodite OD/DO prema stvarnoj sekciji.",
@@ -84,7 +84,7 @@ en: {
  r_desna:"RIGHT axis (right carriageway, driving in the direction of chainage)", r_lijeva:"LEFT axis (left carriageway, driving against chainage)", r_centralna:"CENTRAL axis", r_osovina:"Axis",
  f_h:"Horizontal axis (elements)", f_v:"Longitudinal profile (break points)", f_x:"Cross-slopes", f_pick3:"Choose all 3 files at once (automatic recognition)", f_none:"not selected",
  d_title_new:"New segment", d_title_edit:"Alignment segment", d_type:"Segment type", d_from:"Chainage FROM [m]", d_to:"TO [m]", d_auto:"Set FROM/TO from the printouts",
- d_caps:"Design-speed zones Vr (optional)", d_caps_h:"One row: FROM; TO; Vr km/h. Inside a zone the calculation (Vp, Rmin, sight-distance rays) uses that design speed.", d_caps_why:"Note on the zones (not used in calculation)",
+ d_caps:"Design-speed zones Vr (optional)", d_caps_h:"One row: FROM; TO; Vr km/h [; naprijed | nazad] [; znak]. Inside a zone the calculation (Vp, Rmin, sight-distance rays) uses that design speed; 'naprijed'/'nazad' = zone in one driving direction only, 'znak' = posted speed limit (geometric consistency is assessed without it).", d_caps_why:"Note on the zones (not used in calculation)",
  d_cs:"Cross-slope column of the LEFT side (lane number, empty = automatic)", d_cross:"Cross-section and offset of the driving-lane axis (empty = default)",
  d_half:"Central axis: HALF width of the median [m]", d_wr:"Lane widths RIGHT of the road axis [m] (e.g. 3.5, 3.5)", d_wl:"Lane widths LEFT of the road axis [m] (e.g. 3.5, 3.5)",
  d_or:"Driver's eye axis RIGHT of the carriageway axis [m]", d_ol:"Driver's eye axis LEFT of the carriageway axis [m]", d_range:"Common range of the printouts: {0} – {1} m. Adjust FROM/TO to the actual segment.",
@@ -361,7 +361,7 @@ async function editSec(i) {
     for (const k of ["razdjelni_pola", "ofset_desno", "ofset_lijevo"]) { const v = num(a.pf[k].querySelector("input").value); if (v != null) d[k] = v; }
     return d;
   }
-  const caps = h("textarea", { rows: 3, class: "mono" }); caps.value = (cur.zone_Vr || []).map(z => `${z.od}; ${z.do}; ${z.v}`).join("\n");
+  const caps = h("textarea", { rows: 3, class: "mono" }); caps.value = (cur.zone_Vr || []).map(z => `${z.od}; ${z.do}; ${z.v}` + (z.smjer ? `; ${z.smjer}` : "") + (z.ogranicenje ? "; znak" : "")).join("\n");
   const why = txt(cur.zone_Vr_opis || "");
   const auto = h("button", { class: "btn sm", onclick: async () => {
       const specs = Object.values(ax).map(a => specOf(a, false)); const r = await api("axisrange", { specs });
@@ -376,7 +376,13 @@ async function editSec(i) {
     const s = { tip: tipSel.value, od: num(od.value), do: num(dO.value) };
     if (s.od == null || s.do == null || s.do <= s.od) throw new Error(t("e_range"));
     for (const [r, a] of Object.entries(ax)) { s[r] = specOf(a, true); }
-    const cp = []; for (const ln of caps.value.split("\n")) { const l = ln.trim(); if (!l) continue; const p = l.replace(/;/g, " ").split(/\s+/).map(x => num(x)); if (p.length !== 3 || p.includes(null)) throw new Error(t("e_cap", l)); cp.push({ od: p[0], do: p[1], v: p[2] }); }
+    const cp = []; for (const ln of caps.value.split("\n")) { const l = ln.trim(); if (!l) continue; const w = l.replace(/;/g, " ").split(/\s+/), p = w.slice(0, 3).map(x => num(x)); if (p.length !== 3 || p.includes(null)) throw new Error(t("e_cap", l));
+      const z = { od: p[0], do: p[1], v: p[2] };
+      for (const x of w.slice(3).map(q => q.toLowerCase())) {
+        if (["naprijed", "+", "+1", "→", "forward"].includes(x)) z.smjer = "naprijed"; else if (["nazad", "-", "-1", "←", "backward"].includes(x)) z.smjer = "nazad";
+        else if (["znak", "ogranicenje", "ograničenje", "sign", "limit"].includes(x)) z.ogranicenje = true; else if (!["oba", "both"].includes(x)) throw new Error(t("e_cap", l));
+      }
+      cp.push(z); }
     if (cp.length) s.zone_Vr = cp; if (why.value.trim()) s.zone_Vr_opis = why.value.trim();
     return s;
   } });

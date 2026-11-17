@@ -58,6 +58,21 @@ def test_zone_racunske_brzine(tmp_path):
     assert any(o.endswith(".xlsx") for o in outs)
 
 
+def test_zone_po_smjeru_i_rubne_brzine(tmp_path):
+    cfg = pipeline.load_cfg(os.path.join(ROOT, "primjer", "primjer_projekat.json")); cfg["izlaz"] = str(tmp_path)
+    P0, sec0, c0, *_ = engine.run(cfg, log=lambda *a: None)
+    s0, s1 = c0[0].SA, c0[0].SB; za, zb = s0 + (s1 - s0) * 0.4, s0 + (s1 - s0) * 0.6
+    cfg["sekcije"][0]["zone_Vr"] = [{"od": za, "do": zb, "v": 40.0, "smjer": "naprijed", "ogranicenje": True}]
+    cfg["rubne_brzine"] = {"naprijed": {"kraj": 30}, "nazad": {"pocetak": 25}}
+    P, sec, cs, ax, fw, bw, hc = engine.run(cfg, log=lambda *a: None)
+    f = fw[0]; b = bw[0]; m = (f.S >= za) & (f.S <= zb)
+    assert abs(f.VRS[m].max() - 40) < 1e-9 and abs(b.VRS.min() - P.Vr) < 1e-9          # zona samo u smjeru stacionaže
+    assert f.V[m].max() <= 60 + 1e-6 and f.reg[m].all() and not f.reg[: len(f.S) // 5].any()
+    assert abs(fw[-1].V[-1] - 30) < 1e-6 and abs(bw[0].V[-1] - 25) < 1e-6                 # rubni uslovi: kraj naprijed, početak nazad
+    for c in cs:
+        for t in c.trk: assert (t["v"] <= c.V + 1e-6).all()                            # teško vozilo ≤ profil putničkog
+
+
 @pytest.mark.skipif(shutil.which("pandoc") is None, reason="pandoc nije instaliran")
 def test_word_elaborat(tmp_path):
     outs, _ = pipeline.generate(_cfg(tmp_path), str(tmp_path), log=lambda s: None, word=True, excel=False, sight=False)
