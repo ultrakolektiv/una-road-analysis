@@ -277,3 +277,12 @@ OGRANIČENJA BRZINE (ZNAKOVI), ZONE PO SMJERU, NAPLATNO MJESTO
 - Rubni uslovi brzine na početku/kraju lanca po smjeru (npr. naplatno mjesto):
   "rubne_brzine": {"naprijed": {"kraj": 20}, "nazad": {"pocetak": 20}}
 - Teško vozilo ne vozi brže od rezultirajućeg profila Vp putničkog vozila (isto u Excelu, list Voz*_*).
+
+VOŽNJA KROZ KORIDOR – PRELAZI I NAPLATA
+- Proširenja i suženja asfalta (dodatne trake, proširenja mostova, plato naplate) crtaju se kao glatki prelazi: ivice kolovoza,
+  rubne i razdjelne linije se interpoliraju između presjeka; dodatna traka dobija razdjelnu liniju uz spoljnu ivicu.
+- Nagli skok širine u Civil 3D koridoru (proširenje modelirano u jednom presjeku) prikazuje se kao prelaz 1:8 (koridor.prelaz_nagib,
+  0 = bez izravnanja); pojedinačni "zalutali" presjeci (granica regije) se izostavljaju.
+- Spoj centralne osovine i razdvojenih kolovoza je bez prekida (koridor.prekid, zadano 0,4 m); drugi kolovoz se crta i na mostovima.
+- Naplatno mjesto (shematski: otoci s kabinama i nadstrešnica preko cijele širine platoa):
+  "koridor": {"naplata": {"st": 8160.0, "produzi": 40, "duzina": 24}} – vožnja staje kod kabine, iza nje kolovoz se produži za "produzi" m.
