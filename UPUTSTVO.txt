@@ -251,3 +251,10 @@ NOVO – FORMALNI OKVIR ELABORATA, KRIVINSKA KARAKTERISTIKA, TRAKA ZA SPORA VOZI
 - Vozno-dinamička analiza, poglavlje 5.3: provjera potrebe za dodatnom trakom za spora vozila (usponi veći od 3 %, brzina teškog vozila prema Vn = 40 km/h i Vkr = 50 km/h).
   Vrijednosti se mijenjaju u JSON-u: "spora_vozila": {"granica_nagiba": 3, "Vn": 40, "Vkr": 50, "Vt": {"2": 74, "3": 62, ...}} (trajne brzine Vt po nagibu, zadano prema Koy/Spacek 2005).
 - Nazivi izlaznih Word datoteka više ne sadrže redni broj elaborata: Vozno-dinamicke_analize_<projekat>.docx i Opticke_analize_<projekat>.docx.
+
+TEREN / 3D MODEL TRASE (TIN) U PREGLEDNOSTI
+- "preglednost": {"teren": "3D_MODEL.xml"} – LandXML sa TIN površinom iz Civil 3D (npr. 3D_Model_ALL: kolovoz + kosine usjeka/nasipa, ili teren).
+- Raspoloživa horizontalna preglednost se tada provjerava i prema površini: vizura od oka (h_oka) do predmeta (h_prepreke) je zaklonjena kad je površina
+  iznad nje (izvan kolovoza, "teren_kolovoz" = 6 m od ose vozne trake). U rezultatima je razlog "teren (usjek)".
+- Vožnja kroz koridor (ručni unos) koristi stvarne kosine iz modela; iza dohvata modela teren se nastavlja sintetički.
+- Prvo učitavanje velikog TIN-a traje (rasterizacija 1 m), poslije se koristi keš pored datoteke.

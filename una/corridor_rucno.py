@@ -182,11 +182,23 @@ def build_scene_manual(P, par, out, cfg, log=print):
                 if tun_runs: zt += 38.0 * m_t * max(0.0, 1 - (abs(o) / 130.0) ** 1.6)
                 if br_runs: zt -= 9.0 * v_b * max(0.0, 1 - (abs(o) / 110.0) ** 2)
                 return zt
+            TT = par.get("_teren"); zax = float(np.interp(sta, c.S, c.Z))
+            def dtm_rel(o):
+                if TT is None or m_t > 0.02 or v_b > 0.02: return None
+                v = float(TT.z(x + nxd * o, y + nyd * o)); return None if not np.isfinite(v) else v - zax
             if kind == "otvorena":
                 for side, (oe, ze_) in ((1, (eR + sw, top[-1][1])), (-1, (-(eL + sw), top[0][1]))):
-                    lst = []
-                    for dd in (3, 6, 10, 15, 21, 28, 36, 46, 58, 72, 90, 110, 135, 165, 200, 250, 310):
-                        oo = oe + side * dd; zt = terr_z(oo)
+                    lst = []; last = None; dd_last = 0.0
+                    for dd in (1.5, 3, 4.5, 6, 8, 10, 12.5, 15, 18, 21, 25, 28, 32, 36, 41, 46, 52, 58, 65, 72, 90, 110, 135, 165, 200, 250, 310):
+                        oo = oe + side * dd; zd = dtm_rel(oo)
+                        if zd is not None:
+                            last = zd; dd_last = dd; lst.append((round(oo, 2), round(zd, 2))); continue
+                        if TT is not None and last is None and dd < 3.1: continue
+                        if dd in (1.5, 4.5, 8, 12.5, 18, 25, 32, 41, 52, 65): continue
+                        zt = terr_z(oo)
+                        if last is not None:                                    # iza dohvata 3D modela: teren nastavlja od zadnje tačke modela
+                            zz = last + (zt - terr_z(oe + side * dd_last)) * min(1.0, (dd - dd_last) / 40.0)
+                            lst.append((round(oo, 2), round(zz, 2))); continue
                         lim = dd / 1.6 if zt > ze_ else dd / 2.0                  # kosina useka 1:1,6, nasipa 1:2
                         zz = ze_ + min(max(zt - ze_, -lim), lim) if abs(zt - ze_) > lim else zt
                         lst.append((round(oo, 2), round(zz, 2)))

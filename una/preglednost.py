@@ -206,7 +206,7 @@ def build_chain(ch, P, par, scen=1, side="D"):
                 o = oM; lat = (pr["gR"] - oM) if c.sg == 1 else -(pr["gL"] - oM)
             px = np.where(np.isnan(o), np.nan, y0 + lat * ny); py = np.where(np.isnan(o), np.nan, x0 + lat * nx)
             ob[("r" if (nm == "R") == (c.sg == 1) else "l") + "x"] += list(px); ob[("r" if (nm == "R") == (c.sg == 1) else "l") + "y"] += list(py)
-        zc = np.interp(s, c.S, c.Z)
+        zc = np.interp(s, c.S, c.Z); cols.setdefault("zt", []).extend(list(zc))
         if cols["z"]: zc = zc + (cols["z"][-1] - zc[0])
         cols["z"] += list(zc)
         V = c.V
@@ -221,7 +221,7 @@ def build_chain(ch, P, par, scen=1, side="D"):
     A["xa"] = xa; A["ya"] = ya
     sx = xa - A["x"]; sy = ya - A["y"]
     A["obrxa"] = A["obrx"] + sx; A["obrya"] = A["obry"] + sy; A["oblxa"] = A["oblx"] + sx; A["oblya"] = A["obly"] + sy
-    A["has_ob"] = bool(np.isfinite(A["obrx"]).any() or np.isfinite(A["oblx"]).any())
+    A["has_ob"] = bool(np.isfinite(A["obrx"]).any() or np.isfinite(A["oblx"]).any() or par.get("_teren") is not None)
     dq = np.hypot(np.diff(xa), np.diff(ya)); dq = np.maximum(dq, 0.01); A["q"] = np.concatenate([[0.0], np.cumsum(dq)])
     tx = np.gradient(xa); ty = np.gradient(ya); tn = np.hypot(tx, ty) + 1e-12
     A["tx"] = tx / tn; A["ty"] = ty / tn          # tangenta puta vožnje; desna normala = (ty, -tx)
@@ -296,6 +296,24 @@ def _first_blocked(A, a, cand):
     return int(cand[w[0]]) if len(w) else None
 
 
+def _terr_first_blocked(A, par, a, cand):
+    """Prvi kandidat b čiju vizuru (oko h_oka → predmet h_pr) presijeca teren/kosina usjeka iz 3D modela (TIN). Uzorci nad kolovozom se ne
+    gledaju (to je vertikalna preglednost nivelete)."""
+    T = par.get("_teren")
+    if T is None or len(cand) == 0: return None
+    x = A["x"]; y = A["y"]; zt = A["zt"]; q = A["q"]; ze = zt[a] + par["h_oka"]; hp = hpr_at(A, par, a)
+    L = q[cand] - q[a]; ns = int(max(2, np.ceil(L.max() / 2.0)))
+    t = np.linspace(0, 1, ns + 1)[1:-1]
+    px = x[a] + (x[cand] - x[a])[:, None] * t[None, :]; py = y[a] + (y[cand] - y[a])[:, None] * t[None, :]
+    pz = ze + ((zt[cand] + hp) - ze)[:, None] * t[None, :]
+    kk = np.clip(np.searchsorted(q, q[a] + L[:, None] * t[None, :]), 0, len(q) - 1)      # čvor trase pored uzorka
+    dl = np.hypot(px - x[kk], py - y[kk]); dist = L[:, None] * t[None, :]
+    zz = T.z(px, py)
+    hit = np.isfinite(zz) & (zz > pz + 0.10) & (dl > float(par.get("teren_kolovoz", 6.0))) & (dist > 3.0) & (dist < L[:, None] - 3.0)
+    w = np.where(hit.any(1))[0]
+    return int(cand[w[0]]) if len(w) else None
+
+
 def expected(A, par, Lfun=L_vp):
     """Očekivana (raspoloživa) preglednost: najduža zraka od oka vozača koju prepreka (ofset od ivice kolovoza) i niveleta dopuštaju."""
     n = len(A["q"]); st = max(1, int(round(par["korak_proracun"]))); q = A["q"]; rows = []
@@ -308,12 +326,19 @@ def expected(A, par, Lfun=L_vp):
             coarse = np.arange(a + 2, bmax + 1, 4); cb = _first_blocked(A, a, coarse)
             if cb is not None:
                 fine = np.arange(max(a + 2, cb - 3), cb + 1); blocked = _first_blocked(A, a, fine)
+        tblk = None
+        if par.get("_teren") is not None and bmax > a + 1:
+            coarse = np.arange(a + 2, bmax + 1, 4); cb = _terr_first_blocked(A, par, a, coarse)
+            if cb is not None:
+                fine = np.arange(max(a + 2, cb - 3), cb + 1); tblk = _terr_first_blocked(A, par, a, fine) or cb
+        if tblk is not None and (blocked is None or tblk < blocked): blocked = tblk; by_t = True
+        else: by_t = False
         bh = bmax if blocked is None else max(a, blocked - 1)
         Dh = float(q[bh] - q[a])
         Dv = _vert(A, par, a, bmax) if bmax > a else 0.0           # vertikalna preglednost se računa nezavisno od prepreka (do najveće tražene dužine)
         D = min(Dh, Dv); b = int(np.searchsorted(q, q[a] + D)); b = min(b, bh)
         kc = None                                          # dodirna tačka zrake i linije prepreke (čvor prepreke najbliži tetivi)
-        if A["has_ob"] and b > a + 1:
+        if A["has_ob"] and b > a + 1 and not by_t:
             ux, uy = A["xa"][b] - A["xa"][a], A["ya"][b] - A["ya"][a]; un = math.hypot(ux, uy) + 1e-12; ks = np.arange(a + 1, b); best = 1e18
             for ox, oy, sgn in ((A["obrxa"], A["obrya"], +1), (A["oblxa"], A["oblya"], -1)):
                 px = ox[ks]; py = oy[ks]; fin = np.isfinite(px)
@@ -322,7 +347,7 @@ def expected(A, par, Lfun=L_vp):
                 cl = np.where(fin, cl, 1e18); j = int(np.argmin(cl))
                 if cl[j] < best: best = float(cl[j]); kc = int(ks[j])
             if best > 1.5: kc = None                        # prepreka daleko od tetive – nije dodirna tačka
-        lim = "prepreka" if (blocked is not None and Dh <= Dv + 1e-9) else ("niveleta" if Dv < Dh - 1e-9 else (_T('kraj trase') if end else "Lmax"))
+        lim = (_T("teren (usjek)") if by_t else "prepreka") if (blocked is not None and Dh <= Dv + 1e-9) else ("niveleta" if Dv < Dh - 1e-9 else (_T('kraj trase') if end else "Lmax"))
         short_end = (lim == _T('kraj trase')) and D < Lr - 1e-6
         okH = (Dh >= Lr - 1e-6) or (end and blocked is None); okV = (Dv >= Lr - 1e-6) or (end and Dv >= float(q[bmax] - q[a]) - 1e-6)
         rows.append(dict(i=a, s=float(A["s"][a]), q=float(q[a]), V=float(A["v"][a]), g=float(A["g"][a]), Lz=Lr, Dh=Dh, Dv=float(Dv), D=float(D), b=b, lim=lim,
@@ -376,6 +401,11 @@ def run(P, cases, fw, bw, cfg, log=print):
     """Vraća (par, out): out = dict(vp={trag: R}, zaht={..} ili None, ocek={..} ili None); trag = 'F_D', 'F_L', 'B_D', 'B_L'."""
     par = make_par(cfg); par["Vr"] = float(P.Vr); out = dict(vp={}, zaht=None, ocek=None, vr={})
     out["zaht"] = {} if par["L_zahtijevano"] else None; out["_fixL"] = bool(par["L_zahtijevano"])
+    tp = (cfg.get("preglednost") or {}).get("teren")
+    if tp:
+        from .teren import Teren
+        par["_teren"] = Teren(tp, cell=float((cfg.get("preglednost") or {}).get("teren_celija", 1.0)), log=log)
+        par["ima_prepreke"] = True
     if par["ima_prepreke"]: out["ocek"] = {}
     for tag, ch in (("F", fw), ("B", bw)):
         if not ch: continue

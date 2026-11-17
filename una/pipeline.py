@@ -163,6 +163,8 @@ def load_cfg(path):
                     if sp.get(k) and not os.path.isabs(sp[k]): sp[k] = os.path.normpath(os.path.join(base, sp[k]))
     tp = cfg.get("template")
     if isinstance(tp, dict) and tp.get("file") and not os.path.isabs(tp["file"]): tp["file"] = os.path.normpath(os.path.join(base, tp["file"]))
+    pg_ = cfg.get("preglednost")
+    if isinstance(pg_, dict) and pg_.get("teren") and not os.path.isabs(pg_["teren"]): pg_["teren"] = os.path.normpath(os.path.join(base, pg_["teren"]))
     el_ = cfg.get("elaborat")
     if isinstance(el_, dict):
         for k_ in ("logo_investitor", "logo_projektant"):
