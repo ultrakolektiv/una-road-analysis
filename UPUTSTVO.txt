@@ -258,3 +258,10 @@ TEREN / 3D MODEL TRASE (TIN) U PREGLEDNOSTI
   iznad nje (izvan kolovoza, "teren_kolovoz" = 6 m od ose vozne trake). U rezultatima je razlog "teren (usjek)".
 - Vožnja kroz koridor (ručni unos) koristi stvarne kosine iz modela; iza dohvata modela teren se nastavlja sintetički.
 - Prvo učitavanje velikog TIN-a traje (rasterizacija 1 m), poslije se koristi keš pored datoteke.
+
+KORIDOR (LandXML): OGRADA PREMA RIGOLU / IVIČNJAKU, CUT & COVER, VIŠE CENTRALNIH OSOVINA
+- "koridor": {"ograda_rigol": 0.93, "ograda_ivicnjak": 0.67} – na otvorenoj trasi ograda se postavlja prema elementu uz ivicu asfalta u presjeku
+  koridora (Rigol / Ivicnjak, Ivicnjak_sa_procjepom), posebno za svaku stranu i za razdjelni pojas (strana "razdjelni_desno"/"razdjelni_lijevo").
+- Cut & cover (element AB_konstrukcija) tretira se kao tunel: prepreka je unutrašnja strana zidova, srednji zid u razdjelnom pojasu.
+- Mostovi sa dvije odvojene konstrukcije: ograda u razdjelnom pojasu iz unutrašnjih vijenaca.
+- Vožnja spaja više centralnih osovina (npr. centralna – razdvojene – centralna) redom po stacionaži.

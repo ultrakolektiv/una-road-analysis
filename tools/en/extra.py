@@ -230,6 +230,7 @@ X.update({
 "teren (usjek)": "terrain (cut slope)",
 "Teren: površina '{0}', raster {1} × {2} ćelija po {3} m.": "Terrain: surface '{0}', raster {1} × {2} cells of {3} m.",
 "Teren: u datoteci {0} nema TIN površine.": "Terrain: file {0} contains no TIN surface.",
+"Koridor → proračun: ograda na otvorenoj trasi prema rigolu ({0:.2f} m) / ivičnjaku ({1:.2f} m) iz presjeka koridora: {2} / {3} presjeka.": "Corridor → calculation: open-road barrier by gutter ({0:.2f} m) / kerb ({1:.2f} m) from corridor sections: {2} / {3} sections.",
 "ručni unos": "manual input", "Koridor: nazivi elemenata presjeka: {0}": "Corridor: cross-section element names: {0}",
 "Koridor: nijedan element nije prepoznat kao most ili tunel (ako ih ima, zadajte nazive u koridor → nazivi).": "Corridor: no element was recognised as bridge or tunnel (if there are any, set the names in corridor → nazivi).", "Koridor (ručni unos): scena izrađena ({0} presjeka).": "Corridor (manual input): scene built ({0} sections).",
 "Koridor: nema proračuna preglednosti za ovu osovinu (uključite preglednost).": "Corridor: no sight-distance calculation for this alignment (enable sight distance).",
