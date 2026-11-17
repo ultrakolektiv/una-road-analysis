@@ -146,6 +146,13 @@ def build_scene_manual(P, par, out, cfg, log=print):
             gap = (gR + gL) > 0.4 and c.role == "centralna"
             pvd = [[-eL, -gL], [gR, eR]] if gap else [[-eL, eR]]
             e_half = min(eR, eL) if not gap else min(eR - gR, eL - gL)
+            eR_reg, eL_reg = eR, eL; xp = []
+            wp = getattr(c.axis, "wprof", None)
+            if wp is not None and wp[0][0] - 1 <= sta <= wp[0][-1] + 1:
+                wl_, wr_ = float(np.interp(sta, wp[0], wp[1])), float(np.interp(sta, wp[0], wp[2]))
+                wR_, wL_ = (wr_, wl_) if sg > 0 else (wl_, wr_)                    # okvir vožnje
+                if wR_ > eR + 0.05: xp.append([round(eR, 3), round(wR_, 3)]); eR = wR_
+                if wL_ > eL + 0.05 and not (gap and False): xp.append([round(-wL_, 3), round(-eL, 3)]); eL = wL_
             ofo, ofi = offk[kind]
             # ---- poprečni nagib: dvostrešni krov 2,5 % (pravac) / jednostrani u krivini
             R_ = 1.0 / max(abs(kdrv), 1e-9); p = 0.025 if R_ > 2500 else min(0.07, 0.025 + (2500 - R_) / 2500 * 0.045)
@@ -159,7 +166,7 @@ def build_scene_manual(P, par, out, cfg, log=print):
             for kx, ky in (("obrx", "obry"), ("oblx", "obly")):
                 j = int(np.argmin(np.abs(PD["A"]["s"] - sta)))
                 ob.append(None if not np.isfinite(PD["A"][kx][j]) else round((PD["A"][kx][j] - x) * nxd + (PD["A"][ky][j] - y) * nyd, 3))
-            fR = eR + ofo; fL = -(eL + ofo)
+            fR = max(eR_reg + ofo, eR + 0.02); fL = -max(eL_reg + ofo, eL + 0.02)
             if gap: fL = -(gL - ofi)                                 # lijeva strana vozača = razdjelni pojas
             bf = [round(fR, 3), round(fL, 3)]
             # ---- gornja ploha
@@ -245,6 +252,7 @@ def build_scene_manual(P, par, out, cfg, log=print):
             zones = dict(ug=0, pv=[[round(a_, 3), round(b_, 3)] for a_, b_ in pvd], e=round(e_half, 3), shL=round(shL, 3), shR=round(shR, 3), oe=0, ot=0,
                          med=[round(-gL, 3), 0.0, round(gR, 3), 0.0] if gap else None, nj=1 if (nj_open and kind == "otvorena") else 0)
             if tL is not None: zones["tL"] = round(tL, 3); zones["tR"] = round(tR, 3)
+            if xp: zones["xp"] = xp
             # ---- zraka iz UNA
             pp = prep[sdsel]; Ar = pp["A"]; sxs = Ar["xa"] - Ar["x"]; sys_ = Ar["ya"] - Ar["y"]; nA = len(Ar["q"])
             order_r = np.argsort(pp["rs"], kind="stable"); rsS = pp["rs"][order_r]

@@ -104,7 +104,7 @@ function strip(a,b,fa){
  const ea=a.E,eb=b.E,e=ea.e;
  // profil: unija ofseta
  const os=new Set();for(const p of a.F)os.add(p[0]);for(const p of b.F)os.add(p[0]);const O=[...os].sort((u,v)=>u-v);
- const PV=ea.pv||[[-e,e]],PVL=PV.map(r=>{const u=ea.ug||0;return u>0?(r[1]<0?[r[0],-u]:[u,r[1]]):r}),pave=(om)=>PV.some(r=>om>=r[0]-.001&&om<=r[1]+.001), oth=(om)=>ea.oe>0&&Math.abs(om-ea.ot)<=ea.oe+.001;
+ const PV=ea.pv||[[-e,e]],PVL=PV.map(r=>{const u=ea.ug||0;return u>0?(r[1]<0?[r[0],-u]:[u,r[1]]):r}),pave=(om)=>PV.some(r=>om>=r[0]-.001&&om<=r[1]+.001)||(ea.xp||[]).some(r=>om>=r[0]-.001&&om<=r[1]+.001), oth=(om)=>ea.oe>0&&Math.abs(om-ea.ot)<=ea.oe+.001;
  for(let k=0;k<O.length-1;k++){const o1=O[k],o2=O[k+1],om=(o1+o2)/2;if(o2-o1<1e-4)continue;GOFF=BUILD?Math.max(0,Math.abs(om)-(om>0?ea.shR:-ea.shL)):0;
   let col,al,terr=false;const med=ea.med&&om>ea.med[0]&&om<ea.med[2];
   const isT=ea.tR!=null&&(om>ea.tR||om<ea.tL);

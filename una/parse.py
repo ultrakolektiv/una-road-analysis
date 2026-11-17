@@ -99,6 +99,26 @@ class Axis:
                 try: ctrl.append((float(p[1]), float(p[5])))
                 except ValueError: pass
         self.vdev = max((abs(self.vert(s)[0] - z) for s, z in ctrl if s >= pis[0][4]), default=None)
+        # širine kolovoza iz ispisa poprečnih profila (udaljenost ivica traka od osovine): krajnja lijeva / desna ivica po stacionaži
+        self.wprof = None
+        try:
+            cols = None; recs = []; i = 0
+            while i < len(v):
+                l = v[i]; p = l.split()
+                if p[:2] == ["PROFIL"] + p[1:2] and len(p) > 3 and "OS" in p: cols = [c for c in p[2:] if c != "OS"]; i += 1; continue
+                if cols and l[:1] not in (" ", "*", "&", "") and len(p) == len(cols) + 3 and i + 2 < len(v):
+                    w = v[i + 2].split()
+                    if len(w) == len(cols):
+                        st = float(p[1]); wv = [float(x) for x in w]
+                        if any(x > 0 for x in wv):
+                            wl = max([x for c, x in zip(cols, wv) if "_L" in c] or [0.0]); wr = max([x for c, x in zip(cols, wv) if "_D" in c] or [0.0])
+                            recs.append((st, wl, wr))
+                    i += 3; continue
+                i += 1
+            if len(recs) > 1:
+                recs.sort(); self.wprof = tuple(np.array(x) for x in zip(*recs))
+        except (ValueError, IndexError):
+            self.wprof = None
 
     def vert(self, s):
         pis = self.pis
