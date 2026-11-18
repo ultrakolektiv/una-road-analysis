@@ -199,7 +199,10 @@ def build_md(P, par, out, pp, o, cfg, figs, att, name, template_mode=False):
     A(_T('## Raspoloživa preglednost Pr\n'))
     A(_T('Raspoloživa preglednost Pr određena je kao najduža tetiva od oka vozača koju dozvoljavaju prepreka uz kolovoz (horizontalna preglednost) i niveleta (vertikalna preglednost). Rezultati su dati po tragovima, za oba smjera vožnje, a kompletan proračun je u prilogu (Excel i Tabela 4).\n'))
     if par.get("visina_ograde") not in (None, ""):
-        A(_TF('Čelična odbojna ograda na otvorenoj trasi (uz ivicu kolovoza i u razdjelnom pojasu) uzeta je sa visinom {0} m: ona zaklanja vizuru samo ako zraka od oka vozača do predmeta na mjestu ograde prolazi ispod njenog vrha. Kota podnožja ograde uzeta je iz 3D modela trase, pa je uračunat i poprečni nagib (ograda na nižoj ivici kolovoza) i tok nivelete. Na konstantnom podužnom nagibu visina vizure nad kolovozom ne zavisi od nagiba (oko i predmet se spuštaju jednako), pa vizura prelazi preko ograde zbog niže kote podnožja ograde ili konkavne krivine nivelete. Vijenci i parapeti mostova, zidovi tunela i cut & cover konstrukcija, kao i kosine usjeka iz 3D modela, zaklanjaju cijelom visinom.\n', fm(par['visina_ograde'], 2)))
+        A(_TF('Čelična odbojna ograda na otvorenoj trasi (uz ivicu kolovoza i u razdjelnom pojasu) uzeta je sa visinom {0} m: ona zaklanja vizuru samo ako zraka od oka vozača do predmeta na mjestu ograde prolazi ispod njenog vrha. Kota podnožja ograde i kota kolovoza na putanji oka uzete su iz 3D modela trase, pa je uračunat poprečni nagib (oko i predmet su u traci, ne na osovini) i tok nivelete. Na konstantnom podužnom nagibu visina vizure nad kolovozom ne zavisi od nagiba (oko i predmet se spuštaju jednako), pa vizura može preći preko ograde samo ako je podnožje ograde niže od trake ili zbog konkavne krivine nivelete. Zidovi tunela i cut & cover konstrukcija, kao i kosine usjeka iz 3D modela, zaklanjaju cijelom visinom', fm(par['visina_ograde'], 2))
+          + (_TF('; betonska ograda ima visinu {0} m', fm(par['visina_betonske'], 2)) if par.get('visina_betonske') not in (None, '') else _T('; betonska ograda zaklanja cijelom visinom'))
+          + (_TF(', a vijenac s ogradom na mostu {0} m.', fm(par['visina_ograde_most'], 2)) if par.get('visina_ograde_most') not in (None, '') else _T(', a vijenac s ogradom na mostu zaklanja cijelom visinom.'))
+          + _T(' Analize na hrvatskim autoputevima (Stančerić i dr., 2026) pokazuju da su bočne ograde i ograde u razdjelnom pojasu glavni uzrok nedovoljne preglednosti, i da 3D analiza daje vrijednosti u granicama 3 % od 2D proračuna sa ogradom kao punom preprekom.') + "\n")
     rows = []
     for k, R in out["vp"].items():
         Z = AV(out, k); av = Z["avail"]; rr = [r for r in av["rows"] if not r["trunc"]] or av["rows"]
@@ -209,6 +212,23 @@ def build_md(P, par, out, pp, o, cfg, figs, att, name, template_mode=False):
                      f"{min(r['D'] for r in rr):.0f}–{max(r['D'] for r in rr):.0f}", len(Z["defV"]), len(Z["defH"]) if R["A"]["has_ob"] else "–", f"{lenb:.0f}", "DA" if nb == 0 else "NE"])
     A(tab(_T('Sažetak raspoložive preglednosti u odnosu na zahtijevanu (projektna brzina Vp)')))
     A(table(["Trag", "Vp [km/h]", "Pzp [m]", "Pr [m]", "Vert. nedov. (br. zona)", "Hor. nedov. (br. zona)", _T('Dužina Pr<Pzp [m]'), "Pr ≥ Pzp"], rows))
+    MJ = {k: pg.mjere(AV(out, k), par) for k in out["vp"]}
+    used = [u for u in pg.UZROCI if any(M["po_uzroku"][u] > 0 for M in MJ.values())]
+    A(_T('## Dužina trase sa dovoljnom preglednošću i uzroci nedostataka\n'))
+    A(_T('Za svaki trag data je dužina na kojoj je Pr ≥ Pzp i dužina nedovoljne preglednosti razvrstana po uzroku: čelična ograda uz ivicu kolovoza, ograda u razdjelnom pojasu (strana prema drugom kolovozu), betonska ograda, vijenac i ograda mosta, tunel ili cut & cover, kosina usjeka iz 3D modela i niveleta (vertikalna preglednost). Uzrok je prepreka na dodirnoj tački vizure.\n'))
+    A(tab(_T('Dužina sa Pr ≥ Pzp i dužina nedovoljne preglednosti po uzroku')))
+    A(table(["Trag", _T('Dužina [m]'), _T('Pr ≥ Pzp [m]'), "[%]"] + [_T(u) + " [m]" for u in used],
+            [[f"{TRAG[out['vp'][k]['tag']]}, {pg.SIDE_NAME[out['vp'][k]['side']]}", f"{M['duz']:.0f}", f"{M['duz_ok']:.0f}", f"{100 * M['duz_ok'] / max(M['duz'], 1):.1f}"] + [f"{M['po_uzroku'][u]:.0f}" if M['po_uzroku'][u] else "–" for u in used] for k, M in MJ.items()]))
+    mr = [(k, m) for k, M in MJ.items() for m in M["rows"]]
+    if mr:
+        A(_T('## Mjere za otklanjanje nedostataka preglednosti\n'))
+        A(_T('Za svaku dionicu sa Pr < Pzp, u tački najvećeg nedostatka, data su tri moguća rješenja (Stančerić i dr., 2025 i 2026): pomjeranje prepreke od putanje oka (proširenje bankine, razdjelnog pojasa ili berme) za ΔHSO, povećanje radijusa krivine uz zadržan položaj prepreke, ili ograničenje brzine na vrijednost za koju je Pr ≥ Pzp. Uz kružnu krivinu potrebni bočni slobodni prostor je HSO = Pzp² / (8·R), pa je:\n'))
+        A(_T('ΔHSO = (Pzp² − Pr²) / (8·R),    R~potr~ = R·(Pzp / Pr)²\n'))
+        A(_T('gdje je: Pzp – zahtijevana preglednost [m]; Pr – raspoloživa preglednost [m]; R – najmanji radijus krivine na dužini vizure [m]; ΔHSO – potrebno povećanje bočnog odstojanja prepreke od putanje oka [m]; R~potr~ – radijus pri kojem je Pr = Pzp bez pomjeranja prepreke [m]. V~doz~ je najveća brzina (korak 5 km/h) za koju je Pzp(V, nagib) ≤ Pr na cijeloj dionici. Za nedostatke zbog nivelete mjere u planu nisu primjenjive (potreban je veći radijus vertikalne krivine).\n'))
+        A(tab(_T('Mjere za otklanjanje nedostataka preglednosti')))
+        A(table(["Trag", _T('Dionica [m]'), _T('Uzrok'), "R [m]", "Pr / Pzp [m]", "ΔHSO [m]", "R potr. [m]", "Vp / V doz [km/h]"],
+                [[f"{TRAG[out['vp'][k]['tag']]}, {pg.SIDE_NAME[out['vp'][k]['side']]}", f"{m['s0']:.0f}–{m['s1']:.0f}", _T(m['uzrok']), f"{m['R']:.0f}" if m['R'] else _T("pravac"),
+                  f"{m['Pr']:.0f} / {m['Pzp']:.0f}", f"{m['dHSO']:.2f}" if m['dHSO'] is not None else "–", f"{m['Rpotr']:.0f}" if m['Rpotr'] else "–", f"{m['V']:.0f} / {m['Vdoz']:.0f}"] for k, m in mr]))
     A(_T("## Uslov Pr (Pzp) ≥ X~d~ – put usporenja\n"))
     A(_T('Prema tački 3.4.2.1 Priloga 2 Pravilnika jedan od uslova bezbjednosti vožnje je da dužina raspoložive preglednosti Pr, odnosno zahtijevane preglednosti Pzp, bude veća ili jednaka dužini puta usporenja X~d~, tj. **Pr (Pzp) ≥ X~d~**. Dužina puta usporenja pri prelazu sa brzine V~1~ na V~2~ (slika 3-09, a = d = 0,8 m/s²) iznosi X~d~ = 0,1·V~sr~·ΔV, gdje je V~sr~ = (V~1~ + V~2~)/2, ΔV = V~1~ − V~2~ [km/h], X~d~ u [m]. Provjera se vrši na početku svake zone usporenja rezultirajućeg profila V~p~ (u smjeru vožnje), tj. na mjestu na kojem V~p~ počinje opadati.\n'))
     xr = []; xbad = 0; xznak = False
@@ -286,7 +306,7 @@ def build_md(P, par, out, pp, o, cfg, figs, att, name, template_mode=False):
     A(table(["Br.", "Naziv priloga", "Razmjera", "Format", _T('Datoteka')], [[a, b, c, d, e] for a, b, c, d, e in att]))
     seg("C")
     A(_T('## Korištena regulativa\n'))
-    A(_T('1. Smjernice za projektovanje, građenje, održavanje i nadzor na putevima u BiH – Geometrijski elementi (1-1-3), tačka 4.2.5 Preglednost pri preticanju, Tabela 8.\n2. Pravilnik o uslovima koje sa aspekta bezbjednosti saobraćaja moraju da ispunjavaju putni objekti i drugi elementi javnog puta (Sl. glasnik RS 50/2011), Prilog 1 tač. 6.1.3 i Prilog 2.\n3. Smjernice za projektovanje puteva u Republici Srbiji – Projektni elementi puta (JP Putevi Srbije), Tabela 4.2.4.\n'))
+    A(_T('1. Smjernice za projektovanje, građenje, održavanje i nadzor na putevima u BiH – Geometrijski elementi (1-1-3), tačka 4.2.5 Preglednost pri preticanju, Tabela 8.\n2. Pravilnik o uslovima koje sa aspekta bezbjednosti saobraćaja moraju da ispunjavaju putni objekti i drugi elementi javnog puta (Sl. glasnik RS 50/2011), Prilog 1 tač. 6.1.3 i Prilog 2.\n3. Smjernice za projektovanje puteva u Republici Srbiji – Projektni elementi puta (JP Putevi Srbije), Tabela 4.2.4.\n4. Stančerić, I., Majstorović, I., Stepan, Ž., Bezina, Š.: Influence of Roadside Safety Barriers on Available Sight Distance, Transportation Research Procedia 91 (2025) 600–607.\n5. Stančerić, I., Majstorović, I., Stepan, Ž.: Assessing the Impact of Roadside and Median Safety Barriers on Available Sight Distance on Croatian Motorways, Infrastructures 11 (2026) 316.\n'))
     return "".join(x.rstrip("\n") + "\n\n" for x in md)
 
 

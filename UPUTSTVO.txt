@@ -293,3 +293,8 @@ OGRADA KAO PREPREKA (VISINA), BEZ RAZDJELNOG POJASA
   tuneli, cut & cover i kosine usjeka zaklanjaju cijelom visinom. Pojedinačni unos može imati "visina" ili "vrsta": "ograda".
 - "koridor": {"bez_razdjelnog": [[7965.91, 8200]]}: na tom rasponu nema ograde u razdjelnom pojasu, a u vožnji je kolovoz jedinstven (plato naplate).
 - "koridor": {"zaobljenje": 10}: zaobljenje preloma ivica asfalta u prikazu (klinovi ulivnih/izlivnih traka), sigma u m; 0 = isključeno.
+- Visine po vrsti prepreke: "preglednost": {"visina_ograde": 0.75, "visina_betonske": 0.80, "visina_ograde_most": 1.10}
+  (None = zaklanja cijelom visinom). Vrsta dolazi iz koridora: čelična ograda (rigol/ivičnjak, otvorena trasa), betonska ograda (most, sredina),
+  most (vijenac), tunel / cut & cover. Oko i predmet su na stvarnoj koti kolovoza u traci (3D model), ne na koti osovine.
+- Elaborat optičkih analiza: tabela dužine sa Pr ≥ Pzp i nedostataka po uzroku, i tabela mjera po nedostatku
+  (ΔHSO = (Pzp² − Pr²)/(8R), potreban radijus R·(Pzp/Pr)², dozvoljena brzina).

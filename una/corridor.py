@@ -829,7 +829,7 @@ def median_entries(R, s_from, s_to, g_of, off, step=5.0, log=print):
             if not (s_from - 1 <= sta <= s_to + 1) or sta - last < step: continue
             last = sta; names = {n for n, _, _ in ss}; vr = None
             if "Ploca_mosta" in names or "Vijenac" in names:
-                f = _median_face(ss); o = round(max(0.0, g - f) / 0.05) * 0.05 if f is not None else None
+                f = _median_face(ss); o = round(max(0.0, g - f) / 0.05) * 0.05 if f is not None else None; vr = "betonska" if f is not None else None
                 if f is None:                                                   # dvije odvojene konstrukcije: vijenci uz razdjelni pojas
                     for sd_, key in ((1, "razdjelni_desno"), (-1, "razdjelni_lijevo")):
                         xs = [abs(x) for x in _vij_x([t for t in ss if t[0] == "Vijenac" and t[2] and 0 < max(p[0] * sd_ for p in t[2]) < g], 1.0)]
@@ -837,11 +837,11 @@ def median_entries(R, s_from, s_to, g_of, off, step=5.0, log=print):
                         o2 = round(max(0.0, g - max(xs)) / 0.05) * 0.05; c2 = cur2.get(key)
                         if c2 and abs(c2["ofset"] - o2) < 0.026 and sta - c2["_l"] < step * 1.6: c2["do"] = round(sta + step * 0.5, 2); c2["_l"] = sta
                         else:
-                            c2 = {"osovina": "centralna", "od": round(sta, 2), "do": round(sta + step * 0.5, 2), "ofset": o2, "strana": key, "_kor": True, "_l": sta}; out.append(c2); cur2[key] = c2
+                            c2 = {"osovina": "centralna", "od": round(sta, 2), "do": round(sta + step * 0.5, 2), "ofset": o2, "strana": key, "vrsta": "most", "_kor": True, "_l": sta}; out.append(c2); cur2[key] = c2
                         vals.append(o2)
             elif "AB_konstrukcija" in names:
                 mid = [abs(x) for x in _ab_x(ss, 1.0) if abs(x) < g]
-                o = round(max(0.0, g - max(mid)) / 0.05) * 0.05 if mid else None
+                o = round(max(0.0, g - max(mid)) / 0.05) * 0.05 if mid else None; vr = "tunel"
             else: o = off; vr = "ograda"
             if o is None: cur = None; continue
             if cur and abs(cur["ofset"] - o) < 0.026 and sta - cur["_l"] < step * 1.6 and cur.get("vrsta") == vr: cur["do"] = round(sta + step * 0.5, 2); cur["_l"] = sta
@@ -877,7 +877,7 @@ def face_entries(R, s_from, s_to, e_of, step=5.0, log=print):
                 else:
                     if cur and sta - cur["_l"] < step * 1.6: cur["do"] = round(sta, 2)          # bez rupe između susjednih dionica
                     cur = {"osovina": role, "od": round(sta, 2), "do": round(sta + step * 0.5, 2), "ofset": round(off, 2), "strana": st_, "tip": kind, "_kor": True, "_l": sta}; out.append(cur)
-    for en in out: en.pop("tip"); en.pop("_l")                                    # vrijednost je eksplicitni ofset
+    for en in out: en["vrsta"] = en.pop("tip"); en.pop("_l")                      # vrijednost je eksplicitni ofset; vrsta: most / tunel
     for k, v in stat.items():
         if v: log(_TF("Koridor → proračun: {0}: prepreka iz presjeka koridora, ofset od ivice kolovoza {1:.2f}–{2:.2f} m.", k, min(v), max(v)))
     return out
