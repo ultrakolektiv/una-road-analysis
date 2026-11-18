@@ -137,7 +137,9 @@ function strip(a,b,fa){
   if(terr)poly([W(a,o1,zp(a.F,o1)),W(a,o2,zp(a.F,o2)),W(a,o2,-60-a.z),W(a,o1,-60-a.z)],fog(sc(col,.78)))}   // teren kao zapreminsko tijelo: zavjesa od ivice do dna (nema providnosti)
  // asfalt kao trapez od ivica u presjeku a do ivica u presjeku b (proširenja/suženja bez stepenica)
  if(PR)for(let j=0;j<PV.length;j++){const r=PV[j],t=PVB[j];if(Math.abs(r[0]-t[0])<.02&&Math.abs(r[1]-t[1])<.02)continue;
-  const NS=Math.max(1,Math.ceil(Math.max(r[1]-r[0],t[1]-t[0])/2.5));for(let m=0;m<NS;m++){const u0=m/NS,u1=(m+1)/NS,a0=r[0]+(r[1]-r[0])*u0,a1=r[0]+(r[1]-r[0])*u1,b0=t[0]+(t[1]-t[0])*u0,b1=t[0]+(t[1]-t[0])*u1;
+  const NS=Math.max(1,Math.ceil(Math.max(r[1]-r[0],t[1]-t[0])/2.5)),UU=[];for(let m=0;m<=NS;m++)UU.push(m/NS);   // podjela i u prelomima profila (preklop prati poprečni profil, ne prekriva oznake)
+  for(const [F_,q_] of [[a.F,r],[b.F,t]])for(const p of F_){const u=(p[0]-q_[0])/((q_[1]-q_[0])||1);if(u>.002&&u<.998)UU.push(u)}UU.sort((x,y)=>x-y);
+  for(let m=0;m<UU.length-1;m++){const u0=UU[m],u1=UU[m+1];if(u1-u0<1e-4)continue;const a0=r[0]+(r[1]-r[0])*u0,a1=r[0]+(r[1]-r[0])*u1,b0=t[0]+(t[1]-t[0])*u0,b1=t[0]+(t[1]-t[0])*u1;
    poly([W(a,a0,zp(a.F,a0)+.004),W(a,a1,zp(a.F,a1)+.004),W(b,b1,zp(b.F,b1)+.004),W(b,b0,zp(b.F,b0)+.004)],fog(C.road))}}
  // kolotrazi (blago potamnjenje po trakama)
  if(a.kind!=="tunel"||true){const LC=[];for(const r of PVL){const nl=Math.max(1,Math.round((r[1]-r[0])/3.85));for(let j=0;j<nl;j++)LC.push(r[0]+(j+.5)*(r[1]-r[0])/nl)}for(const c0 of LC)for(const w of [-.9,.9]){const o=c0+w;poly([W(a,o-.35,zp(a.F,o-.35)+.006),W(a,o+.35,zp(a.F,o+.35)+.006),W(b,o+.35,zp(b.F,o+.35)+.006),W(b,o-.35,zp(b.F,o-.35)+.006)],fog(C.road2),.45)}}

@@ -483,6 +483,39 @@ def _taper_jumps(keep, ratio=8.0):
     return [k for j, k in enumerate(keep) if j not in drop]
 
 
+def _blend_geom(Ga, Gb, f):
+    """Presjek između dva presjeka iste vrste (prelaz širine): ivice, profil gornje površine i ograde linearno po f (0 → Ga, 1 → Gb)."""
+    L = lambda a, b: a + (b - a) * f
+    G = dict(Ga if f < 0.5 else Gb)
+    for k in ("e", "eL", "eR", "shL", "shR"): G[k] = L(Ga[k], Gb[k])
+    if len(Ga["pv"]) == len(Gb["pv"]): G["pv"] = [[L(a[0], b[0]), L(a[1], b[1])] for a, b in zip(Ga["pv"], Gb["pv"])]
+    if Ga.get("gap") and Gb.get("gap"): G["gap"] = (L(Ga["gap"][0], Gb["gap"][0]), L(Ga["gap"][1], Gb["gap"][1]))
+    def side(top, sd):
+        pts = sorted([(abs(x), z) for x, z in top if x * sd >= 0]); return pts if len(pts) >= 2 and pts[-1][0] > 0.1 else None
+    tp = []
+    for sd in (-1, 1):
+        a, b = side(Ga["top"], sd), side(Gb["top"], sd)
+        if not a or not b: tp += [p for p in (Ga["top"] if f < 0.5 else Gb["top"]) if p[0] * sd >= 0]; continue
+        ea_ = Ga["eR"] if sd > 0 else abs(Ga["eL"]); eb_ = Gb["eR"] if sd > 0 else abs(Gb["eL"])
+        c = max(0.0, min(ea_, eb_) - 0.5); ma, mb = a[-1][0], b[-1][0]
+        if ma <= c + 0.05 or mb <= c + 0.05: c = 0.0
+        Tf = lambda x, m: x if x <= c else c + (x - c) / (m - c)               # dio do zajedničke ivice ostaje na mjestu, razvlači se samo dio koji se širi
+        ua = [Tf(x, ma) for x, _ in a]; ub = [Tf(x, mb) for x, _ in b]; U = sorted(set([round(u, 4) for u in ua + ub]))
+        za = np.interp(U, ua, [z for _, z in a]); zb = np.interp(U, ub, [z for _, z in b]); M = L(ma, mb)
+        tp += [(sd * (u if u <= c else c + (u - c) * (M - c)), float(L(p, q))) for u, p, q in zip(U, za, zb)]
+    G["top"] = sorted(set(tp))
+    if len(Ga["box"]) == len(Gb["box"]) and all(x[0] == y[0] for x, y in zip(Ga["box"], Gb["box"])):
+        bx = []
+        for x, y in zip(Ga["box"], Gb["box"]):
+            r = [x[0], L(x[1], y[1]), L(x[2], y[2]), L(x[3], y[3])]
+            pa, pb = (x[4] if len(x) > 4 else None), (y[4] if len(y) > 4 else None)
+            if pa and pb and len(pa) == len(pb): r.append([(L(p[0], q[0]), L(p[1], q[1])) for p, q in zip(pa, pb)])
+            elif pa or pb: r.append(pa if (f < 0.5 and pa) or not pb else pb)
+            bx.append(r)
+        G["box"] = bx
+    return G
+
+
 def _round_edges(o_, sig=10.0):
     """Zaobljenje ivica asfalta u prikazu: početak/kraj klina dodatne trake (ulivna/izlivna traka), proširenja – Gausovo izravnanje
     ivica po dužini (sigma = sig m) unutar dionica s istim brojem kolovoza; konstantne ivice ostaju iste, prelomi se zaobljavaju."""
@@ -502,6 +535,19 @@ def _round_edges(o_, sig=10.0):
                     vn = np.interp(qq, g, vs)
                     for m, i in enumerate(range(i0, i1 + 1)):
                         if abs(vn[m] - v[m]) < 1.5: o_["e"][i]["pv"][j][t] = round(float(vn[m]), 3)
+            for fk, ix in (("orng", 0), ("orng", 1), ("med", 0), ("med", 2)):          # ivice drugog kolovoza i razdjelnog pojasa (prelaz otvorena trasa – most)
+                j0 = i0
+                while j0 <= i1:
+                    if not o_["e"][j0].get(fk): j0 += 1; continue
+                    j1 = j0
+                    while j1 + 1 <= i1 and o_["e"][j1 + 1].get(fk): j1 += 1
+                    if j1 - j0 >= 4:
+                        qq = q[j0:j1 + 1]; v = np.array([float(o_["e"][i][fk][ix]) for i in range(j0, j1 + 1)])
+                        g = np.arange(qq[0], qq[-1] + 0.5, 1.0); vg = np.interp(g, qq, v)
+                        vs = np.convolve(np.pad(vg, (len(w) // 2, len(w) // 2), mode="edge"), kk, mode="valid"); vn = np.interp(qq, g, vs)
+                        for m, i in enumerate(range(j0, j1 + 1)):
+                            if abs(vn[m] - v[m]) < 1.5: o_["e"][i][fk][ix] = round(float(vn[m]), 3)
+                    j0 = j1 + 1
         i0 = i1 + 1
 
 
@@ -518,8 +564,16 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
         for sta, ss in R["sect"][nm]:
             if s_from - 1 <= sta <= s_to + 1 and sta - last >= max(1.2, (s_to - s_from) / 2500): keep.append((sta, ss)); last = sta
         keep = _taper_jumps(keep, (cfg.get("koridor") or {}).get("prelaz_nagib", 8.0) if isinstance(cfg.get("koridor"), dict) else 8.0)
-        sta = np.array([r[0] for r in keep]); N, E = A_[nm].pos(sta); nu = A_[nm].heading(sta)
-        secs_by[nm] = dict(sta=sta, N=N, E=E, nu=nu, z0=A_[nm].z(sta), G=[section_geom(ss, 0.78, False, "CENTR" in nm.upper()) for _, ss in keep], k=A_[nm].curvature(sta))
+        GG = [section_geom(ss, 0.78, False, "CENTR" in nm.upper()) for _, ss in keep]; SS = [r[0] for r in keep]
+        st2, G2 = [], []                                              # dugi razmaci (prelazi širine): međupresjeci na osovini, širina se interpolira (ivice prate krivinu, bez tetiva)
+        for j in range(len(SS)):
+            if j and SS[j] - SS[j - 1] > 4.0 and GG[j]["kind"] == GG[j - 1]["kind"]:
+                m_ = int(math.ceil((SS[j] - SS[j - 1]) / 2.0))
+                for t_ in range(1, m_):
+                    f_ = t_ / m_; st2.append(SS[j - 1] + f_ * (SS[j] - SS[j - 1])); G2.append(_blend_geom(GG[j - 1], GG[j], f_))
+            st2.append(SS[j]); G2.append(GG[j])
+        sta = np.array(st2); N, E = A_[nm].pos(sta); nu = A_[nm].heading(sta)
+        secs_by[nm] = dict(sta=sta, N=N, E=E, nu=nu, z0=A_[nm].z(sta), G=G2, k=A_[nm].curvature(sta))
     trees = {nm: _NN(np.c_[v["E"], v["N"]]) for nm, v in secs_by.items()}
     bz_ = _bez_razdjelnog(cfg.get("koridor") or {})
     h_oka = float(par["h_oka"]); scene = dict(routes={}, h=h_oka, range=[s_from, s_to], projekat=cfg.get("projekat", ""), h_pr=float(par["h_prepreke"]), h_auto=bool(par.get("h_auto")))
@@ -576,7 +630,7 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
             if abs(lat[sdsel]) > 25: raise ValueError(_TF("Koridor: osovina '{0}' na st. {1:.1f} je {2:.0f} m od osovine u UNA projektu – koordinate ili stacionaže se ne poklapaju.", nm, sta, abs(lat[sdsel])))
             # --- profil u stacionažnom okviru
             top = list(G["top"]); oth_top = None; oth_e = None
-            oth_rng = None
+            oth_rng = None; oth_box = None
             if oth_a and G["kind"] in ("otvorena", "most"):
                 d, j = trees[oth_a].query([x, y])
                 if d < 60:
@@ -585,6 +639,13 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
                         t = (secs_by[oth_a]["E"][j] - x) * nxs + (secs_by[oth_a]["N"][j] - y) * nys
                         dz = float(secs_by[oth_a]["z0"][j]) - z0
                         oth_top = [(o + t, zz + dz) for o, zz in Go["top"]]; oth_e = (Go["e"], t); oth_rng = sorted((sg * (Go["eL"] + t), sg * (Go["eR"] + t)))
+                        if G["kind"] == "most":                              # vijenac drugog mosta uz razdjelni pojas (dvije odvojene konstrukcije)
+                            pb = [b_ for b_ in Go["box"] if b_[0] == ST["parapet"]]
+                            if pb:
+                                b_ = min(pb, key=lambda r_: min(abs(r_[1] + t), abs(r_[2] + t)))
+                                sd_ = 1 if b_[1] > 0 else -1; m_ = min(abs(b_[1]), abs(b_[2]))
+                                prof = [(round(sd_ * (m_ + rx) + t, 3), round(rz + dz, 3)) for rx, rz in b_[4]] if len(b_) > 4 and b_[4] else []
+                                oth_box = [ST["medblok"], b_[1] + t, b_[2] + t, b_[3] + dz] + ([prof] if len(prof) >= 3 else [])
             drv = lambda tp: sorted([(sg * o, zz) for o, zz in tp])
             P1 = drv(top); P2 = drv(oth_top) if oth_top else None; pts = list(P1); med = None
             if P2:
@@ -677,7 +738,7 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
             o_["tx"].append(round(sg * math.sin(nu), 5)); o_["ty"].append(round(sg * math.cos(nu), 5)); o_["k"].append(round(kd, 6))
             o_["el"].append(_elem_at(A_[nm_c], sta)); o_["kind"].append(G["kind"]); o_["jn"].append(0); o_["pt"].append(pt); o_["hl"].append(hl); o_["vr"].append(round(_interp_s(PD["A"], PD["A"]["vr"], sta, PD["o"]), 1) if "vr" in PD["A"] else None); o_["gr"].append(G["gr"]); o_["F"].append([[round(a_, 3), round(b_, 3)] for a_, b_ in full]); o_["e"].append(zones)
             bx = []
-            for st_, a_, b_, h_, *pf in G["box"]:
+            for st_, a_, b_, h_, *pf in (G["box"] + ([oth_box] if (oth_box and P2) else [])):
                 lo, hi = sorted((sg * a_, sg * b_))
                 if st_ == ST["medblok"] and pf: pf = [sorted([(round(sg * x_, 3), z_) for x_, z_ in pf[0]])]      # apsolutni profil u okviru vožnje
                 bx.append([st_, round(lo, 3), round(hi, 3), round(h_, 3)] + (list(pf) if pf else []))
