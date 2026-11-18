@@ -50,7 +50,8 @@ def lzn(V, g, par):
 
 
 DEFAULTS = dict(norma="BiH", ofset=1.75, h_oka=None, h_prepreke="auto", h2_varijanta="nize", korak_proracun=5.0, korak_crtez=20.0, mjerilo=1000, scenarij=1,
-                L_zahtijevano=None, dodatak_L=0.0, Lmax=500.0, ivice=True, ivica_debljina=0.3)
+                L_zahtijevano=None, dodatak_L=0.0, Lmax=500.0, ivice=True, ivica_debljina=0.3,
+                visina_ograde=None)          # visina čelične odbojne ograde na otvorenoj trasi [m]; None = ograda zaklanja cijelom visinom (kao ranije)
 SIDES = {"desno": "D", "lijevo": "L", "D": "D", "L": "L"}
 SIDE_NAME = TrDict({"D": "desna traka (desno od osovine kolovoza)", "L": "lijeva traka (lijevo od osovine kolovoza)"})
 TIP_ZNAK = TrDict({"PRAVAC": "pravac", "KRUZNI_LUK": "kružni luk", "PRIJELAZNICA": "prijelaznica"})
@@ -126,12 +127,18 @@ def _match(en, c, e=None):
     return True
 
 
-def obstacle_offsets(c, par, s, median=False):
+def obstacle_offsets(c, par, s, median=False, heights=False):
     """Ofset prepreke od krajnje ivice kolovoza za stacionaže s: (oR, oL) – desna/lijeva strana u smjeru STACIONAŽE; NaN = nema prepreke.
     Redoslijed prioriteta: zadano po vrsti elementa < unos po elementu (br.) < unos po rasponu stacionaža."""
     s = np.asarray(s, float); oR = np.full(len(s), np.nan); oL = np.full(len(s), np.nan); oM = np.full(len(s), np.nan); oM2 = np.full(len(s), np.nan)   # oM (desni kolovoz) / oM2 (lijevi kolovoz): ograda u razdjelnom pojasu (centralna osovina), ofset od unutrašnje ivice kolovoza
-    ret = (lambda: (oR, oL, oM, oM2)) if median else (lambda: (oR, oL))
+    hR = np.full(len(s), np.nan); hL = np.full(len(s), np.nan); hM = np.full(len(s), np.nan); hM2 = np.full(len(s), np.nan)   # visina prepreke [m] (NaN = zaklanja cijelom visinom: zid, obloga, kosina, parapet)
+    if heights: ret = (lambda: (oR, oL, oM, oM2, hR, hL, hM, hM2))
+    else: ret = (lambda: (oR, oL, oM, oM2)) if median else (lambda: (oR, oL))
     pre = par.get("prepreke") or []; dflt = par.get("prepreke_zadano") or {}; tipovi = par.get("tipovi_prepreka") or {}; ztip = par.get("zadani_tip") or ""
+    hog = par.get("visina_ograde"); hog = float(hog) if hog not in (None, "") else np.nan
+    def hv(en):                                            # visina ograde: eksplicitno 'visina', ili visina čelične ograde za unose vrste 'ograda'
+        if en.get("visina") not in (None, ""): return float(en["visina"])
+        return hog if en.get("vrsta") == "ograda" else np.nan
     if not pre and not dflt and not ztip: return ret()
     def val(en):
         if en.get("tip") not in (None, ""):
@@ -143,38 +150,38 @@ def obstacle_offsets(c, par, s, median=False):
         if c.role == "lijeva": return (raz, vani)
         return (vani, vani)
     els = element_rows(c)
-    def put(mask, off, side, k):
+    def put(mask, off, side, k, h=np.nan):
         if isinstance(off, dict):
             r, l = sides(off)
-            if r is not None: oR[mask] = float(r)
-            if l is not None: oL[mask] = float(l)
+            if r is not None: oR[mask] = float(r); hR[mask] = h
+            if l is not None: oL[mask] = float(l); hL[mask] = h
             return
         if side in ("razdjelni", "razdjelni_desno", "razdjelni_lijevo"):
-            if side != "razdjelni_lijevo": oM[mask] = off
-            if side != "razdjelni_desno": oM2[mask] = off
+            if side != "razdjelni_lijevo": oM[mask] = off; hM[mask] = h
+            if side != "razdjelni_desno": oM2[mask] = off; hM2[mask] = h
             return
-        if side in ("desno", "D", "desna"): oR[mask] = off
-        elif side in ("lijevo", "L", "lijeva"): oL[mask] = off
+        if side in ("desno", "D", "desna"): oR[mask] = off; hR[mask] = h
+        elif side in ("lijevo", "L", "lijeva"): oL[mask] = off; hL[mask] = h
         else:                                            # 'unutra' / 'vani' prema zakrivljenosti (k>0: desna krivina, unutra = desno)
             if abs(k) < 1e-12: return
             inside_right = k > 0
             if side in ("vani", "izvana"): inside_right = not inside_right
-            (oR if inside_right else oL)[mask] = off
+            (oR if inside_right else oL)[mask] = off; (hR if inside_right else hL)[mask] = h
     for e in els:
         m = (s >= e["s0"] - 1e-9) & (s <= e["s1"] + 1e-9)
         if not m.any(): continue
         key = {"PRAVAC": "pravac", "KRUZNI_LUK": "kruzni", "PRIJELAZNICA": 'prijelaznica'}[e["typ"]]
         if dflt.get(key) not in (None, ""): put(m, float(dflt[key]), "unutra", e["k"])
-        if ztip and e["typ"] != "PRAVAC" and tipovi.get(ztip) not in (None, ""): put(m, tipovi[ztip] if isinstance(tipovi[ztip], dict) else float(tipovi[ztip]), "unutra", e["k"])
+        if ztip and e["typ"] != "PRAVAC" and tipovi.get(ztip) not in (None, ""): put(m, tipovi[ztip] if isinstance(tipovi[ztip], dict) else float(tipovi[ztip]), "unutra", e["k"], hog if par.get("zadani_tip_ograda", True) else np.nan)
         for en in pre:
             if not _match(en, c): continue
             if en.get("element") not in (None, "") and int(en["element"]) == e["no"] and val(en) is not None:
-                put(m, val(en), en.get("strana", "unutra"), e["k"])
+                put(m, val(en), en.get("strana", "unutra"), e["k"], hv(en))
     for en in pre:                                        # rasponi stacionaža
         if not _match(en, c) or en.get("od") in (None, "") or val(en) is None: continue
         for e in els:
             m = (s >= max(e["s0"], float(en["od"])) - 1e-9) & (s <= min(e["s1"], float(en["do"])) + 1e-9)
-            if m.any(): put(m, val(en), en.get("strana", "unutra"), e["k"])
+            if m.any(): put(m, val(en), en.get("strana", "unutra"), e["k"], hv(en))
     return ret()
 
 
@@ -189,7 +196,8 @@ def case_frame(c, par, s):
 def build_chain(ch, P, par, scen=1, side="D"):
     """Lanac slučajeva u smjeru vožnje → čvorovi (korak 1 m) po osovini vozne trake na strani side ('D' desno / 'L' lijevo od osovine)."""
     cols = {k: [] for k in ("x", "y", "s", "ci", "z", "v", "g", "vr", "reg")}
-    ob = {k: [] for k in ("rx", "ry", "lx", "ly")}            # prepreke u smjeru vožnje (desno/lijevo od vozača), CAD koordinate
+    ob = {k: [] for k in ("rx", "ry", "lx", "ly", "rh", "lh", "rz", "lz")}   # prepreke u smjeru vožnje (desno/lijevo od vozača), CAD koordinate; visina ograde i kota podnožja
+    T = par.get("_teren")
     for ci, c in enumerate(ch):
         pr = case_prof(c, par)
         d = pr["pD"] if side == "D" else pr["pL"]              # udaljenost osovine oka od osovine puta, + desno u smjeru vožnje
@@ -200,15 +208,20 @@ def build_chain(ch, P, par, scen=1, side="D"):
         xl = x0 + c.sg * d * nx; yl = y0 + c.sg * d * ny
         cols["x"] += list(yl); cols["y"] += list(xl)            # CAD: x = istok (Y), y = sjever (X)
         cols["s"] += list(s); cols["ci"] += [ci] * len(s)
-        oR, oL, oMd, oMl = obstacle_offsets(c, par, s, median=True)    # smjer stacionaže
-        oM = oMd if c.sg == 1 else oMl
-        for nm, o, sign in (("R", oR, +1), ("L", oL, -1)):       # položaj prepreke u smjeru stacionaže: desno +(eR+o), lijevo -(eL+o)
+        oR, oL, oMd, oMl, hR, hL, hMd, hMl = obstacle_offsets(c, par, s, median=True, heights=True)    # smjer stacionaže
+        oM = oMd if c.sg == 1 else oMl; hM = hMd if c.sg == 1 else hMl
+        zc = np.interp(s, c.S, c.Z)
+        for nm, o, h, sign in (("R", oR, hR, +1), ("L", oL, hL, -1)):       # položaj prepreke u smjeru stacionaže: desno +(eR+o), lijevo -(eL+o)
             lat = sign * ((pr["eR"] if sign > 0 else pr["eL"]) + o)
             if c.role == "centralna" and np.isfinite(oM).any() and (sign < 0) == (c.sg == 1):    # strana vozača prema razdjelnom pojasu: ograda je u razdjelnom pojasu
-                o = oM; lat = (pr["gR"] - oM) if c.sg == 1 else -(pr["gL"] - oM)
+                o = oM; h = hM; lat = (pr["gR"] - oM) if c.sg == 1 else -(pr["gL"] - oM)
             px = np.where(np.isnan(o), np.nan, y0 + lat * ny); py = np.where(np.isnan(o), np.nan, x0 + lat * nx)
-            ob[("r" if (nm == "R") == (c.sg == 1) else "l") + "x"] += list(px); ob[("r" if (nm == "R") == (c.sg == 1) else "l") + "y"] += list(py)
-        zc = np.interp(s, c.S, c.Z); cols.setdefault("zt", []).extend(list(zc))
+            zb = zc.copy()                                       # kota podnožja ograde: iz 3D modela (TIN) ako postoji, inače kota trase
+            if T is not None and np.isfinite(h).any():
+                zt_ = T.z(np.nan_to_num(px), np.nan_to_num(py)); zb = np.where(np.isfinite(zt_) & (np.abs(zt_ - zc) < 3.0), zt_, zc)
+            kk = ("r" if (nm == "R") == (c.sg == 1) else "l")
+            ob[kk + "x"] += list(px); ob[kk + "y"] += list(py); ob[kk + "h"] += list(h); ob[kk + "z"] += list(zb)
+        cols.setdefault("zt", []).extend(list(zc))
         if cols["z"]: zc = zc + (cols["z"][-1] - zc[0])
         cols["z"] += list(zc)
         V = c.V
@@ -283,18 +296,27 @@ def analyse(A, par, Lfun=L_vp):
     return dict(rows=rows, mR=mR, mL=mL)
 
 
-def _first_blocked(A, a, cand):
-    """Prvi (po redu) kandidat b čija tetiva a→b presijeca prepreku; None ako nijedan."""
+def _first_blocked(A, a, cand, par=None):
+    """Prvi (po redu) kandidat b čija tetiva a→b presijeca prepreku; None ako nijedan. Ograda zadane visine (A['obrh'], čelična odbojna ograda)
+    zaklanja samo ako vizura oko (h_oka) → predmet (h_pr) na tom mjestu prolazi ispod vrha ograde (kota podnožja + visina)."""
     if len(cand) == 0: return None
     x = A["xa"]; y = A["ya"]; ux = x[cand] - x[a]; uy = y[cand] - y[a]
     ks = np.arange(a + 1, cand[-1]); 
     if len(ks) == 0: return None
     mk = ks[None, :] < cand[:, None]; blk = np.zeros(len(cand), bool)
-    for ox, oy, sgn in ((A["obrxa"], A["obrya"], +1), (A["oblxa"], A["oblya"], -1)):
+    zl = None
+    if par is not None and "zt" in A and (np.isfinite(A.get("obrh", np.array([np.nan]))).any() or np.isfinite(A.get("oblh", np.array([np.nan]))).any()):
+        q = A["q"]; zt = A["zt"]; ze = zt[a] + par["h_oka"]; zc = zt[cand] + hpr_at(A, par, a)
+        f = (q[ks][None, :] - q[a]) / np.maximum(q[cand] - q[a], 1e-6)[:, None]; zl = ze + (zc - ze)[:, None] * f      # visina vizure nad čvorom prepreke
+    for ox, oy, oh, oz, sgn in ((A["obrxa"], A["obrya"], A.get("obrh"), A.get("obrz"), +1), (A["oblxa"], A["oblya"], A.get("oblh"), A.get("oblz"), -1)):
         px = ox[ks]; py = oy[ks]; fin = np.isfinite(px)
         if not fin.any(): continue
         cr = ux[:, None] * (np.where(fin, py, 0) - y[a]) - uy[:, None] * (np.where(fin, px, 0) - x[a])      # >0: prepreka lijevo od tetive
-        blk |= ((sgn * cr > 0) & mk & fin[None, :]).any(1)           # desna prepreka lijevo od tetive (ili lijeva desno) = tetiva je presjekla prepreku
+        hit = (sgn * cr > 0) & mk & fin[None, :]                       # desna prepreka lijevo od tetive (ili lijeva desno) = tetiva je presjekla prepreku u tlocrtu
+        if zl is not None and oh is not None:
+            top = np.where(np.isfinite(oh[ks]), oz[ks] + oh[ks], np.inf)
+            hit &= zl < top[None, :]                                    # vizura iznad vrha ograde: ograda ne zaklanja
+        blk |= hit.any(1)
     w = np.where(blk)[0]
     return int(cand[w[0]]) if len(w) else None
 
@@ -326,9 +348,9 @@ def expected(A, par, Lfun=L_vp):
         end = bmax == n - 1 and q[n - 1] - q[a] < max(Lmax, Lr) - 1e-6
         blocked = None
         if A["has_ob"] and bmax > a + 1:
-            coarse = np.arange(a + 2, bmax + 1, 4); cb = _first_blocked(A, a, coarse)
+            coarse = np.arange(a + 2, bmax + 1, 4); cb = _first_blocked(A, a, coarse, par)
             if cb is not None:
-                fine = np.arange(max(a + 2, cb - 3), cb + 1); blocked = _first_blocked(A, a, fine)
+                fine = np.arange(max(a + 2, cb - 3), cb + 1); blocked = _first_blocked(A, a, fine, par) or cb
         tblk = None
         if par.get("_teren") is not None and bmax > a + 1:
             coarse = np.arange(a + 2, bmax + 1, 4); cb = _terr_first_blocked(A, par, a, coarse)

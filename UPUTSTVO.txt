@@ -286,3 +286,10 @@ VOŽNJA KROZ KORIDOR – PRELAZI I NAPLATA
 - Spoj centralne osovine i razdvojenih kolovoza je bez prekida (koridor.prekid, zadano 0,4 m); drugi kolovoz se crta i na mostovima.
 - Naplatno mjesto (shematski: otoci s kabinama i nadstrešnica preko cijele širine platoa):
   "koridor": {"naplata": {"st": 8160.0, "produzi": 40, "duzina": 24}} – vožnja staje kod kabine, iza nje kolovoz se produži za "produzi" m.
+
+OGRADA KAO PREPREKA (VISINA), BEZ RAZDJELNOG POJASA
+- "koridor": {"ograda_visina": 0.75} (ili "preglednost": {"visina_ograde": 0.75}): čelična odbojna ograda na otvorenoj trasi zaklanja
+  vizuru samo ako zraka oko → predmet na mjestu ograde prolazi ispod njenog vrha (kota podnožja iz 3D modela/TIN). Parapeti mostova,
+  tuneli, cut & cover i kosine usjeka zaklanjaju cijelom visinom. Pojedinačni unos može imati "visina" ili "vrsta": "ograda".
+- "koridor": {"bez_razdjelnog": [[7965.91, 8200]]}: na tom rasponu nema ograde u razdjelnom pojasu, a u vožnji je kolovoz jedinstven (plato naplate).
+- "koridor": {"zaobljenje": 10}: zaobljenje preloma ivica asfalta u prikazu (klinovi ulivnih/izlivnih traka), sigma u m; 0 = isključeno.

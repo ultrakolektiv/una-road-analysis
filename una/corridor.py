@@ -473,6 +473,28 @@ def _taper_jumps(keep, ratio=8.0):
     return [k for j, k in enumerate(keep) if j not in drop]
 
 
+def _round_edges(o_, sig=10.0):
+    """Zaobljenje ivica asfalta u prikazu: početak/kraj klina dodatne trake (ulivna/izlivna traka), proširenja – Gausovo izravnanje
+    ivica po dužini (sigma = sig m) unutar dionica s istim brojem kolovoza; konstantne ivice ostaju iste, prelomi se zaobljavaju."""
+    if not sig or sig <= 0: return
+    q = np.array(o_["q"], float); n = len(q)
+    if n < 5: return
+    key = [len(z["pv"]) for z in o_["e"]]; jn = o_["jn"]; i0 = 0
+    while i0 < n:
+        i1 = i0
+        while i1 + 1 < n and key[i1 + 1] == key[i0] and not jn[i1]: i1 += 1
+        if i1 - i0 >= 4:
+            qq = q[i0:i1 + 1]; g = np.arange(qq[0], qq[-1] + 0.5, 1.0); w = np.arange(-3 * sig, 3 * sig + 1); kk = np.exp(-0.5 * (w / sig) ** 2); kk /= kk.sum()
+            for j in range(key[i0]):
+                for t in (0, 1):
+                    v = np.array([o_["e"][i]["pv"][j][t] for i in range(i0, i1 + 1)]); vg = np.interp(g, qq, v)
+                    vp = np.pad(vg, (len(w) // 2, len(w) // 2), mode="edge"); vs = np.convolve(vp, kk, mode="valid")
+                    vn = np.interp(qq, g, vs)
+                    for m, i in enumerate(range(i0, i1 + 1)):
+                        if abs(vn[m] - v[m]) < 1.5: o_["e"][i]["pv"][j][t] = round(float(vn[m]), 3)
+        i0 = i1 + 1
+
+
 def build_scene(R, s_from, s_to, out, par, cfg, log=print):
     """Scena vožnje. SVE što se tiče preglednosti (oko, ofset trake, prepreke, zrake, D, Lz, v, g) uzima se direktno iz UNA proračuna (out['vp'] / out['ocek']);
     iz koridora dolaze samo oblik presjeka, teren, most i tunel. 'F' = osovina D* u smjeru stacionaže, 'B' = druga osovina suprotno stacionaži."""
@@ -489,6 +511,7 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
         sta = np.array([r[0] for r in keep]); N, E = A_[nm].pos(sta); nu = A_[nm].heading(sta)
         secs_by[nm] = dict(sta=sta, N=N, E=E, nu=nu, z0=A_[nm].z(sta), G=[section_geom(ss, 0.78, False, "CENTR" in nm.upper()) for _, ss in keep], k=A_[nm].curvature(sta))
     trees = {nm: _NN(np.c_[v["E"], v["N"]]) for nm, v in secs_by.items()}
+    bz_ = _bez_razdjelnog(cfg.get("koridor") or {})
     h_oka = float(par["h_oka"]); scene = dict(routes={}, h=h_oka, range=[s_from, s_to], projekat=cfg.get("projekat", ""), h_pr=float(par["h_prepreke"]), h_auto=bool(par.get("h_auto")))
     ug_c = 0.0
     for sec_ in cfg.get("sekcije", []):
@@ -603,6 +626,8 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
             else: pvd = [sorted((sg * G["eL"], sg * G["eR"]))]                  # stvarna širina asfalta (dodatne trake, proširenja)
             zones = dict(ug=ug_c if (G.get("gap") and ug_c) else 0, pv=[[round(a_, 3), round(b_, 3)] for a_, b_ in pvd], e=round(G["e"], 3), shL=round(sg * (G["shL"] if sg > 0 else G["shR"]), 3), shR=round(sg * (G["shR"] if sg > 0 else G["shL"]), 3),
                          oe=round(oth_e[0], 3) if (oth_top and oth_e) else 0, ot=round(sg * oth_e[1], 3) if (oth_top and oth_e) else 0, med=[round(v, 3) for v in med] if med else None)
+            if G.get("gap") and any(a_ - 1e-6 <= sta <= b_ + 1e-6 for a_, b_ in bz_):          # bez razdjelnog pojasa (plato naplate): jedan kolovoz
+                zones["pv"] = [[zones["pv"][0][0], zones["pv"][-1][1]]]; zones["med"] = None; zones["ug"] = 0
             if oth_top and oth_e and oth_rng: zones["orng"] = [round(oth_rng[0], 3), round(oth_rng[1], 3)]
             if oth_top and G["kind"] == "most" and med and not G.get("gap"): zones["mg"] = 1          # između dvije rasponske konstrukcije nema površine
             # --- prepreke iz UNA proračuna (bočni ofset u okviru vožnje)
@@ -662,6 +687,7 @@ def build_scene(R, s_from, s_to, out, par, cfg, log=print):
                     w2 = 12; sm = np.array([md[max(0, j - w2):j + w2 + 1].mean() for j in range(len(seg))])
                     for j, val in enumerate(sm): o_["ob"][i0_ + j][kk] = round(float(val), 3)
                 i0_ = i1_ + 1
+        _round_edges(o_, float((cfg.get("koridor") or {}).get("zaobljenje", 10.0)) if isinstance(cfg.get("koridor"), dict) else 10.0)
         scene["routes"][tag] = o_
     log(_TF("Koridor: scena izrađena ({0} presjeka po smjeru).", len(order)))
     return scene
@@ -801,7 +827,7 @@ def median_entries(R, s_from, s_to, g_of, off, step=5.0, log=print):
         g = g_of.get(nm, 1.5); cur = None; last = -1e9; cur2 = {}
         for sta, ss in lst:
             if not (s_from - 1 <= sta <= s_to + 1) or sta - last < step: continue
-            last = sta; names = {n for n, _, _ in ss}
+            last = sta; names = {n for n, _, _ in ss}; vr = None
             if "Ploca_mosta" in names or "Vijenac" in names:
                 f = _median_face(ss); o = round(max(0.0, g - f) / 0.05) * 0.05 if f is not None else None
                 if f is None:                                                   # dvije odvojene konstrukcije: vijenci uz razdjelni pojas
@@ -816,12 +842,14 @@ def median_entries(R, s_from, s_to, g_of, off, step=5.0, log=print):
             elif "AB_konstrukcija" in names:
                 mid = [abs(x) for x in _ab_x(ss, 1.0) if abs(x) < g]
                 o = round(max(0.0, g - max(mid)) / 0.05) * 0.05 if mid else None
-            else: o = off
+            else: o = off; vr = "ograda"
             if o is None: cur = None; continue
-            if cur and abs(cur["ofset"] - o) < 0.026 and sta - cur["_l"] < step * 1.6: cur["do"] = round(sta + step * 0.5, 2); cur["_l"] = sta
+            if cur and abs(cur["ofset"] - o) < 0.026 and sta - cur["_l"] < step * 1.6 and cur.get("vrsta") == vr: cur["do"] = round(sta + step * 0.5, 2); cur["_l"] = sta
             else:
                 if cur and sta - cur["_l"] < step * 1.6: cur["do"] = round(sta, 2)
-                cur = {"osovina": "centralna", "od": round(sta, 2), "do": round(sta + step * 0.5, 2), "ofset": round(o, 2), "strana": "razdjelni", "_kor": True, "_l": sta}; out.append(cur)
+                cur = {"osovina": "centralna", "od": round(sta, 2), "do": round(sta + step * 0.5, 2), "ofset": round(o, 2), "strana": "razdjelni", "_kor": True, "_l": sta}
+                if vr: cur["vrsta"] = vr
+                out.append(cur)
             vals.append(o)
     for en in out: en.pop("_l")
     if vals: log(_TF("Koridor → proračun: ograda u razdjelnom pojasu: ofset od unutrašnje ivice kolovoza {0:.2f}–{1:.2f} m.", min(vals), max(vals)))
@@ -886,10 +914,21 @@ def open_entries(R, s_from, s_to, e_of, g_of, off_rig, off_ivc, step=5.0, log=pr
                 if c_ and abs(c_["ofset"] - o) < 0.026 and sta - c_["_l"] < step * 1.6: c_["do"] = round(sta + step * 0.5, 2); c_["_l"] = sta
                 else:
                     if c_ and sta - c_["_l"] < step * 1.6: c_["do"] = round(sta, 2)
-                    c_ = {"osovina": role, "od": round(sta, 2), "do": round(sta + step * 0.5, 2), "ofset": round(o, 2), "strana": key, "_kor": True, "_l": sta}
+                    c_ = {"osovina": role, "od": round(sta, 2), "do": round(sta + step * 0.5, 2), "ofset": round(o, 2), "strana": key, "vrsta": "ograda", "_kor": True, "_l": sta}
                     out.append(c_); cur[key] = c_
     for en in out: en.pop("_l", None)
     log(_TF("Koridor → proračun: ograda na otvorenoj trasi prema rigolu ({0:.2f} m) / ivičnjaku ({1:.2f} m) iz presjeka koridora: {2} / {3} presjeka.", off_rig, off_ivc, stat["Rigol"], stat["Ivicnjak"]))
+    return out
+
+
+def _bez_razdjelnog(kc):
+    out = []
+    for r in (kc.get("bez_razdjelnog") or []) if isinstance(kc, dict) else []:
+        try: a_, b_ = float(r[0]), float(r[1])
+        except (TypeError, ValueError, IndexError):
+            try: a_, b_ = float(r["od"]), float(r["do"])
+            except Exception: continue
+        if b_ > a_: out.append((a_, b_))
     return out
 
 
@@ -943,5 +982,18 @@ def harmonize(cfg, R, log=print):
         pre += median_entries(R, s_from, s_to, {k: v["g"] for k, v in geo.items()}, None, log=log)
     else:
         pre += median_entries(R, s_from, s_to, {k: v["g"] for k, v in geo.items()}, off, log=log)
+    bz = _bez_razdjelnog(kc)
+    if bz:                                                            # bez razdjelnog pojasa (npr. plato naplate): nema ograde u sredini
+        out_ = []
+        for en in pre:
+            if not (en.get("_kor") and str(en.get("strana", "")).startswith("razdjelni")): out_.append(en); continue
+            parts = [(float(en["od"]), float(en["do"]))]
+            for a_, b_ in bz: parts = [pp for p0, p1 in parts for pp in ((p0, min(p1, a_)), (max(p0, b_), p1)) if pp[1] - pp[0] > 0.01]
+            for p0, p1 in parts: out_.append(dict(en, od=round(p0, 2), do=round(p1, 2)))
+        pre = out_
+        log(_TF("Koridor → proračun: bez razdjelnog pojasa (i ograde u sredini) na st. {0}.", ", ".join(f"{a_:.2f}–{b_:.2f}" for a_, b_ in bz)))
+    if kc.get("ograda_visina") not in (None, ""):
+        pc["visina_ograde"] = float(kc["ograda_visina"])
+        log(_TF("Koridor → proračun: čelična ograda na otvorenoj trasi visine {0:.2f} m – zaklanja samo ako vizura prolazi ispod njenog vrha.", pc["visina_ograde"]))
     pc["prepreke"] = pre
     log(_TF("Koridor → proračun: dionice mosta/tunela preuzete iz koridora ({0}).", len([e_ for e_ in pre if e_.get("_kor")])))

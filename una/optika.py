@@ -198,6 +198,8 @@ def build_md(P, par, out, pp, o, cfg, figs, att, name, template_mode=False):
     A(_T('# Raspoloživa i preticajna preglednost\n'))
     A(_T('## Raspoloživa preglednost Pr\n'))
     A(_T('Raspoloživa preglednost Pr određena je kao najduža tetiva od oka vozača koju dozvoljavaju prepreka uz kolovoz (horizontalna preglednost) i niveleta (vertikalna preglednost). Rezultati su dati po tragovima, za oba smjera vožnje, a kompletan proračun je u prilogu (Excel i Tabela 4).\n'))
+    if par.get("visina_ograde") not in (None, ""):
+        A(_TF('Čelična odbojna ograda na otvorenoj trasi (uz ivicu kolovoza i u razdjelnom pojasu) uzeta je sa visinom {0} m: ona zaklanja vizuru samo ako zraka od oka vozača do predmeta na mjestu ograde prolazi ispod njenog vrha. Kota podnožja ograde uzeta je iz 3D modela trase, pa je uračunat i poprečni nagib (ograda na nižoj ivici kolovoza) i tok nivelete. Na konstantnom podužnom nagibu visina vizure nad kolovozom ne zavisi od nagiba (oko i predmet se spuštaju jednako), pa vizura prelazi preko ograde zbog niže kote podnožja ograde ili konkavne krivine nivelete. Vijenci i parapeti mostova, zidovi tunela i cut & cover konstrukcija, kao i kosine usjeka iz 3D modela, zaklanjaju cijelom visinom.\n', fm(par['visina_ograde'], 2)))
     rows = []
     for k, R in out["vp"].items():
         Z = AV(out, k); av = Z["avail"]; rr = [r for r in av["rows"] if not r["trunc"]] or av["rows"]
