@@ -216,9 +216,10 @@ def build_chain(ch, P, par, scen=1, side="D"):
             if c.role == "centralna" and np.isfinite(oM).any() and (sign < 0) == (c.sg == 1):    # strana vozača prema razdjelnom pojasu: ograda je u razdjelnom pojasu
                 o = oM; h = hM; lat = (pr["gR"] - oM) if c.sg == 1 else -(pr["gL"] - oM)
             px = np.where(np.isnan(o), np.nan, y0 + lat * ny); py = np.where(np.isnan(o), np.nan, x0 + lat * nx)
-            zb = zc.copy()                                       # kota podnožja ograde: iz 3D modela (TIN) ako postoji, inače kota trase
-            if T is not None and np.isfinite(h).any():
-                zt_ = T.z(np.nan_to_num(px), np.nan_to_num(py)); zb = np.where(np.isfinite(zt_) & (np.abs(zt_ - zc) < 3.0), zt_, zc)
+            zb = zc.copy()                                       # kota podnožja ograde: razlika TIN(ograda) − TIN(putanja oka) iz 3D modela dodana koti trase
+            if T is not None and np.isfinite(h).any():               # (razlika, ne apsolutna kota: niveleta proračuna i 3D modela se mogu razlikovati za nekoliko cm–dm)
+                zt_ = T.z(np.nan_to_num(px), np.nan_to_num(py)); zl_ = T.z(yl, xl); dz_ = zt_ - zl_
+                zb = np.where(np.isfinite(dz_) & (np.abs(dz_) < 3.0), zc + dz_, zc)
             kk = ("r" if (nm == "R") == (c.sg == 1) else "l")
             ob[kk + "x"] += list(px); ob[kk + "y"] += list(py); ob[kk + "h"] += list(h); ob[kk + "z"] += list(zb)
         cols.setdefault("zt", []).extend(list(zc))
