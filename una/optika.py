@@ -223,7 +223,7 @@ def build_md(P, par, out, pp, o, cfg, figs, att, name, template_mode=False):
     if mr:
         A(_T('## Mjere za otklanjanje nedostataka preglednosti\n'))
         A(_T('Za svaku dionicu sa Pr < Pzp, u tački najvećeg nedostatka, data su tri moguća rješenja (Stančerić i dr., 2025 i 2026): pomjeranje prepreke od putanje oka (proširenje bankine, razdjelnog pojasa ili berme) za ΔHSO, povećanje radijusa krivine uz zadržan položaj prepreke, ili ograničenje brzine na vrijednost za koju je Pr ≥ Pzp. Uz kružnu krivinu potrebni bočni slobodni prostor je HSO = Pzp² / (8·R), pa je:\n'))
-        A(_T('ΔHSO = (Pzp² − Pr²) / (8·R),    R~potr~ = R·(Pzp / Pr)²\n'))
+        A('$$\\Delta HSO = \\frac{P_{zp}^2 - P_r^2}{8\\,R},\\qquad R_{potr} = R\\left(\\frac{P_{zp}}{P_r}\\right)^2$$\n')
         A(_T('gdje je: Pzp – zahtijevana preglednost [m]; Pr – raspoloživa preglednost [m]; R – najmanji radijus krivine na dužini vizure [m]; ΔHSO – potrebno povećanje bočnog odstojanja prepreke od putanje oka [m]; R~potr~ – radijus pri kojem je Pr = Pzp bez pomjeranja prepreke [m]. V~doz~ je najveća brzina (korak 5 km/h) za koju je Pzp(V, nagib) ≤ Pr na cijeloj dionici. Za nedostatke zbog nivelete mjere u planu nisu primjenjive (potreban je veći radijus vertikalne krivine).\n'))
         A(tab(_T('Mjere za otklanjanje nedostataka preglednosti')))
         A(table(["Trag", _T('Dionica [m]'), _T('Uzrok'), "R [m]", "Pr / Pzp [m]", "ΔHSO [m]", "R potr. [m]", "Vp / V doz [km/h]"],
