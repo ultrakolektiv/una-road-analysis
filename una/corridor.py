@@ -944,6 +944,13 @@ def _bez_razdjelnog(kc):
     return out
 
 
+def _vozna_traka(secs, g, e):
+    """Širina vozne trake iz prelomnih tačaka gornjeg sloja kolovoza (razdjelne linije), bez ivične/zaustavne trake; None ako se ne može odrediti."""
+    xs = sorted({round(abs(p[0]), 2) for n, _, pp in secs if n in ("Pave1", "Sloj1", "Sloj1_vrh", "Top") for p in pp if g - 0.01 <= abs(p[0]) <= e + 0.01})
+    d = [round(b - a, 2) for a, b in zip(xs, xs[1:]) if 2.75 <= b - a <= 4.0]
+    return max(set(d), key=d.count) if d else None
+
+
 def harmonize(cfg, R, log=print):
     """Proračun preglednosti prati koridor: širina trake iz koridora, prepreka na otvorenoj trasi na zadanom ofsetu od ivice kolovoza (zadano 0,78 m),
     vrsta prepreke (most / tunel) po stacionaži iz koridora. Mijenja cfg (poziva se prije proračuna)."""
@@ -952,14 +959,18 @@ def harmonize(cfg, R, log=print):
     s_from, s_to = kor_range(cfg); off = float(kc.get("ograda_ofset", 0.78))
     geo = {}                                                        # po osovini: ivica kolovoza e, razdjelni pojas (pola) g, širina trake w, broj traka po smjeru n
     for nm, lst in R["sect"].items():
-        es = []; gs = []
+        es = []; gs = []; ws = []
         for sta, ss in lst[::10]:
             if s_from <= sta <= s_to:
                 G = section_geom(ss, off, False, "CENTR" in nm.upper())
-                if G["kind"] == "otvorena": es.append(round(G["e"], 2)); gs.append(G["gap"][1] if G.get("gap") else 0.0)
+                if G["kind"] == "otvorena":
+                    es.append(round(G["e"], 2)); gs.append(G["gap"][1] if G.get("gap") else 0.0)
+                    wv_ = _vozna_traka(ss, gs[-1], max(abs(G["eL"]), G["eR"]))
+                    if wv_: ws.append(wv_)
         if es:
             e_ = max(set(es), key=es.count); g_ = float(np.median(gs)); n_ = max(1, int(round((e_ - g_) / 3.85))) if g_ > 0 else 1
-            geo[nm] = dict(e=e_, g=g_, n=n_, w=(e_ - g_) / n_ if g_ > 0 else e_, central="CENTR" in nm.upper())
+            wv = kc.get("sirina_vozne_trake") or (max(set(ws), key=ws.count) if ws else None)
+            geo[nm] = dict(e=e_, g=g_, n=n_, w=(e_ - g_) / n_ if g_ > 0 else e_, central="CENTR" in nm.upper(), wv=float(wv) if wv else None)
     if not geo: return
     for sec in cfg.get("sekcije", []):
         if float(sec["do"]) < s_from or float(sec["od"]) > s_to: continue
@@ -978,6 +989,9 @@ def harmonize(cfg, R, log=print):
             else:
                 sp["trake_desno"] = [round(gg["e"], 3)]; sp["trake_lijevo"] = [round(gg["e"], 3)]
                 log(_TF("Koridor → proračun: sekcija {0} ({1}): širina trake {2} → {3:.2f} m.", sec.get("od"), r, old[0], gg["e"]))
+            if gg.get("wv"):                                         # oko vozača na sredini VOZNE trake (bez ivične / zaustavne trake)
+                sp["ofset"] = round(gg["wv"] / 2, 3)
+                log(_TF("Koridor → proračun: sekcija {0} ({1}): vozna traka {2:.2f} m – oko vozača {3:.3f} m od razdjelne linije (sredina vozne trake).", sec.get("od"), r, gg["wv"], gg["wv"] / 2))
     e = max((v["e"] for v in geo.values() if not v["central"]), default=3.85)
     pc = cfg.setdefault("preglednost", {"ukljuci": True})
     tip = dict(pc.get("tipovi_prepreka") or {})

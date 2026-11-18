@@ -243,3 +243,10 @@ def test_osovine_iz_landxml(tmp_path):
     ax = parse.make_axis("t", xp + "#DESNA", xp + "#DESNA", xp + "#DESNA")
     assert abs(ax.vert(50)[0] - 261.5) < 0.01 and abs(ax.cross(50)) < 0.01 and ax.elems and ax.plan.shape[1] == 3
     assert parse.file_ok(xp + "#DESNA") and not parse.file_ok(xp + "x#DESNA")
+
+
+def test_vozna_traka_iz_presjeka():
+    from una.corridor import _vozna_traka
+    sec = [("Pave1", None, [(x, 0.0) for x in (-9.2, -8.85, -5.35, -1.85, -1.5)]), ("Pave1", None, [(x, 0.0) for x in (1.5, 1.85, 5.35, 8.85, 9.2)])]
+    assert _vozna_traka(sec, 1.5, 9.2) == 3.5
+    assert _vozna_traka([("Pave1", None, [(x, 0.0) for x in (-3.85, -3.5, 0.0, 3.5, 3.85)])], 0.0, 3.85) == 3.5
